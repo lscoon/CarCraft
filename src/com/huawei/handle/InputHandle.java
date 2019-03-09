@@ -1,14 +1,14 @@
-package handle;
+package com.huawei.handle;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-import data.Car;
-import data.Cross;
-import data.RoadMap;
-import data.Road;
+import com.huawei.data.Car;
+import com.huawei.data.Cross;
+import com.huawei.data.Road;
+import com.huawei.data.RoadMap;
 
 public class InputHandle {
 	
@@ -83,12 +83,6 @@ public class InputHandle {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		readInputs();
-		RoadMap.printMapSize();
 	}
 
 }

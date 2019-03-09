@@ -1,4 +1,4 @@
-package data;
+package com.huawei.data;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;

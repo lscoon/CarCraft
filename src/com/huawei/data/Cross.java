@@ -1,4 +1,4 @@
-package data;
+package com.huawei.data;
 
 public class Cross {
 	

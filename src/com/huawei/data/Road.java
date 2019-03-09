@@ -1,4 +1,4 @@
-package data;
+package com.huawei.data;
 
 public class Road {
 
@@ -10,6 +10,7 @@ public class Road {
 	private int destination;
 	private int isBiDirectional;
 	
+	
 	public Road (String[] strs) {
 		if (strs.length != 7)
 			return;
@@ -20,7 +21,6 @@ public class Road {
 		origin = Integer.valueOf(strs[4].trim()).intValue();
 		destination = Integer.valueOf(strs[5].trim()).intValue();
 		isBiDirectional = Integer.valueOf(strs[6].trim()).intValue();
-		
 		
 	}
 	

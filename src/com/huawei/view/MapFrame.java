@@ -1,4 +1,4 @@
-package view;
+package com.huawei.view;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
@@ -16,20 +16,27 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 
-import data.Car;
-import data.Cross;
-import data.Road;
-import data.RoadMap;
-import handle.InputHandle;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+
+import com.huawei.data.Car;
+import com.huawei.data.Cross;
+import com.huawei.data.Road;
+import com.huawei.data.RoadMap;
+import com.huawei.handle.InputHandle;
 
 public class MapFrame extends JFrame{
+	private static final Logger logger = Logger.getLogger(MapFrame.class);
 	
 	private static final int ViewX = 800;
-	private static final int ViewY = 500;
+	private static final int ViewY = 600;
 	private static final int CarInfoX = 100;
-	private static final int RoadInfoX = 250;
 	private static final int InfoX = 50;
 	private static final int InfoY = 200;
+	private static final int RoadInfoX = 250;
+	private static final int RoadInfoY = 150;
+	private static final int RoadViewX = 400;
+	private static final int RoadViewY = 150;
 	
 	private static final String CarInfo = "car \ncarId: \norigin: \ndestination: \nmaxSpeed: \n"
 			+ "startTime: \nrealStTime: \nnowSpeed: \nnowRoad: ";
@@ -39,6 +46,8 @@ public class MapFrame extends JFrame{
 			+ "origin: \ndestination: ";
 	
 	JPanel pControl = new JPanel(new BorderLayout());
+	MapPanel pMap = new MapPanel();
+	JPanel pRoad = new JPanel(new GridLayout(1,2));
 	
 	private JComboBox<Integer> carBox = new JComboBox<Integer>();
 	private JComboBox<Integer> crossBox = new JComboBox<Integer>();
@@ -47,12 +56,16 @@ public class MapFrame extends JFrame{
 	private JTextPane carInfo = new JTextPane();
 	private JTextPane crossInfo = new JTextPane();
 	private JTextPane roadInfo = new JTextPane();
+	private JTextPane roadView0 = new JTextPane();
+	private JTextPane roadView1 = new JTextPane();
 	
 	private JButton btMapRefresh = new JButton("refresh");
 	
 	public MapFrame() {
-		MapPanel pMap = new MapPanel();
+		
 		add(pMap, BorderLayout.EAST);
+		add(pControl, BorderLayout.CENTER);
+		add(pRoad, BorderLayout.SOUTH);
 		
 		JPanel pTop = new JPanel();
 		pTop.setLayout(new GridLayout(4,2));
@@ -95,8 +108,8 @@ public class MapFrame extends JFrame{
 		
 		pControl.add(pTop, BorderLayout.NORTH);
 		initInfoPanel();
+		initRoadPanel();
 		
-		add(pControl, BorderLayout.CENTER);
 		setTitle("map");
 		setSize(ViewX, ViewY);
 		setLocationRelativeTo(null);
@@ -106,12 +119,11 @@ public class MapFrame extends JFrame{
 	}
 	
 	private void initInfoPanel() {
-		
 		carInfo.setPreferredSize(new Dimension(CarInfoX, InfoY));
 		carInfo.setEditable(false);
 		crossInfo.setPreferredSize(new Dimension(CarInfoX, InfoY));
 		crossInfo.setEditable(false);
-		roadInfo.setPreferredSize(new Dimension(RoadInfoX, InfoY));
+		roadInfo.setPreferredSize(new Dimension(RoadInfoX, RoadInfoY));
 		roadInfo.setEditable(false);
 		
 		JTextPane tempCarInfo = new JTextPane();
@@ -123,7 +135,7 @@ public class MapFrame extends JFrame{
 		tempCrossInfo.setText(CrossInfo);
 		tempCrossInfo.setEditable(false);
 		JTextPane tempRoadInfo = new JTextPane();
-		tempRoadInfo.setPreferredSize(new Dimension(InfoX, InfoY));
+		tempRoadInfo.setPreferredSize(new Dimension(InfoX, RoadInfoY));
 		tempRoadInfo.setText(RoadInfo);		
 		tempRoadInfo.setEditable(false);
 		
@@ -139,10 +151,12 @@ public class MapFrame extends JFrame{
 		pControl.add(pTemp2, BorderLayout.SOUTH);
 	}
 	
-	public static void main(String[] args) {
-		InputHandle.readInputs();
-		//RoadMap.printMapSize();
-		MapFrame view = new MapFrame();
-		
+	private void initRoadPanel() {
+		pRoad.add(roadView0);
+		pRoad.add(roadView1);
+		roadView0.setPreferredSize(new Dimension(RoadViewX, RoadViewY));
+		roadView0.setEditable(false);
+		roadView1.setPreferredSize(new Dimension(RoadViewX, RoadViewY));
+		roadView1.setEditable(false);
 	}
 }
