@@ -20,6 +20,8 @@ public class Road {
 		origin = Integer.valueOf(strs[4].trim()).intValue();
 		destination = Integer.valueOf(strs[5].trim()).intValue();
 		isBiDirectional = Integer.valueOf(strs[6].trim()).intValue();
+		
+		
 	}
 	
 	public int getRoadId() {
@@ -76,6 +78,15 @@ public class Road {
 
 	public void setIsBiDirectional(int isBiDirectional) {
 		this.isBiDirectional = isBiDirectional;
+	}
+	
+	public String info() {
+		String info = "\n";
+		info = info.concat(roadId + "\n");
+		info = info.concat(limitSpeed + "\n");
+		info = info.concat(origin + "\n");
+		info = info.concat(destination + "\n");
+		return info;
 	}
 	
 }

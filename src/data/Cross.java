@@ -49,4 +49,14 @@ public class Cross {
 		this.road3Id = road3Id;
 	}
 	
+	public String info() {
+		String info = "\n";
+		info = info.concat(crossId + "\n");
+		info = info.concat(road0Id + "\n");
+		info = info.concat(road1Id + "\n");
+		info = info.concat(road2Id + "\n");
+		info = info.concat(road3Id + "\n");
+		return info;
+	}
+	
 }

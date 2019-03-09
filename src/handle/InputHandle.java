@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import data.Car;
 import data.Cross;
-import data.Map;
+import data.RoadMap;
 import data.Road;
 
 public class InputHandle {
@@ -34,7 +34,7 @@ public class InputHandle {
 					continue;
 				line = line.substring(1, line.length()-1);
 				String[] roadStrings = line.split(",");
-				Map.roads.add(new Road(roadStrings));
+				RoadMap.roads.put(Integer.valueOf(roadStrings[0].trim()).intValue(), new Road(roadStrings));
 			}
 			reader.close();
 			br.close();
@@ -54,7 +54,7 @@ public class InputHandle {
 					continue;
 				line = line.substring(1, line.length()-1);
 				String[] carStrings = line.split(",");
-				Map.cars.add(new Car(carStrings));
+				RoadMap.cars.put(Integer.valueOf(carStrings[0].trim()).intValue(), new Car(carStrings));
 			}
 			reader.close();
 			br.close();
@@ -75,7 +75,7 @@ public class InputHandle {
 					continue;
 				line = line.substring(1, line.length()-1);
 				String[] crossStrings = line.split(",");
-				Map.crosses.add(new Cross(crossStrings));
+				RoadMap.crosses.put(Integer.valueOf(crossStrings[0].trim()).intValue(), new Cross(crossStrings));
 			}
 			reader.close();
 			br.close();
@@ -88,7 +88,7 @@ public class InputHandle {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		readInputs();
-		Map.printMapSize();
+		RoadMap.printMapSize();
 	}
 
 }
