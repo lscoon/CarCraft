@@ -34,10 +34,19 @@ public class Main {
 
         logger.info("End...");*/
     	
+    	
+    	//logger info show program process
+    	//logger error show program bugs
+    	
+    	logger.info("Start...");
+    	
+    	logger.info("start read input files");
     	InputHandle.readInputs();
+    	logger.info("end read input files");
+    	
 		//RoadMap.printMapSize();
 		MapFrame view = new MapFrame();
-		//PropertyConfigurator.configure("log4j.properties");
-		logger.info("111");
+		logger.info("End...");
+		
     }
 }

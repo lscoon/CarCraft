@@ -13,6 +13,8 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 
@@ -34,9 +36,9 @@ public class MapFrame extends JFrame{
 	private static final int InfoX = 50;
 	private static final int InfoY = 200;
 	private static final int RoadInfoX = 250;
-	private static final int RoadInfoY = 150;
+	private static final int RoadInfoY = 140;
 	private static final int RoadViewX = 400;
-	private static final int RoadViewY = 150;
+	private static final int RoadViewY = 160;
 	
 	private static final String CarInfo = "car \ncarId: \norigin: \ndestination: \nmaxSpeed: \n"
 			+ "startTime: \nrealStTime: \nnowSpeed: \nnowRoad: ";
@@ -52,12 +54,15 @@ public class MapFrame extends JFrame{
 	private JComboBox<Integer> carBox = new JComboBox<Integer>();
 	private JComboBox<Integer> crossBox = new JComboBox<Integer>();
 	private JComboBox<Integer> roadBox = new JComboBox<Integer>();
+	private JComboBox<Integer> roadBoxTwo = new JComboBox<Integer>();
 	
-	private JTextPane carInfo = new JTextPane();
-	private JTextPane crossInfo = new JTextPane();
-	private JTextPane roadInfo = new JTextPane();
-	private JTextPane roadView0 = new JTextPane();
-	private JTextPane roadView1 = new JTextPane();
+	private JTextArea carInfo = new JTextArea();
+	private JTextArea crossInfo = new JTextArea();
+	private JTextArea roadInfo = new JTextArea();
+	private JTextArea roadText0 = new JTextArea();
+	private JScrollPane roadView0 = new JScrollPane(roadText0);
+	private JTextArea roadText1 = new JTextArea();
+	private JScrollPane roadView1 = new JScrollPane(roadText1);
 	
 	private JButton btMapRefresh = new JButton("refresh");
 	
@@ -76,13 +81,16 @@ public class MapFrame extends JFrame{
 		pTop.add(new JLabel("Road ID"));
 		pTop.add(roadBox);
 		pTop.add(btMapRefresh);
+		pTop.add(roadBoxTwo);
 		
 		for(int i : RoadMap.cars.keySet())
 			carBox.addItem(i);
 		for(int i : RoadMap.crosses.keySet())
 			crossBox.addItem(i);
-		for(int i : RoadMap.roads.keySet())
+		for(int i : RoadMap.roads.keySet()) {
 			roadBox.addItem(i);
+			roadBoxTwo.addItem(i);
+		}
 		
 		carBox.addActionListener(
 				new ActionListener() {
@@ -103,6 +111,14 @@ public class MapFrame extends JFrame{
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						roadInfo.setText(RoadMap.roads.get(roadBox.getSelectedItem()).info());
+						roadText0.setText(RoadMap.roads.get(roadBox.getSelectedItem()).showStatus());
+					}
+				});
+		roadBoxTwo.addActionListener(
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						roadText1.setText(RoadMap.roads.get(roadBoxTwo.getSelectedItem()).showStatus());
 					}
 				});
 		
@@ -155,8 +171,8 @@ public class MapFrame extends JFrame{
 		pRoad.add(roadView0);
 		pRoad.add(roadView1);
 		roadView0.setPreferredSize(new Dimension(RoadViewX, RoadViewY));
-		roadView0.setEditable(false);
+		roadText0.setEditable(false);
 		roadView1.setPreferredSize(new Dimension(RoadViewX, RoadViewY));
-		roadView1.setEditable(false);
+		roadText1.setEditable(false);
 	}
 }

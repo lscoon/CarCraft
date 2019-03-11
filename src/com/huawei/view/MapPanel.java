@@ -13,12 +13,11 @@ public class MapPanel extends JPanel{
 	private static final Logger logger = Logger.getLogger(MapPanel.class);
 	
 	private static final int MapX = 500;
-	private static final int MapY = 450;
+	private static final int MapY = 440;
 	
 	public MapPanel() {
 		setPreferredSize(new Dimension(MapX, MapY));
 		setForeground(Color.white);
-		logger.info("22");
 	}
 	
 	@Override

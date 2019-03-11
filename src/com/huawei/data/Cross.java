@@ -1,6 +1,12 @@
 package com.huawei.data;
 
+import org.apache.log4j.Logger;
+
+import com.huawei.view.MapPanel;
+
 public class Cross {
+	
+	private static final Logger logger = Logger.getLogger(Cross.class);
 	
 	private int crossId;
 	private int road0Id;
@@ -9,8 +15,10 @@ public class Cross {
 	private int road3Id;
 	
 	public Cross (String[] strs) {
-		if (strs.length != 5)
+		if (strs.length != 5) {
+			logger.error("cross create format error: " + strs);
 			return;
+		}
 		crossId = Integer.valueOf(strs[0].trim()).intValue();
 		road0Id = Integer.valueOf(strs[1].trim()).intValue();
 		road1Id = Integer.valueOf(strs[2].trim()).intValue();

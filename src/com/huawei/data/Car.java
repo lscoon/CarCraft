@@ -1,10 +1,21 @@
 package com.huawei.data;
 
+import org.apache.log4j.Logger;
+
+import com.huawei.util.Util;
+import com.huawei.view.MapPanel;
+
+/**
+ * @author sc
+ *
+ */
 /**
  * @author sc
  *
  */
 public class Car {
+	
+	private static final Logger logger = Logger.getLogger(Car.class);
 	
 	private int carId;
 	private int origin;
@@ -13,17 +24,26 @@ public class Car {
 	private int startTime;
 	
 	private int realStTime = 0;
+	private int realEndTime = 0;
+	
+	// now speed = 0 means in jammed status
 	private int nowSpeed = 0;
 	private int nowRoad = 0;
+	private boolean isUpdated = false;
 	
 	public Car (String[] strs) {
-		if (strs.length != 5)
+		if (strs.length != 5) {
+			logger.error("car create format error: " + strs);
 			return;
+		}
 		carId = Integer.valueOf(strs[0].trim()).intValue();
 		origin = Integer.valueOf(strs[1].trim()).intValue();
 		destination = Integer.valueOf(strs[2].trim()).intValue();
 		maxSpeed = Integer.valueOf(strs[3].trim()).intValue();
 		startTime = Integer.valueOf(strs[4].trim()).intValue();
+		
+		if(carId/Util.CarIdMaxLength > 0)
+			Util.CarIdMaxLength = Util.CarIdMaxLength*10;
 	}
 	
 	public int getCarId() {
@@ -65,6 +85,14 @@ public class Car {
 		this.realStTime = realStTime;
 	}
 	
+	public int getRealEndTime() {
+		return realEndTime;
+	}
+
+	public void setRealEndTime(int realEndTime) {
+		this.realEndTime = realEndTime;
+	}
+
 	public int getNowSpeed() {
 		return nowSpeed;
 	}
@@ -79,6 +107,14 @@ public class Car {
 
 	public void setNowRoad(int nowRoad) {
 		this.nowRoad = nowRoad;
+	}
+	
+	public boolean isUpdated() {
+		return isUpdated;
+	}
+
+	public void setUpdated(boolean isUpdated) {
+		this.isUpdated = isUpdated;
 	}
 
 	public String info() {

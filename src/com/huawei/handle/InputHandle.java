@@ -5,18 +5,21 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
+
 import com.huawei.data.Car;
 import com.huawei.data.Cross;
 import com.huawei.data.Road;
 import com.huawei.data.RoadMap;
+import com.huawei.view.MapPanel;
 
 public class InputHandle {
 	
+	private static final Logger logger = Logger.getLogger(InputHandle.class);
 	private static final String inputFilePath = "inputs" + File.separator;
 	private static final String roadFile = inputFilePath + "Road.txt";
 	private static final String carFile = inputFilePath + "Car.txt";
 	private static final String crossFile = inputFilePath + "Cross.txt";
-	
 	
 	public static void readInputs() {
 		inputRoad();
@@ -40,6 +43,7 @@ public class InputHandle {
 			br.close();
 		}
 		catch (IOException e) {
+			logger.error("road input stream problem");
 			e.printStackTrace();
 		}
 	}
@@ -60,6 +64,7 @@ public class InputHandle {
 			br.close();
 		}
 		catch (IOException e) {
+			logger.error("car input stream problem");
 			e.printStackTrace();
 		}
 	}
@@ -81,6 +86,7 @@ public class InputHandle {
 			br.close();
 		}
 		catch (IOException e) {
+			logger.error("cross input stream problem");
 			e.printStackTrace();
 		}
 	}
