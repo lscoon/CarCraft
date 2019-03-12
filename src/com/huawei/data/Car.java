@@ -9,10 +9,7 @@ import com.huawei.view.MapPanel;
  * @author sc
  *
  */
-/**
- * @author sc
- *
- */
+
 public class Car {
 	
 	private static final Logger logger = Logger.getLogger(Car.class);

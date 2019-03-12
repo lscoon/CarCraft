@@ -127,6 +127,12 @@ public class Road {
 			return countNum(input/10) + 1;
 	}
 	
+	public int getLinkedCross(int crossId) {
+		if(crossId==origin)
+			return destination;
+		else return origin;
+	}
+	
 	// check if car carId on this road
 	public boolean carOnRoad(int carId) {
 		for (int i=0; i<lanesNum*(isBiDirect+1); i++)
@@ -159,7 +165,7 @@ public class Road {
 	}
 	
 	// order road car sequence while passing the cross
-	public List<Integer> getOrderCrossCarSequence(){
+	public List<Integer> getOrderPassCrossCarSequence(){
 		if(isBiDirect==0) {
 			List<Integer> temp = new LinkedList<Integer>();
 			for(int j=length-1; j>=0; j--)
@@ -177,7 +183,7 @@ public class Road {
 	}
 	
 	// reverse road car sequence while passing the cross
-	public List<Integer> getReverseCrossCarSequence(){
+	public List<Integer> getReversePassCrossCarSequence(){
 		if(isBiDirect==0) {
 			logger.error("get reverse car sequence from single road " + roadId);
 			return null;

@@ -3,6 +3,7 @@ package com.huawei;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import com.huawei.data.RoadMap;
 import com.huawei.handle.InputHandle;
 import com.huawei.view.MapFrame;
 
@@ -44,7 +45,8 @@ public class Main {
     	InputHandle.readInputs();
     	logger.info("end read input files");
     	
-		//RoadMap.printMapSize();
+    	RoadMap.generateCrossSequence();
+    	
 		MapFrame view = new MapFrame();
 		logger.info("End...");
 		

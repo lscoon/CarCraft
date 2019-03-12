@@ -7,6 +7,10 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -31,12 +35,12 @@ public class MapFrame extends JFrame{
 	private static final Logger logger = Logger.getLogger(MapFrame.class);
 	
 	private static final int ViewX = 800;
-	private static final int ViewY = 600;
+	private static final int ViewY = 660;
 	private static final int CarInfoX = 100;
 	private static final int InfoX = 50;
 	private static final int InfoY = 200;
 	private static final int RoadInfoX = 250;
-	private static final int RoadInfoY = 140;
+	private static final int RoadInfoY = 180;
 	private static final int RoadViewX = 400;
 	private static final int RoadViewY = 160;
 	
@@ -68,12 +72,12 @@ public class MapFrame extends JFrame{
 	
 	public MapFrame() {
 		
-		add(pMap, BorderLayout.EAST);
 		add(pControl, BorderLayout.CENTER);
 		add(pRoad, BorderLayout.SOUTH);
+		add(pMap, BorderLayout.EAST);
 		
 		JPanel pTop = new JPanel();
-		pTop.setLayout(new GridLayout(4,2));
+		pTop.setLayout(new GridLayout(5,2));
 		pTop.add(new JLabel("Car ID"));
 		pTop.add(carBox);
 		pTop.add(new JLabel("Cross ID"));
@@ -122,6 +126,28 @@ public class MapFrame extends JFrame{
 					}
 				});
 		
+		addMouseWheelListener(new MouseWheelListener() {
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				if(e.getWheelRotation() < 0)
+					pMap.enlargeMap();
+				else pMap.reduceMap();
+			}
+		});
+		
+		addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				switch(e.getKeyCode()) {
+					case KeyEvent.VK_UP: pMap.upMap();break;
+					case KeyEvent.VK_DOWN: pMap.downMap();break;
+					case KeyEvent.VK_LEFT: pMap.leftMap();break;
+					case KeyEvent.VK_RIGHT: pMap.rightMap();break;
+					default: break;
+				}
+			}
+		});
+		
 		pControl.add(pTop, BorderLayout.NORTH);
 		initInfoPanel();
 		initRoadPanel();
@@ -132,6 +158,8 @@ public class MapFrame extends JFrame{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 		setResizable(false);
+		// important!!! take control of keyboard listener
+		requestFocus();
 	}
 	
 	private void initInfoPanel() {

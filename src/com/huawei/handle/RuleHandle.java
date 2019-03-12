@@ -16,6 +16,10 @@ public class RuleHandle {
 	// first step: update all cars
 	// 	 1.could run without crosses
 	// 	 2.won't fall into jammed status
+	public void stepOne() {
+		
+	}
+	
 	public boolean carRunOnRoad(int carId, Road road) {
 		Car car = RoadMap.cars.get(carId);
 		if(car.isUpdated()) {
