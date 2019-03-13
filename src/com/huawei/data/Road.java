@@ -12,15 +12,14 @@ public class Road {
 	private static final Logger logger = Logger.getLogger(Road.class);
 	
 	private int roadId;
-	private int length;
 	private int limitSpeed;
-	private int lanesNum;
-	private int origin;
-	private int destination;
+	private Cross origin;
+	private Cross destination;
 	
 	// 1 means yes, 0 means no
-	private int isBiDirect;
-	private int[][] status;
+	private boolean isBiDirect;
+	private OneWayRoad forwardRoad;
+	private OneWayRoad backwardRoad;
 	
 	public Road (String[] strs) {
 		if (strs.length != 7) {
@@ -28,47 +27,45 @@ public class Road {
 			return;
 		}
 		roadId = Integer.valueOf(strs[0].trim()).intValue();
-		length = Integer.valueOf(strs[1].trim()).intValue();
 		limitSpeed = Integer.valueOf(strs[2].trim()).intValue();
-		lanesNum = Integer.valueOf(strs[3].trim()).intValue();
-		origin = Integer.valueOf(strs[4].trim()).intValue();
-		destination = Integer.valueOf(strs[5].trim()).intValue();
-		isBiDirect = Integer.valueOf(strs[6].trim()).intValue();
+		origin = RoadMap.crosses.get(Integer.valueOf(strs[4].trim()).intValue());
+		destination = RoadMap.crosses.get(Integer.valueOf(strs[5].trim()).intValue());
+		if(Integer.valueOf(strs[6].trim()).intValue()==1)
+			isBiDirect = true;
+		else isBiDirect = false;
 		
-		status = new int[lanesNum*(isBiDirect+1)][length];
+		int length = Integer.valueOf(strs[1].trim()).intValue();
+		int lanesNum = Integer.valueOf(strs[3].trim()).intValue();
+		forwardRoad = new OneWayRoad(lanesNum, length);
+		if(isBiDirect)
+			backwardRoad = new OneWayRoad(lanesNum, length);
 	}
 	
 	public String info() {
 		String info = "\n";
 		info = info.concat(roadId + "\n");
 		info = info.concat(limitSpeed + "\n");
-		info = info.concat(origin + "\n");
-		info = info.concat(destination + "\n");
+		info = info.concat(origin.getCrossId() + "\n");
+		info = info.concat(destination.getCrossId() + "\n");
 		return info;
 	}
 	
-	// show road matrix status in map panel
 	public String showStatus() {
-		int carIdMaxLength = countNum(Util.CarIdMaxLength);
 		String temp = "";
-		for(int i=0; i<lanesNum*(isBiDirect+1); i++) {
-			for(int j=0; j<length; j++) {
-				int blankCount = carIdMaxLength-countNum(status[i][j]);
-				for(int k=0; k<blankCount; k++)
-					temp = temp.concat(" ");
-				temp = temp.concat(status[i][j]+"");
-			}
-			temp = temp.concat("\n");
+		if(isBiDirect) {
+			temp = temp.concat(backwardRoad.showBackwardStatus());
+			temp = temp.concat("------------------------\n");
 		}
-		return temp;	
+		temp = temp.concat(forwardRoad.showForwardStatus());
+		return temp;
 	}
 	
-	private int countNum(int input) {
-		if(input/10==0)
-			return 1;
-		else 
-			return countNum(input/10) + 1;
+	public int getAnOtherCross(int crossId) {
+		if(crossId == origin.getCrossId())
+			return destination.getCrossId();
+		else return origin.getCrossId();
 	}
+	/*
 	
 	public int getLinkedCross(int crossId) {
 		if(crossId==origin)
@@ -138,4 +135,28 @@ public class Road {
 		return temp;
 	}
 	
+	public void updateRunnableCars() {
+		updateForwardRunnableCars();
+		if(isBiDirect==1)
+			updateBackwardRunnableCars();
+	}
+	
+	private void updateForwardRunnableCars() {
+		for(int i=0+(isBiDirect)*lanesNum; i<(isBiDirect+1)*lanesNum; i++)
+			for(int j=length-1;j>=0;j--) {
+				int carId = status[i][j];
+				Car car = RoadMap.cars.get(carId);
+				int s1 = length-1-j;
+				int nowSpeed = Math.min(car.getMaxSpeed(), limitSpeed);
+				//if(nowSpeed>s1)
+			}
+	}
+	
+	private void updateBackwardRunnableCars() {
+		
+	}*/
+	
+	public int getRoadId() {
+		return roadId;
+	}
 }

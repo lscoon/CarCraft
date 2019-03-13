@@ -23,7 +23,7 @@ public class RuleHandle {
 	public void stepOne() {
 		
 	}
-	
+	/*
 	public boolean carRunOnRoad(int carId, Road road) {
 		Car car = RoadMap.cars.get(carId);
 		if(car.isUpdated()) {
@@ -67,5 +67,5 @@ public class RuleHandle {
 			//move forward and change speed
 			return false;
 		}
-	}
+	}*/
 }

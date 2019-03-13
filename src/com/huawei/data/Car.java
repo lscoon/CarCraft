@@ -1,5 +1,6 @@
 package com.huawei.data;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,10 +21,12 @@ public class Car {
 	private int realStTime = 0;
 	private int realEndTime = 0;
 	
-	private List<Integer> runRoadList = new LinkedList<Integer>();
+	private List<Integer> runRoadList = new ArrayList<Integer>();
 	
-	private int nowSpeed = 0;
 	private int nowRoad = 0;
+	private int nextRoad = 0;
+	private int nowDistance = 0;
+	private int nextDistance = 0;
 	private boolean isRunning = false;
 	private boolean isUpdated = false;
 	
@@ -82,14 +85,6 @@ public class Car {
 		this.runRoadList = runRoadList;
 	}
 
-	public int getNowSpeed() {
-		return nowSpeed;
-	}
-
-	public void setNowSpeed(int nowSpeed) {
-		this.nowSpeed = nowSpeed;
-	}
-
 	public int getNowRoad() {
 		return nowRoad;
 	}
@@ -98,12 +93,44 @@ public class Car {
 		this.nowRoad = nowRoad;
 	}
 	
+	public int getNextRoad() {
+		return nextRoad;
+	}
+
+	public void setNextRoad(int nextRoad) {
+		this.nextRoad = nextRoad;
+	}
+
+	public int getNowDistance() {
+		return nowDistance;
+	}
+
+	public void setNowDistance(int nowDistance) {
+		this.nowDistance = nowDistance;
+	}
+
+	public int getNextDistance() {
+		return nextDistance;
+	}
+
+	public void setNextDistance(int nextDistance) {
+		this.nextDistance = nextDistance;
+	}
+
 	public boolean isUpdated() {
 		return isUpdated;
 	}
 
 	public void setUpdated(boolean isUpdated) {
 		this.isUpdated = isUpdated;
+	}
+	
+	public boolean isRunning() {
+		return isRunning;
+	}
+
+	public void setRunning(boolean isRunning) {
+		this.isRunning = isRunning;
 	}
 
 	public String info() {
@@ -114,9 +141,14 @@ public class Car {
 		info = info.concat(maxSpeed + "\n");
 		info = info.concat(startTime + "\n");
 		info = info.concat(realStTime + "\n");
-		info = info.concat(nowSpeed + "\n");
 		info = info.concat(nowRoad + "\n");
 		
 		return info;
 	}
+	
+	public void computeNowAndNextDistance() {
+		//RoadMap.roads.get
+	}
+	
+	
 }

@@ -44,8 +44,6 @@ public class Main {
     	InputHandle.readInputs("inputs/config_0");
     	logger.info("end read input files");
     	
-    	RoadMap.generateCrossSequence();
-    	
 		MapFrame view = new MapFrame();
 		logger.info("End...");
 		

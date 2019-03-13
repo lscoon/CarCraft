@@ -6,18 +6,21 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-public class Cross {
+public class Cross{
 	
 	private static final Logger logger = Logger.getLogger(Cross.class);
 	
 	private int crossId;
-	private int[] roadId;
+	private int[] roadIds = new int[4];;
+	private List<Road> roads = null;
+	
+	private int rotationStatus=0;
 	
 	// means road direction: north, east, south, west
-	public enum Direction{n,e,s,w};
+	//public enum Direction{n,e,s,w};
 	
 	// key matrix, don't ask me why
-	private static final int[][] rotationMatrix = {{0,3,2,1},{1,0,3,2},{2,3,0,1},{1,2,3,0}};
+	//private static final int[][] rotationMatrix = {{0,3,2,1},{1,0,3,2},{2,3,0,1},{1,2,3,0}};
 		
 	public Cross (String[] strs) {
 		if (strs.length != 5) {
@@ -25,42 +28,37 @@ public class Cross {
 			return;
 		}
 		crossId = Integer.valueOf(strs[0].trim()).intValue();
-		roadId = new int[4];
-		roadId[0] = Integer.valueOf(strs[1].trim()).intValue();
-		roadId[1] = Integer.valueOf(strs[2].trim()).intValue();
-		roadId[2] = Integer.valueOf(strs[3].trim()).intValue();
-		roadId[3] = Integer.valueOf(strs[4].trim()).intValue();
+		roadIds[0] = Integer.valueOf(strs[1].trim()).intValue();
+		roadIds[1] = Integer.valueOf(strs[2].trim()).intValue();
+		roadIds[2] = Integer.valueOf(strs[3].trim()).intValue();
+		roadIds[3] = Integer.valueOf(strs[4].trim()).intValue();
+	}
+	
+	public void initRoads() {
+		roads = new ArrayList<Road>(4);
+		for(int i=0; i<4; i++)
+			roads.add(RoadMap.roads.get(roadIds[i]));
 	}
 	
 	public String info() {
 		String info = "\n";
 		info = info.concat(crossId + "\n");
-		info = info.concat(roadId[0] + "\n");
-		info = info.concat(roadId[1] + "\n");
-		info = info.concat(roadId[2] + "\n");
-		info = info.concat(roadId[3] + "\n");
+		info = info.concat(roadIds[0] + "\n");
+		info = info.concat(roadIds[1] + "\n");
+		info = info.concat(roadIds[2] + "\n");
+		info = info.concat(roadIds[3] + "\n");
 		return info;
 	}
-	
-	public void rotate(int i, Direction direct) {
-		int dir = -1;
-		switch(direct) {
-			case n:dir=2;break;
-			case e:dir=3;break;
-			case s:dir=0;break;
-			case w:dir=1;break;
-			default:break;
-		}
-		
-		dir = rotationMatrix[i][dir];
-		for(int j=0; j<dir; j++) {
-			int temp = roadId[0];
-			roadId[0] = roadId[1];
-			roadId[1] = roadId[2];
-			roadId[2] = roadId[3];
-			roadId[3] = temp;
-		}
+
+	public int getRotation(int roadId) {
+		for(int i=0; i<4; i++)
+			if(roadId==roadIds[i])
+				return i;
+		return -1;
 	}
+	
+	
+	/*
 	
 	public int getDirectRoadId(int rId) {
 		for(int i=0; i<4; i++)
@@ -112,6 +110,27 @@ public class Cross {
 					list.add(roadId[j]);
 			}
 		return list;
+	}
+	*/
+	
+	public int getCrossId() {
+		return crossId;
+	}
+
+	public int[] getRoadIds() {
+		return roadIds;
+	}
+	
+	public List<Road> getRoads() {
+		return roads;
+	}
+
+	public int getRotationStatus() {
+		return rotationStatus;
+	}
+
+	public void setRotationStatus(int rotation) {
+		this.rotationStatus = rotation;
 	}
 	
 }

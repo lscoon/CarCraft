@@ -2,22 +2,27 @@ package com.huawei.data;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 public class RoadMap {
 	
-	public static Map<Integer, Road> roads = new LinkedHashMap<Integer, Road>();
-	public static Map<Integer, Cross> crosses = new LinkedHashMap<Integer, Cross>();
-	public static Map<Integer, Car> cars = new LinkedHashMap<Integer, Car>();
-	public static List<Integer> crossSequence = new ArrayList<Integer>();
+	public static Map<Integer, Cross> crosses = new HashMap<>();
+	public static Map<Integer, Road> roads = new HashMap<>();
+	public static Map<Integer, Car> cars = new HashMap<>();
+	public static List<Integer> crossSequence = new ArrayList<>();
 	
-	public static void generateCrossSequence() {
-		for(int crossId : crosses.keySet()) {
-			crossSequence.add(crossId);
-		}
-		Collections.sort(crossSequence);
+	private static int nowTime = 0;
+	public static Set<Integer> nowRunCars = new LinkedHashSet<>();
+	
+	public static void updateMap() {
+		
+		//stepOne
 	}
 	
 	public static void printMapSize() {

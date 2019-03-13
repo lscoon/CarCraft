@@ -37,7 +37,7 @@ public class MapFrame extends JFrame{
 	private static final int RoadViewY = 160;
 	
 	private static final String CarInfo = "car \ncarId: \norigin: \ndestination: \nmaxSpeed: \n"
-			+ "startTime: \nrealStTime: \nnowSpeed: \nnowRoad: ";
+			+ "startTime: \nrealStTime: \nnowRoad: ";
 	private static final String CrossInfo = "cross \ncrossId: \nroad0Id: \n"
 			+ "road1Id: \nroad2Id: \nroad3Id: ";
 	private static final String RoadInfo = "road \nroadId: \nlimitSpeed \n"
@@ -47,10 +47,10 @@ public class MapFrame extends JFrame{
 	MapPanel pMap = new MapPanel();
 	JPanel pRoad = new JPanel(new GridLayout(1,2));
 	
-	private JComboBox<Integer> carBox = new JComboBox<Integer>();
-	private JComboBox<Integer> crossBox = new JComboBox<Integer>();
-	private JComboBox<Integer> roadBox = new JComboBox<Integer>();
-	private JComboBox<Integer> roadBoxTwo = new JComboBox<Integer>();
+	private JComboBox<Integer> carBox = new JComboBox<>();
+	private JComboBox<Integer> crossBox = new JComboBox<>();
+	private JComboBox<Integer> roadBox = new JComboBox<>();
+	private JComboBox<Integer> roadBoxTwo = new JComboBox<>();
 	
 	private JTextArea carInfo = new JTextArea();
 	private JTextArea crossInfo = new JTextArea();
