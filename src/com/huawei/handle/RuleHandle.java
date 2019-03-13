@@ -1,7 +1,9 @@
 package com.huawei.handle;
 
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -12,6 +14,8 @@ import com.huawei.data.RoadMap;
 public class RuleHandle {
 	
 	private static final Logger logger = Logger.getLogger(RuleHandle.class);
+	
+	private static Set<Integer> carSetToBeUpdated = new LinkedHashSet<Integer>();
 	
 	// first step: update all cars
 	// 	 1.could run without crosses
@@ -32,7 +36,7 @@ public class RuleHandle {
 		}
 		List<Integer> lane=road.getCarLane(carId);
 		if(lane==null) {
-			logger.error("Step1: car " + carId + " is not in road " + road.getRoadId());
+			logger.error("Step1: car " + carId + " is not in road " );//+ road.getRoadId());
 			return false;
 		} else {
 			if(lane.size()<=1) {

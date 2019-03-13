@@ -60,7 +60,7 @@ public class MapPanel extends JPanel{
 			Integer[] location = crossLocationMap.get(crossId);
 			if(location == null)
 				logger.error("can't find cross location");
-			int[] roads = RoadMap.crosses.get(crossId).getAvailableRoadIds();
+			int[] roads = RoadMap.crosses.get(crossId).getRoadIds();
 			for(int i=0; i<4; i++) {
 				int roadId = roads[i];
 				if(roadId==-1)
@@ -70,28 +70,32 @@ public class MapPanel extends JPanel{
 					crossStack.push(nextCrossId);
 				switch (i) {
 					case 0:
-						roadDirectionMap.put(roadId, Cross.Direction.n);
+						if(!roadDirectionMap.containsKey(roadId))
+							roadDirectionMap.put(roadId, Cross.Direction.n);
 						if(!crossLocationMap.containsKey(nextCrossId)) {
 							rotateCross(nextCrossId);
 							crossLocationMap.put(nextCrossId, new Integer[]{location[0],location[1]-1});
 						}
 						break;
 					case 1:
-						roadDirectionMap.put(roadId, Cross.Direction.e);
+						if(!roadDirectionMap.containsKey(roadId))
+							roadDirectionMap.put(roadId, Cross.Direction.e);
 						if(!crossLocationMap.containsKey(nextCrossId)) {
 							rotateCross(nextCrossId);
 							crossLocationMap.put(nextCrossId, new Integer[]{location[0]+1,location[1]});
 						}
 						break;
 					case 2:
-						roadDirectionMap.put(roadId, Cross.Direction.s);
+						if(!roadDirectionMap.containsKey(roadId))
+							roadDirectionMap.put(roadId, Cross.Direction.s);
 						if(!crossLocationMap.containsKey(nextCrossId)) {
 							rotateCross(nextCrossId);
 							crossLocationMap.put(nextCrossId, new Integer[]{location[0],location[1]+1});
 						}
 						break;
 					case 3:
-						roadDirectionMap.put(roadId, Cross.Direction.w);
+						if(!roadDirectionMap.containsKey(roadId))
+							roadDirectionMap.put(roadId, Cross.Direction.w);
 						if(!crossLocationMap.containsKey(nextCrossId)) {
 							rotateCross(nextCrossId);
 							crossLocationMap.put(nextCrossId, new Integer[]{location[0]-1,location[1]});
@@ -105,7 +109,7 @@ public class MapPanel extends JPanel{
 	}
 	
 	private void rotateCross(int crossId) {
-		int[] roads = RoadMap.crosses.get(crossId).getAvailableRoadIds();
+		int[] roads = RoadMap.crosses.get(crossId).getRoadIds();
 		for(int i=0; i<4; i++) 
 			if(roads[i]!=-1 && roadDirectionMap.containsKey(roads[i])) {
 				RoadMap.crosses.get(crossId).rotate(i, roadDirectionMap.get(roads[i]));
@@ -134,7 +138,7 @@ public class MapPanel extends JPanel{
 		g.setColor(Color.black);
 		g.setFont(roadFont);
 		
-		int[] roads = RoadMap.crosses.get(crossId).getAvailableRoadIds();
+		int[] roads = RoadMap.crosses.get(crossId).getRoadIds();
 		if(roads[0]!=-1)
 			paintRoad(g, roads[0], locationX, locationY, locationX, locationY-Distance);
 		if(roads[1]!=-1)

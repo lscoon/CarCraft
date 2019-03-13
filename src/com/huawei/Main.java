@@ -41,7 +41,7 @@ public class Main {
     	logger.info("Start...");
     	
     	logger.info("start read input files");
-    	InputHandle.readInputs("inputs/config_9");
+    	InputHandle.readInputs("inputs/config_0");
     	logger.info("end read input files");
     	
     	RoadMap.generateCrossSequence();

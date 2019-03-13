@@ -38,62 +38,6 @@ public class Road {
 		status = new int[lanesNum*(isBiDirect+1)][length];
 	}
 	
-	public int getRoadId() {
-		return roadId;
-	}
-
-	public void setRoadId(int id) {
-		this.roadId = id;
-	}
-
-	public int getLength() {
-		return length;
-	}
-
-	public void setLength(int length) {
-		this.length = length;
-	}
-
-	public int getLimitSpeed() {
-		return limitSpeed;
-	}
-
-	public void setLimitSpeed(int limitSpeed) {
-		this.limitSpeed = limitSpeed;
-	}
-
-	public int getLanesNum() {
-		return lanesNum;
-	}
-
-	public void setLanesNum(int lanesNum) {
-		this.lanesNum = lanesNum;
-	}
-
-	public int getOrigin() {
-		return origin;
-	}
-
-	public void setOrigin(int origin) {
-		this.origin = origin;
-	}
-
-	public int getDestination() {
-		return destination;
-	}
-
-	public void setDestination(int destination) {
-		this.destination = destination;
-	}
-
-	public int getIsBiDirect() {
-		return isBiDirect;
-	}
-
-	public void setIsBiDirect(int isBiDirectional) {
-		this.isBiDirect = isBiDirectional;
-	}
-	
 	public String info() {
 		String info = "\n";
 		info = info.concat(roadId + "\n");

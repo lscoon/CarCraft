@@ -1,6 +1,7 @@
 package com.huawei.data;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -31,13 +32,6 @@ public class Cross {
 		roadId[3] = Integer.valueOf(strs[4].trim()).intValue();
 	}
 	
-	public int getCrossId() {
-		return crossId;
-	}
-	public void setCrossId(int id) {
-		this.crossId = id;
-	}
-	
 	public String info() {
 		String info = "\n";
 		info = info.concat(crossId + "\n");
@@ -60,11 +54,11 @@ public class Cross {
 		
 		dir = rotationMatrix[i][dir];
 		for(int j=0; j<dir; j++) {
-			int temp = roadId[3];
-			roadId[3] = roadId[2];
-			roadId[2] = roadId[1];
-			roadId[1] = roadId[0];
-			roadId[0] = temp;
+			int temp = roadId[0];
+			roadId[0] = roadId[1];
+			roadId[1] = roadId[2];
+			roadId[2] = roadId[3];
+			roadId[3] = temp;
 		}
 	}
 	
@@ -92,11 +86,23 @@ public class Cross {
 		return -1;
 	}
 	
-	public int[] getAvailableRoadIds() {
+	public int[] getRoadIds() {
 		return roadId;
 	}
 	
-	public List<Integer> getOtherAvailableRoadId(int rId){
+	// sequence by road id from max to min
+	public List<Integer> getOrderedRoadIds() {
+		List<Integer> list = new ArrayList<Integer>();
+		for(int i=0; i<4; i++)
+			if(roadId[i]!=-1)
+				list.add(roadId[i]);
+		Collections.sort(list);
+		return list;
+	}
+	
+	
+	// clockwise order since rId'next road
+	public List<Integer> getOtherRoadIds(int rId){
 		List<Integer> list = new ArrayList<Integer>();
 		for(int i=0; i<4; i++)
 			if(rId == roadId[i]) {

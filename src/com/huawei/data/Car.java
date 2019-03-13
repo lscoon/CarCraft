@@ -1,13 +1,11 @@
 package com.huawei.data;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 
 import com.huawei.util.Util;
-
-/**
- * @author sc
- *
- */
 
 public class Car {
 	
@@ -22,8 +20,11 @@ public class Car {
 	private int realStTime = 0;
 	private int realEndTime = 0;
 	
+	private List<Integer> runRoadList = new LinkedList<Integer>();
+	
 	private int nowSpeed = 0;
 	private int nowRoad = 0;
+	private boolean isRunning = false;
 	private boolean isUpdated = false;
 	
 	public Car (String[] strs) {
@@ -41,37 +42,22 @@ public class Car {
 			Util.CarIdMaxLength = Util.CarIdMaxLength*10;
 	}
 	
-	public int getCarId() {
-		return carId;
-	}
-	public void setCarId(int id) {
-		this.carId = id;
-	}
 	public int getOrigin() {
 		return origin;
 	}
-	public void setOrigin(int origin) {
-		this.origin = origin;
-	}
+
 	public int getDestination() {
 		return destination;
 	}
-	public void setDestination(int destination) {
-		this.destination = destination;
-	}
+
 	public int getMaxSpeed() {
 		return maxSpeed;
 	}
-	public void setMaxSpeed(int speed) {
-		this.maxSpeed = speed;
-	}
+
 	public int getStartTime() {
 		return startTime;
 	}
-	public void setStartTime(int beginTime) {
-		this.startTime = beginTime;
-	}
-	
+
 	public int getRealStTime() {
 		return realStTime;
 	}
@@ -86,6 +72,14 @@ public class Car {
 
 	public void setRealEndTime(int realEndTime) {
 		this.realEndTime = realEndTime;
+	}
+
+	public List<Integer> getRunRoadList() {
+		return runRoadList;
+	}
+
+	public void setRunRoadList(List<Integer> runRoadList) {
+		this.runRoadList = runRoadList;
 	}
 
 	public int getNowSpeed() {
