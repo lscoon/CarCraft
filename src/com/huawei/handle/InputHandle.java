@@ -11,17 +11,20 @@ import com.huawei.data.Car;
 import com.huawei.data.Cross;
 import com.huawei.data.Road;
 import com.huawei.data.RoadMap;
-import com.huawei.view.MapPanel;
 
 public class InputHandle {
 	
 	private static final Logger logger = Logger.getLogger(InputHandle.class);
-	private static final String inputFilePath = "inputs" + File.separator;
-	private static final String roadFile = inputFilePath + "Road.txt";
-	private static final String carFile = inputFilePath + "Car.txt";
-	private static final String crossFile = inputFilePath + "Cross.txt";
+	private static String inputFilesPath = "";
+	private static String roadFile = inputFilesPath + "road.txt";
+	private static String carFile = inputFilesPath + "car.txt";
+	private static String crossFile = inputFilesPath + "cross.txt";
 	
-	public static void readInputs() {
+	public static void readInputs(String inputFiles) {
+		inputFilesPath = inputFiles + File.separator;
+		roadFile = inputFilesPath + "road.txt";
+		carFile = inputFilesPath + "car.txt";
+		crossFile = inputFilesPath + "cross.txt";
 		inputRoad();
 		inputCar();
 		inputCross();

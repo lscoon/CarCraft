@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.huawei.util.Util;
-import com.huawei.view.MapPanel;
 
 public class Road {
 

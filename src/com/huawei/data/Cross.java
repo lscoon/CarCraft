@@ -1,12 +1,9 @@
 package com.huawei.data;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-
-import com.huawei.view.MapPanel;
 
 public class Cross {
 	
@@ -15,8 +12,11 @@ public class Cross {
 	private int crossId;
 	private int[] roadId;
 	
-	//means road direction: north, east, south, west
+	// means road direction: north, east, south, west
 	public enum Direction{n,e,s,w};
+	
+	// key matrix, don't ask me why
+	private static final int[][] rotationMatrix = {{0,3,2,1},{1,0,3,2},{2,3,0,1},{1,2,3,0}};
 		
 	public Cross (String[] strs) {
 		if (strs.length != 5) {
@@ -57,7 +57,8 @@ public class Cross {
 			case w:dir=1;break;
 			default:break;
 		}
-		dir = (dir+i)%4;
+		
+		dir = rotationMatrix[i][dir];
 		for(int j=0; j<dir; j++) {
 			int temp = roadId[3];
 			roadId[3] = roadId[2];

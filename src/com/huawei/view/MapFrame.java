@@ -1,8 +1,6 @@
 package com.huawei.view;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -19,19 +17,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
+
 import javax.swing.JTextPane;
-
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
-
-import com.huawei.data.Car;
-import com.huawei.data.Cross;
-import com.huawei.data.Road;
 import com.huawei.data.RoadMap;
-import com.huawei.handle.InputHandle;
 
 public class MapFrame extends JFrame{
+
 	private static final Logger logger = Logger.getLogger(MapFrame.class);
 	
 	private static final int ViewX = 800;

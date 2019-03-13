@@ -1,7 +1,6 @@
 package com.huawei;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 import com.huawei.data.RoadMap;
 import com.huawei.handle.InputHandle;
@@ -42,7 +41,7 @@ public class Main {
     	logger.info("Start...");
     	
     	logger.info("start read input files");
-    	InputHandle.readInputs();
+    	InputHandle.readInputs("inputs/config_9");
     	logger.info("end read input files");
     	
     	RoadMap.generateCrossSequence();

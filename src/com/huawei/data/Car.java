@@ -3,7 +3,6 @@ package com.huawei.data;
 import org.apache.log4j.Logger;
 
 import com.huawei.util.Util;
-import com.huawei.view.MapPanel;
 
 /**
  * @author sc
@@ -23,7 +22,6 @@ public class Car {
 	private int realStTime = 0;
 	private int realEndTime = 0;
 	
-	// now speed = 0 means in jammed status
 	private int nowSpeed = 0;
 	private int nowRoad = 0;
 	private boolean isUpdated = false;
