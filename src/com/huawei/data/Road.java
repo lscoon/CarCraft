@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.huawei.data.Car.Direction;
 import com.huawei.util.Util;
 
 public class Road {
@@ -16,7 +17,6 @@ public class Road {
 	private Cross origin;
 	private Cross destination;
 	
-	// 1 means yes, 0 means no
 	private boolean isBiDirect;
 	private OneWayRoad forwardRoad;
 	private OneWayRoad backwardRoad;
@@ -65,98 +65,79 @@ public class Road {
 			return destination.getCrossId();
 		else return origin.getCrossId();
 	}
-	/*
-	
-	public int getLinkedCross(int crossId) {
-		if(crossId==origin)
-			return destination;
-		else return origin;
-	}
-	
-	// check if car carId on this road
-	public boolean carOnRoad(int carId) {
-		for (int i=0; i<lanesNum*(isBiDirect+1); i++)
-			for (int j=0; j<length; j++)
-				if(status[i][j]==carId)
-					return true;
-		return false;
-	}
-	
-	// return car lane list from carId to cross
-	public List<Integer> getCarLane(int carId) {
-		for (int i=0; i<lanesNum*(isBiDirect+1); i++)
-			for (int j=0; j<length; j++)
-				if(status[i][j]==carId) {
-					List<Integer> temp = new LinkedList<Integer>();
-					if(isBiDirect==1) {
-						if(i<lanesNum) {
-							for(int k=j;k>=0;k--)
-								temp.add(status[i][k]);
-						} else {
-							for(int k=j;k<length;k++)
-								temp.add(status[i][k]);
-						}
-					} else {
-						for(int k=j;k<length;k++)
-							temp.add(status[i][k]);
-					}
-				}
-		return null;
-	}
-	
-	// order road car sequence while passing the cross
-	public List<Integer> getOrderPassCrossCarSequence(){
-		if(isBiDirect==0) {
-			List<Integer> temp = new LinkedList<Integer>();
-			for(int j=length-1; j>=0; j--)
-				for(int i=0; i<lanesNum; i++)
-					temp.add(status[i][j]);
-			return temp;
-		}
-		else {
-			List<Integer> temp = new LinkedList<Integer>();
-			for(int j=length-1; j>=0; j--)
-				for(int i=lanesNum; i<2*lanesNum; i++)
-					temp.add(status[i][j]);
-			return temp;
-		}	
-	}
-	
-	// reverse road car sequence while passing the cross
-	public List<Integer> getReversePassCrossCarSequence(){
-		if(isBiDirect==0) {
-			logger.error("get reverse car sequence from single road " + roadId);
-			return null;
-		}
-		List<Integer> temp = new LinkedList<Integer>();
-		for(int j=0; j<length; j++)
-			for(int i=lanesNum-1; i>=0; i--)
-				temp.add(status[i][j]);
-		return temp;
-	}
 	
 	public void updateRunnableCars() {
-		updateForwardRunnableCars();
-		if(isBiDirect==1)
-			updateBackwardRunnableCars();
+		logger.info("step1: update road " + roadId );
+		forwardRoad.updateRunnableCars();
+		if(isBiDirect)
+			backwardRoad.updateRunnableCars();
 	}
 	
-	private void updateForwardRunnableCars() {
-		for(int i=0+(isBiDirect)*lanesNum; i<(isBiDirect+1)*lanesNum; i++)
-			for(int j=length-1;j>=0;j--) {
-				int carId = status[i][j];
-				Car car = RoadMap.cars.get(carId);
-				int s1 = length-1-j;
-				int nowSpeed = Math.min(car.getMaxSpeed(), limitSpeed);
-				//if(nowSpeed>s1)
-			}
+	public int updateWaitedCars(Cross cross) {
+		if(cross.getCrossId() == destination.getCrossId())
+			return forwardRoad.updateWaitedCars(cross, getNeighbourDirections(cross));
+		else if(isBiDirect)
+			return backwardRoad.updateWaitedCars(cross,getNeighbourDirections(cross));
+		else logger.error("step2: update invalid road cars " + roadId);
+		return -1;
 	}
 	
-	private void updateBackwardRunnableCars() {
-		
-	}*/
+	public void updateRoadDirections(Cross cross) {
+		if(cross.getCrossId() == destination.getCrossId())
+			forwardRoad.updateRoadDirection();
+		else if(isBiDirect)
+			backwardRoad.updateRoadDirection();
+		else logger.error("step2: update invalid road directions " + roadId);
+	}
+	
+	public Direction getRoadDirection(Cross cross) {
+		if(cross.getCrossId() == destination.getCrossId())
+			return forwardRoad.getRoadDirection();
+		else if(isBiDirect)
+			return backwardRoad.getRoadDirection();
+		else 
+			logger.error("step2: update invalid road directions " + roadId);
+		return Direction.d;
+	}
+	
+	private Direction[] getNeighbourDirections(Cross cross) {
+		Direction[] directions = new Direction[3];
+		int index = cross.getRoads().indexOf(this);
+		for(int i=1; i<4; i++)
+			if(cross.getRoads().get((index+i)%4)!=null)
+				directions[i-1] = cross.getRoads().get((index+i)%4).getRoadDirection(cross);
+			else directions[i-1] = Direction.n;
+		return directions;
+	}
+	
+	// 0, 1... in road lan num
+	// -1, waited, means road has no enough space or ahead car is not updated
+	// -2, error, invalid
+	protected int getInRoadLaneNum(Cross cross, int nextDistance) {
+		if(cross.getCrossId() == destination.getCrossId())
+			return forwardRoad.getInRoadLaneNum(nextDistance);
+		else if(isBiDirect)
+			return backwardRoad.getInRoadLaneNum(nextDistance);
+		else 
+			logger.error("step2: get invalid road lane nums " + roadId);
+		return -2;
+	}
+	
+	// num means car in road lane num
+	protected void updateRoadWhilecarInNextRoad(Cross cross, Car car, int num) {
+		if(cross.getCrossId() == destination.getCrossId())
+			forwardRoad.updateRoadWhilecarInNextRoad(car, num);
+		else if(isBiDirect)
+			backwardRoad.updateRoadWhilecarInNextRoad(car, num);
+		else
+			logger.error("step2: invalid car " + car.getCarId() + " in " + roadId);
+	}
 	
 	public int getRoadId() {
 		return roadId;
+	}
+	
+	public int getLimitSpeed() {
+		return limitSpeed;
 	}
 }

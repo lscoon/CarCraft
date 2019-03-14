@@ -45,6 +45,7 @@ public class Main {
     	logger.info("end read input files");
     	
 		MapFrame view = new MapFrame();
+		RoadMap.runMap();
 		logger.info("End...");
 		
     }

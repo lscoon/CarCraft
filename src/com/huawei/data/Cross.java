@@ -9,19 +9,16 @@ import org.apache.log4j.Logger;
 public class Cross{
 	
 	private static final Logger logger = Logger.getLogger(Cross.class);
+	private static final int roadIdMax = 1000000;
 	
 	private int crossId;
-	private int[] roadIds = new int[4];;
+	private int[] roadIds = new int[4];
+	private int[] sequenceRoadIds = new int[] 
+			{roadIdMax, roadIdMax, roadIdMax, roadIdMax};;
 	private List<Road> roads = null;
 	
 	private int rotationStatus=0;
-	
-	// means road direction: north, east, south, west
-	//public enum Direction{n,e,s,w};
-	
-	// key matrix, don't ask me why
-	//private static final int[][] rotationMatrix = {{0,3,2,1},{1,0,3,2},{2,3,0,1},{1,2,3,0}};
-		
+
 	public Cross (String[] strs) {
 		if (strs.length != 5) {
 			logger.error("cross create format error: " + strs);
@@ -32,12 +29,36 @@ public class Cross{
 		roadIds[1] = Integer.valueOf(strs[2].trim()).intValue();
 		roadIds[2] = Integer.valueOf(strs[3].trim()).intValue();
 		roadIds[3] = Integer.valueOf(strs[4].trim()).intValue();
+		
+		// compute id sequence from min to max
+		for(int i=0; i<4; i++)
+			for(int j=0; j<4; j++) {
+				if(roadIds[i]!=-1 && roadIds[i] < sequenceRoadIds[j]) {
+					for(int k=3; k>j; k--)
+						sequenceRoadIds[k] = sequenceRoadIds[k-1];
+					sequenceRoadIds[j] = roadIds[i];
+					break;
+				}
+			}
+		// change sequenceRoadIds elements to roadId index or -1
+		for(int i=0; i<4; i++)
+			if(sequenceRoadIds[i]!=roadIdMax) {
+				for(int j=0; j<4; j++)
+					if(roadIds[j] == sequenceRoadIds[i]) {
+						sequenceRoadIds[i] = j;
+						break;
+					}
+			}
+			else sequenceRoadIds[i] = -1;
+					
 	}
 	
 	public void initRoads() {
 		roads = new ArrayList<Road>(4);
 		for(int i=0; i<4; i++)
-			roads.add(RoadMap.roads.get(roadIds[i]));
+			if(roadIds[i]!=-1)
+				roads.add(RoadMap.roads.get(roadIds[i]));
+			else roads.add(null);
 	}
 	
 	public String info() {
@@ -57,61 +78,29 @@ public class Cross{
 		return -1;
 	}
 	
-	
-	/*
-	
-	public int getDirectRoadId(int rId) {
-		for(int i=0; i<4; i++)
-			if(rId == roadId[i])
-				return roadId[(i+2)%4];
-		logger.error("Road not in Cross");
-		return -1;
-	}
-	
-	public int getLeftRoadId(int rId) {
-		for(int i=0; i<4; i++)
-			if(rId == roadId[i])
-				return roadId[(i+1)%4];
-		logger.error("Road not in Cross");
-		return -1;
-	}
-	
-	public int getRightRoadId(int rId) {
-		for(int i=0; i<4; i++)
-			if(rId == roadId[i])
-				return roadId[(i+3)%4];
-		logger.error("Road not in Cross");
-		return -1;
-	}
-	
-	public int[] getRoadIds() {
-		return roadId;
-	}
-	
-	// sequence by road id from max to min
-	public List<Integer> getOrderedRoadIds() {
-		List<Integer> list = new ArrayList<Integer>();
-		for(int i=0; i<4; i++)
-			if(roadId[i]!=-1)
-				list.add(roadId[i]);
-		Collections.sort(list);
-		return list;
-	}
-	
-	
-	// clockwise order since rId'next road
-	public List<Integer> getOtherRoadIds(int rId){
-		List<Integer> list = new ArrayList<Integer>();
-		for(int i=0; i<4; i++)
-			if(rId == roadId[i]) {
-				for(int j=i+1; j<4; j++)
-					list.add(roadId[j]);
-				for(int j=0; j<i; j++)
-					list.add(roadId[j]);
+	public void updateCross() {
+		logger.info("step2: update cross" + crossId);
+		initFirstCarDirection();
+		int count, num=0;
+		do {
+			count = 0;
+			num++;
+			for(int i=0; i<4; i++) {
+				if(sequenceRoadIds[i]==-1)
+					break;
+				Road road = roads.get(sequenceRoadIds[i]);
+				count += road.updateWaitedCars(this);
 			}
-		return list;
+			logger.info("step2: cross " + crossId + " ," + count + " ,pass " + count + " cars");
+		} while(count!=0);
+		
 	}
-	*/
+	
+	private void initFirstCarDirection() {
+		for(int i=0; i<4; i++)
+			if(roads.get(i)!=null)
+				roads.get(i).updateRoadDirections(this);
+	}
 	
 	public int getCrossId() {
 		return crossId;

@@ -126,9 +126,10 @@ public class InputHandle {
 				String[] answerStrings = line.split(",");
 				int carId = Integer.valueOf(answerStrings[0].trim()).intValue();
 				int realStTime = Integer.valueOf(answerStrings[1].trim()).intValue();
-				List<Integer> runRoadList = new LinkedList<Integer>();
+				List<Road> runRoadList = new LinkedList<Road>();
 				for(int i=2; i<answerStrings.length; i++)
-					runRoadList.add(Integer.valueOf(answerStrings[i].trim()).intValue());
+					runRoadList.add(RoadMap.roads.get(
+							Integer.valueOf(answerStrings[i].trim()).intValue()));
 				Car car = RoadMap.cars.get(carId);
 				car.setRealStTime(realStTime);
 				car.setRunRoadList(runRoadList);
