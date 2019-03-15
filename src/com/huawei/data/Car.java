@@ -61,16 +61,17 @@ public class Car {
 		return info;
 	}
 	
-	protected void startOff() {
+	protected boolean startOff() {
 		nextRoad = runRoadList.get(0);
 		nextDistance = Math.min(maxSpeed, nextRoad.getLimitSpeed());
-		if(updateCarWhileInNextRoad(RoadMap.crosses.get(origin))) {
-			logger.info("car " + carId + " start off in " + RoadMap.nowTime);
+		if(updateCarWhilePassCross(RoadMap.crosses.get(origin))) {
+			logger.info("car " + carId + " start off in Time " + RoadMap.nowTime);
 			isRunning = true;
-			RoadMap.outRoadCars.remove((Integer)carId);
-			RoadMap.nowRunCars.add(carId);
+			RoadMap.outRoadCars.remove(this);
+			RoadMap.nowRunCars.add(this);
+			return true;
 		}
-		
+		return false;
 	}
 	
 	protected void arrive() {
@@ -79,25 +80,53 @@ public class Car {
 		nextRoad = null;
 		isRunning = false;
 		isUpdated = true;
-		RoadMap.nowRunCars.remove(carId);
-		RoadMap.finishCars.add(carId);
-		RoadMap.nowWaitedCars.remove(carId);
+		RoadMap.nowRunCars.remove(this);
+		RoadMap.finishCars.add(this);
+		RoadMap.nowWaitedCars.remove(this);
 	}
 	
 	protected void stepForward() {
 		isUpdated = true;
-		RoadMap.nowWaitedCars.remove(carId);
+		RoadMap.nowWaitedCars.remove(this);
+	}
+	
+	private void stepPassCross() {
+		nowRoad = nextRoad;
+		int index = runRoadList.indexOf(nowRoad);
+		if(index == runRoadList.size()-1)
+			nextRoad = null;
+		else nextRoad = runRoadList.get(index+1);
+		direction = computeDirection();
+		isUpdated = true;
+		RoadMap.nowWaitedCars.remove(this);
+	}
+	
+	private Direction computeDirection() {
+		if(nextRoad == null)
+			return Direction.d;
+		Cross cross = null;
+		if(nowRoad.getOrigin().getRoads().contains(nextRoad))
+			cross = nowRoad.getOrigin();
+		else cross = nowRoad.getDestination();
+		switch((cross.getRoads().indexOf(nowRoad)-
+				cross.getRoads().indexOf(nextRoad)+4)%4) {
+			case 1: return Direction.r;
+			case 2: return Direction.d;
+			case 3: return Direction.l;
+			default: logger.error("something error while computing directions");
+		}
+		return Direction.n;
 	}
 	
 	protected void computeNowAndNextDistance(int s1) {
 		int nowSpeed = Math.min(maxSpeed, nowRoad.getLimitSpeed());
-		if(nowSpeed < s1) {
+		if(nowSpeed <= s1) {
 			nowDistance = nowSpeed;
 			nextDistance = 0;
 		} else if(nextRoad==null) {
 			// will arrive destination
 			nowDistance = s1;
-			nextDistance = 0;
+			nextDistance = -1;
 		} else {
 			nowDistance = s1;
 			int nextSpeed = Math.min(maxSpeed, nextRoad.getLimitSpeed());
@@ -107,26 +136,16 @@ public class Car {
 		}
 	}
 	
-	private void stepNextRoad() {
-		nowRoad = nextRoad;
-		int index = runRoadList.indexOf(nowRoad);
-		if(index == runRoadList.size()-1)
-			nextRoad = null;
-		else nextRoad = runRoadList.get(index+1);
-		isUpdated = true;
-		RoadMap.nowWaitedCars.remove(carId);
-	}
-	
 	// from nowRoad to nextRoad
-	protected boolean updateCarWhileInNextRoad(Cross cross) {
+	protected boolean updateCarWhilePassCross(Cross cross) {
 		if(nextRoad==null)
 			logger.error("next road " + nextRoad.getRoadId() + " not exists");
 		int laneNum = nextRoad.getInRoadLaneNum(cross, nextDistance);
 		if(laneNum < 0)
 			return false;
 		else {
-			nextRoad.updateRoadWhilecarInNextRoad(cross, this, laneNum);
-			stepNextRoad();
+			nextRoad.updateRoadWhilePassCross(cross, this, laneNum);
+			stepPassCross();
 			return true;
 		}
 	}

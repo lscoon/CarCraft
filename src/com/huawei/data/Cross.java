@@ -79,7 +79,6 @@ public class Cross{
 	}
 	
 	public void updateCross() {
-		logger.info("step2: update cross" + crossId);
 		initFirstCarDirection();
 		int count, num=0;
 		do {
@@ -91,7 +90,7 @@ public class Cross{
 				Road road = roads.get(sequenceRoadIds[i]);
 				count += road.updateWaitedCars(this);
 			}
-			logger.info("step2: cross " + crossId + " ," + count + " ,pass " + count + " cars");
+			logger.info("step2: cross " + crossId + ", " + count + " cars passed in iterator " + num);
 		} while(count!=0);
 		
 	}

@@ -10,7 +10,7 @@ public class Main {
     private static final Logger logger = Logger.getLogger(Main.class);
     public static void main(String[] args)
     {
-        
+        /*
     	if (args.length != 4) {
             logger.error("please input args: inputFilePath, resultFilePath");
             return;
@@ -36,10 +36,9 @@ public class Main {
 
         logger.info("End...");
     	
-    	
     	//logger info show program process
     	//logger error show program bugs
-    	/*
+    	*/
     	logger.info("Start...");
     	
     	logger.info("start read input files");
@@ -47,8 +46,8 @@ public class Main {
     	logger.info("end read input files");
     	
 		MapFrame view = new MapFrame();
-		RoadMap.runMap();
-		logger.info("End...");*/
+		//RoadMap.runMapWithOutView();
+		logger.info("End...");
 		
     }
 }

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -47,7 +48,7 @@ public class MapPanel extends JPanel{
 		setForeground(Color.black);
 		setVisible(true);
 		
-		BFSCrosses();	
+		BFSCrosses();
 	}
 	
 	private void BFSCrosses() {
@@ -107,26 +108,32 @@ public class MapPanel extends JPanel{
 		int[] location = crossLocationMap.get(crossId);
 		int locationX = Distance*location[0]+TranslateX;
 		int locationY = Distance*location[1]+TranslateY;
-		g.setColor(Color.red);
+		g.setColor(Color.green);
 		g.setFont(crossFont);
 		g.drawString(Integer.toString(crossId), locationX, locationY);
 		
 		g.setColor(Color.black);
 		g.setFont(roadFont);
 		
-		int[] roads = cross.getRoadIds();
+		List<Road> roads = cross.getRoads();
 		int roSta = cross.getRotationStatus();
 		
-		paintRoad(g, roads[(4-roSta)%4], locationX, locationY, locationX, locationY-Distance);
-		paintRoad(g, roads[(5-roSta)%4], locationX, locationY, locationX+Distance, locationY);
-		paintRoad(g, roads[(6-roSta)%4], locationX, locationY, locationX, locationY+Distance);
-		paintRoad(g, roads[(7-roSta)%4], locationX, locationY, locationX-Distance, locationY);
+		paintRoad(g, roads.get((4-roSta)%4), locationX, locationY, locationX, locationY-Distance);
+		paintRoad(g, roads.get((5-roSta)%4), locationX, locationY, locationX+Distance, locationY);
+		paintRoad(g, roads.get((6-roSta)%4), locationX, locationY, locationX, locationY+Distance);
+		paintRoad(g, roads.get((7-roSta)%4), locationX, locationY, locationX-Distance, locationY);
 	}
 	
-	private void paintRoad(Graphics g, int roadId, int x_1, int y_1, int x_2, int y_2) {
-		if(roadId==-1 || paintedRoads.contains(roadId))
+	private void paintRoad(Graphics g, Road road, int x_1, int y_1, int x_2, int y_2) {
+		if(road==null)
 			return;
-		g.drawString(Integer.toString(roadId), (x_1+x_2)/2, (y_1+y_2)/2);
+		int roadId = road.getRoadId();
+		if(paintedRoads.contains(roadId))
+			return;
+		g.drawString(Integer.toString(roadId), (x_1+x_2-20)/2, (y_1+y_2)/2);
+		g.setColor(Color.red);
+		g.drawString(Integer.toString(road.getCarNum()), (x_1+x_2+10)/2, (y_1+y_2)/2);
+		g.setColor(Color.black);
 		g.drawLine(x_1, y_1, x_2, y_2);
 		paintedRoads.add(roadId);
 	}

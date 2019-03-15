@@ -152,6 +152,26 @@ public class MapFrame extends JFrame{
 		setResizable(false);
 		// important!!! take control of keyboard listener
 		requestFocus();
+		
+		runMap();
+	}
+	
+	private void runMap() {
+		RoadMap.initMap();
+		btMapRefresh.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(RoadMap.finishCars.size()!=RoadMap.cars.size()) {
+					RoadMap.updateMap();
+					btMapRefresh.setText(Integer.toString(RoadMap.nowTime));
+					RoadMap.nowTime++;
+					pMap.repaint();
+				}
+				else btMapRefresh.setText("End " + (RoadMap.nowTime-1));
+			}
+			
+		});
 	}
 	
 	private void initInfoPanel() {

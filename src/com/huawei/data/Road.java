@@ -36,9 +36,9 @@ public class Road {
 		
 		int length = Integer.valueOf(strs[1].trim()).intValue();
 		int lanesNum = Integer.valueOf(strs[3].trim()).intValue();
-		forwardRoad = new OneWayRoad(lanesNum, length);
+		forwardRoad = new OneWayRoad(lanesNum, length, this);
 		if(isBiDirect)
-			backwardRoad = new OneWayRoad(lanesNum, length);
+			backwardRoad = new OneWayRoad(lanesNum, length, this);
 	}
 	
 	public String info() {
@@ -67,10 +67,11 @@ public class Road {
 	}
 	
 	public void updateRunnableCars() {
-		logger.info("step1: update road " + roadId );
-		forwardRoad.updateRunnableCars();
+		int count = 0;
+		count = forwardRoad.updateRunnableCars();
 		if(isBiDirect)
-			backwardRoad.updateRunnableCars();
+			count += backwardRoad.updateRunnableCars();
+		logger.info("step1: road " + roadId + ", " + count + " cars updated");
 	}
 	
 	public int updateWaitedCars(Cross cross) {
@@ -124,11 +125,11 @@ public class Road {
 	}
 	
 	// num means car in road lane num
-	protected void updateRoadWhilecarInNextRoad(Cross cross, Car car, int num) {
+	protected void updateRoadWhilePassCross(Cross cross, Car car, int num) {
 		if(cross.getCrossId() == destination.getCrossId())
-			forwardRoad.updateRoadWhilecarInNextRoad(car, num);
+			forwardRoad.updateRoadWhilePassCross(car, num);
 		else if(isBiDirect)
-			backwardRoad.updateRoadWhilecarInNextRoad(car, num);
+			backwardRoad.updateRoadWhilePassCross(car, num);
 		else
 			logger.error("step2: invalid car " + car.getCarId() + " in " + roadId);
 	}
@@ -139,5 +140,19 @@ public class Road {
 	
 	public int getLimitSpeed() {
 		return limitSpeed;
+	}
+
+	public Cross getOrigin() {
+		return origin;
+	}
+
+	public Cross getDestination() {
+		return destination;
+	}
+	
+	public int getCarNum() {
+		if(isBiDirect)
+			return backwardRoad.getCarNum() + forwardRoad.getCarNum();
+		return forwardRoad.getCarNum();
 	}
 }

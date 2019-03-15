@@ -2,6 +2,7 @@ package com.huawei.data;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,13 +28,12 @@ public class RoadMap {
 	public static List<Integer> crossSequence = new ArrayList<>();
 	
 	public static int nowTime = 0;
-	public static List<Integer> outRoadCars = new LinkedList<>();
-	public static Set<Integer> nowRunCars = new HashSet<>();
-	public static Set<Integer> nowWaitedCars = new HashSet<>();
-	public static Set<Integer> finishCars = new HashSet<>();
+	public static List<Car> outRoadCars = new LinkedList<>();
+	public static Set<Car> nowRunCars = new HashSet<>();
+	public static Set<Car> nowWaitedCars = new HashSet<>();
+	public static Set<Car> finishCars = new HashSet<>();
 	
-	public static void runMap() {
-		logger.info("init map in " + nowTime);
+	public static void runMapWithOutView() {
 		initMap();
 		while(finishCars.size()!=cars.size()) {
 			updateMap();
@@ -42,14 +42,23 @@ public class RoadMap {
 	}
 	
 	public static void initMap() {
-		for(Integer i : cars.keySet())
+		logger.info("init map in " + nowTime);
+		for(Car i : cars.values())
 			outRoadCars.add(i);
-		Collections.sort(outRoadCars);
+		Collections.sort(outRoadCars, new Comparator<Car>() {
+			@Override
+			public int compare(Car o1, Car o2) {
+				return o1.getCarId()-o2.getCarId();
+			}
+		});
 	}
 	
 	public static void updateMap() {
 		logger.info("start updateMap in " + nowTime);
 		nowWaitedCars.addAll(nowRunCars);
+		for(Car car : nowWaitedCars) {
+			car.setUpdated(false);
+		}
 		// step one
 		// only consider and update cars that will not pass the cross
 		Iterator<Map.Entry<Integer, Road>> iterator = roads.entrySet().iterator();
@@ -65,10 +74,11 @@ public class RoadMap {
 			}
 		}
 		// step three
-		for(int carId : outRoadCars) {
-			Car car = cars.get((Integer)carId);
+		for(int i=0; i<outRoadCars.size(); i++) {
+			Car car = outRoadCars.get(i);
 			if(car.getStartTime()<=nowTime)
-				car.startOff();
+				if(car.startOff())
+					i--;
 		}
 	}
 	
