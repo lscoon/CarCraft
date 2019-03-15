@@ -40,6 +40,17 @@ public class InputHandle {
 		inputAnswer();
 	}
 	
+	public static void readInputs(String carPath, String roadPath, String crossPath) {
+		crossFile = crossPath;
+		roadFile = roadPath;
+		carFile = carPath;
+		inputCross();
+		inputRoad();
+		bindRoadToCross();
+		
+		inputCar();
+	}
+	
 	private static void inputCross() {
 		try {
 			String line = null;
