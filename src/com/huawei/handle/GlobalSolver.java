@@ -1,7 +1,6 @@
 package com.huawei.handle;
 
 import org.apache.log4j.Logger;
-import com.huawei.data.RoadMap;
 
 public class GlobalSolver {
 	private static final Logger logger = Logger.getLogger(GlobalSolver.class);
@@ -20,7 +19,7 @@ public class GlobalSolver {
 
 		while (!RoadMap.isDispatchFinished()) {
 			RoadMap.updateMap();
-			RoadMap.nowTime++;
+			RoadMap.termn++;
 			updateCarRoadList();
 		}
 	}

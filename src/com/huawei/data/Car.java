@@ -6,13 +6,14 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.huawei.handle.RoadMap;
 import com.huawei.util.Util;
 
 public class Car {
 	
 	private static final Logger logger = Logger.getLogger(Car.class);
 	// left right direct no
-	public static enum Direction {l,r,d,n};
+	public static enum Direction {left,right,direct,unknown};
 	
 	private int carId;
 	private int origin;
@@ -20,18 +21,18 @@ public class Car {
 	private int maxSpeed;
 	private int startTime;
 	
-	private int realStTime = 0;
+	private int realStartTime = 0;
 	private int realEndTime = 0;
 	
-	private List<Road> runRoadList = new ArrayList<Road>();
+	private List<Road> roadList = new ArrayList<Road>();
 	
 	private Road nowRoad = null;
 	private Road nextRoad = null;
-	private Direction direction = Direction.n;
+	private Direction direction = Direction.unknown;
 	private int nowDistance = 0;
 	private int nextDistance = 0;
 	private boolean isRunning = false;
-	private boolean isUpdated = true;
+	private boolean isWaited = false;
 	
 	public Car (String[] strs) {
 		if (strs.length != 5) {
@@ -46,6 +47,10 @@ public class Car {
 		
 		if(carId/Util.CarIdMaxLength > 0)
 			Util.CarIdMaxLength = Util.CarIdMaxLength*10;
+		if(maxSpeed>Util.CarMaxSpeed)
+			Util.CarMaxSpeed = maxSpeed;
+		if(maxSpeed<Util.CarMinSpeed)
+			Util.CarMinSpeed = maxSpeed;
 	}
 
 	public String info() {
@@ -55,17 +60,17 @@ public class Car {
 		info = info.concat(destination + "\n");
 		info = info.concat(maxSpeed + "\n");
 		info = info.concat(startTime + "\n");
-		info = info.concat(realStTime + "\n");
+		info = info.concat(realStartTime + "\n");
 		info = info.concat(nowRoad + "\n");
 		
 		return info;
 	}
 	
-	protected boolean startOff() {
-		nextRoad = runRoadList.get(0);
+	public boolean startOff() {
+		nextRoad = roadList.get(0);
 		nextDistance = Math.min(maxSpeed, nextRoad.getLimitSpeed());
 		if(updateCarWhilePassCross(RoadMap.crosses.get(origin))) {
-			logger.info("car " + carId + " start off in Time " + RoadMap.nowTime);
+			logger.info("car " + carId + " start off in Time " + RoadMap.termn);
 			isRunning = true;
 			RoadMap.outRoadCars.remove(this);
 			RoadMap.nowRunCars.add(this);
@@ -75,47 +80,47 @@ public class Car {
 	}
 	
 	protected void arrive() {
-		realEndTime = RoadMap.nowTime+1;
+		realEndTime = RoadMap.termn+1;
 		nowRoad = null;
 		nextRoad = null;
 		isRunning = false;
-		isUpdated = true;
+		isWaited = false;
 		RoadMap.nowRunCars.remove(this);
 		RoadMap.finishCars.add(this);
 		RoadMap.nowWaitedCars.remove(this);
 	}
 	
 	protected void stepForward() {
-		isUpdated = true;
+		isWaited = false;
 		RoadMap.nowWaitedCars.remove(this);
 	}
 	
 	private void stepPassCross() {
 		nowRoad = nextRoad;
-		int index = runRoadList.indexOf(nowRoad);
-		if(index == runRoadList.size()-1)
+		int index = roadList.indexOf(nowRoad);
+		if(index == roadList.size()-1)
 			nextRoad = null;
-		else nextRoad = runRoadList.get(index+1);
+		else nextRoad = roadList.get(index+1);
 		direction = computeDirection();
-		isUpdated = true;
+		isWaited = false;
 		RoadMap.nowWaitedCars.remove(this);
 	}
 	
 	private Direction computeDirection() {
 		if(nextRoad == null)
-			return Direction.d;
+			return Direction.direct;
 		Cross cross = null;
 		if(nowRoad.getOrigin().getRoads().contains(nextRoad))
 			cross = nowRoad.getOrigin();
 		else cross = nowRoad.getDestination();
 		switch((cross.getRoads().indexOf(nowRoad)-
 				cross.getRoads().indexOf(nextRoad)+4)%4) {
-			case 1: return Direction.r;
-			case 2: return Direction.d;
-			case 3: return Direction.l;
+			case 1: return Direction.right;
+			case 2: return Direction.direct;
+			case 3: return Direction.left;
 			default: logger.error("something error while computing directions");
 		}
-		return Direction.n;
+		return Direction.unknown;
 	}
 	
 	protected void computeNowAndNextDistance(int s1) {
@@ -162,16 +167,20 @@ public class Car {
 		return destination;
 	}
 
+	public int getMaxSpeed() {
+		return maxSpeed;
+	}
+	
 	public int getStartTime() {
 		return startTime;
 	}
 
-	public int getRealStTime() {
-		return realStTime;
+	public int getRealStartTime() {
+		return realStartTime;
 	}
 
-	public void setRealStTime(int realStTime) {
-		this.realStTime = realStTime;
+	public void setRealStartTime(int realStTime) {
+		this.realStartTime = realStTime;
 	}
 	
 	public int getRealEndTime() {
@@ -182,12 +191,12 @@ public class Car {
 		this.realEndTime = realEndTime;
 	}
 
-	public List<Road> getRunRoadList() {
-		return runRoadList;
+	public List<Road> getRoadList() {
+		return roadList;
 	}
 
-	public void setRunRoadList(List<Road> runRoadList) {
-		this.runRoadList = runRoadList;
+	public void setRoadList(List<Road> runRoadList) {
+		this.roadList = runRoadList;
 	}
 
 	public Road getNowRoad() {
@@ -226,12 +235,12 @@ public class Car {
 		this.nextDistance = nextDistance;
 	}
 
-	public boolean isUpdated() {
-		return isUpdated;
+	public boolean isWaited() {
+		return isWaited;
 	}
 
-	public void setUpdated(boolean isUpdated) {
-		this.isUpdated = isUpdated;
+	public void setWaited(boolean isWaited) {
+		this.isWaited = isWaited;
 	}
 	
 	public boolean isRunning() {

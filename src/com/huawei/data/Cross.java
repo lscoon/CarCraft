@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.huawei.handle.RoadMap;
+
 public class Cross{
 	
 	private static final Logger logger = Logger.getLogger(Cross.class);
@@ -99,6 +101,14 @@ public class Cross{
 		for(int i=0; i<4; i++)
 			if(roads.get(i)!=null)
 				roads.get(i).updateRoadDirections(this);
+	}
+	
+	public Road findLinkedRoad(Cross crossTwo) {
+		for(Road road :roads) {
+			if(road.getAnOtherCross(crossId) == crossTwo.crossId)
+				return road;
+		}
+		return null;
 	}
 	
 	public int getCrossId() {

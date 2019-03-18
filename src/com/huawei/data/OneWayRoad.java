@@ -14,16 +14,16 @@ public class OneWayRoad {
 	private Road road;
 	
 	private Car[][] status;
-	private int[] firstCar;
+	private int[] firstCarLocation;
 	private int carNum = 0;
-	private Direction roadDirection = Direction.n; 
+	private Direction firstCarDirection = Direction.unknown; 
 	
 	public OneWayRoad(int lanesNumber, int length, Road r) {
 		lanesNum = lanesNumber;
 		len = length;
 		road = r;
 		status = new Car[lanesNumber][length];
-		firstCar = new int[]{0,len-1};
+		firstCarLocation = new int[]{0,len-1};
 	}
 	
 	protected String showForwardStatus() {
@@ -98,7 +98,7 @@ public class OneWayRoad {
 					Car aheadCar = status[i][k];
 					
 					// aheadCar is updated will update nowCar, otherwise not consider
-					if(aheadCar.isUpdated()) {
+					if(!aheadCar.isWaited()) {
 						// forward k-j-1 step
 						car.stepForward();
 						if(k-j!=1) {
@@ -133,17 +133,17 @@ public class OneWayRoad {
 	
 	protected int updateWaitedCars(Cross cross, Direction[] directions) {
 		int count = 0;
-		while(roadDirection!=Direction.n) {
-			Car car = status[firstCar[0]][firstCar[1]];
+		while(firstCarDirection!=Direction.unknown) {
+			Car car = status[firstCarLocation[0]][firstCarLocation[1]];
 			boolean jammedTag = false;
-			switch(roadDirection) {
-				case d: break;
-				case r: 
-					if(directions[0]==Direction.d || directions[1]==Direction.l)
+			switch(firstCarDirection) {
+				case direct: break;
+				case right: 
+					if(directions[0]==Direction.direct || directions[1]==Direction.left)
 						jammedTag = true;
 					break;
-				case l:
-					if(directions[2]==Direction.d)
+				case left:
+					if(directions[2]==Direction.direct)
 						jammedTag = true;
 					break;
 				default: break;
@@ -155,8 +155,8 @@ public class OneWayRoad {
 			if(!car.updateCarWhilePassCross(cross))
 				return count;
 			// true means could in nextRoad
-			status[firstCar[0]][firstCar[1]] = null;
-			updateLaneRunnableCars(firstCar[0]);
+			status[firstCarLocation[0]][firstCarLocation[1]] = null;
+			updateLaneRunnableCars(firstCarLocation[0]);
 			updateRoadDirection();
 			carNum--;
 			count++;
@@ -168,19 +168,19 @@ public class OneWayRoad {
 	protected void updateRoadDirection() {
 		if(carNum==0)
 			return;
-		for(int j=firstCar[1]; j>=0; j--)
-			for(int i=firstCar[0]; i<lanesNum; i++) {
-				if(status[i][j]!=null && !status[i][j].isUpdated()) {
-					roadDirection = status[i][j].getDirection();
-					firstCar[0] = i;
-					firstCar[1] = j;
+		for(int j=firstCarLocation[1]; j>=0; j--)
+			for(int i=firstCarLocation[0]; i<lanesNum; i++) {
+				if(status[i][j]!=null && status[i][j].isWaited()) {
+					firstCarDirection = status[i][j].getDirection();
+					firstCarLocation[0] = i;
+					firstCarLocation[1] = j;
 					return;
 				}
 			}
 		// all cars have been updated
-		firstCar[0] = 0;
-		firstCar[1] = len-1;
-		roadDirection = Direction.n;
+		firstCarLocation[0] = 0;
+		firstCarLocation[1] = len-1;
+		firstCarDirection = Direction.unknown;
 	}
 	
 	protected int getInRoadLaneNum(int nextDistance) {
@@ -188,10 +188,10 @@ public class OneWayRoad {
 			int j=0;
 			for(; j<nextDistance; j++)
 				if(status[i][j]!=null) {
-					// ahead car is not updated, wait
-					if(!status[i][j].isUpdated())
+					// ahead car is waited
+					if(status[i][j].isWaited())
 						return -1;
-					// ahead car is updated
+					// ahead car is not waited
 					else if(j!=0)
 						return i;
 					// this lane has no enough space
@@ -218,11 +218,15 @@ public class OneWayRoad {
 		carNum++;
 	}
 	
-	protected Direction getRoadDirection() {
-		return roadDirection;
+	protected Direction getFirstCarDirection() {
+		return firstCarDirection;
 	}
 
 	public int getCarNum() {
 		return carNum;
+	}
+	
+	protected int getLength() {
+		return len;
 	}
 }

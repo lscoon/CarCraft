@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.huawei.data.Car.Direction;
+import com.huawei.handle.RoadMap;
 import com.huawei.util.Util;
 
 public class Road {
@@ -91,14 +92,14 @@ public class Road {
 		else logger.error("step2: update invalid road directions " + roadId);
 	}
 	
-	public Direction getRoadDirection(Cross cross) {
+	public Direction getFirstCarDirection(Cross cross) {
 		if(cross.getCrossId() == destination.getCrossId())
-			return forwardRoad.getRoadDirection();
+			return forwardRoad.getFirstCarDirection();
 		else if(isBiDirect)
-			return backwardRoad.getRoadDirection();
+			return backwardRoad.getFirstCarDirection();
 		else 
 			logger.error("step2: update invalid road directions " + roadId);
-		return Direction.d;
+		return Direction.direct;
 	}
 	
 	private Direction[] getNeighbourDirections(Cross cross) {
@@ -106,8 +107,8 @@ public class Road {
 		int index = cross.getRoads().indexOf(this);
 		for(int i=1; i<4; i++)
 			if(cross.getRoads().get((index+i)%4)!=null)
-				directions[i-1] = cross.getRoads().get((index+i)%4).getRoadDirection(cross);
-			else directions[i-1] = Direction.n;
+				directions[i-1] = cross.getRoads().get((index+i)%4).getFirstCarDirection(cross);
+			else directions[i-1] = Direction.unknown;
 		return directions;
 	}
 	
@@ -150,6 +151,14 @@ public class Road {
 		return destination;
 	}
 	
+	public boolean isBiDirect() {
+		return isBiDirect;
+	}
+	
+	public int getLength() {
+		return forwardRoad.getLength();
+	}
+
 	public int getCarNum() {
 		if(isBiDirect)
 			return backwardRoad.getCarNum() + forwardRoad.getCarNum();

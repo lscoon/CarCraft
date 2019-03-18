@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 
 import com.huawei.data.Cross;
 import com.huawei.data.Road;
-import com.huawei.data.RoadMap;
+import com.huawei.handle.RoadMap;
 
 public class MapPanel extends JPanel{
 	private static final Logger logger = Logger.getLogger(MapPanel.class);

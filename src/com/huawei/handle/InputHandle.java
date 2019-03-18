@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 import com.huawei.data.Car;
 import com.huawei.data.Cross;
 import com.huawei.data.Road;
-import com.huawei.data.RoadMap;
 
 public class InputHandle {
 	
@@ -142,8 +141,8 @@ public class InputHandle {
 					runRoadList.add(RoadMap.roads.get(
 							Integer.valueOf(answerStrings[i].trim()).intValue()));
 				Car car = RoadMap.cars.get(carId);
-				car.setRealStTime(realStTime);
-				car.setRunRoadList(runRoadList);
+				car.setRealStartTime(realStTime);
+				car.setRoadList(runRoadList);
 			}
 			reader.close();
 			br.close();

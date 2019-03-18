@@ -20,7 +20,8 @@ import javax.swing.JTextArea;
 
 import javax.swing.JTextPane;
 import org.apache.log4j.Logger;
-import com.huawei.data.RoadMap;
+
+import com.huawei.handle.RoadMap;
 
 public class MapFrame extends JFrame{
 
@@ -164,11 +165,11 @@ public class MapFrame extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 				if(RoadMap.finishCars.size()!=RoadMap.cars.size()) {
 					RoadMap.updateMap();
-					btMapRefresh.setText(Integer.toString(RoadMap.nowTime));
-					RoadMap.nowTime++;
+					btMapRefresh.setText(Integer.toString(RoadMap.termn));
+					RoadMap.termn++;
 					pMap.repaint();
 				}
-				else btMapRefresh.setText("End " + (RoadMap.nowTime-1));
+				else btMapRefresh.setText("End " + (RoadMap.termn-1));
 			}
 			
 		});

@@ -2,8 +2,8 @@ package com.huawei;
 
 import org.apache.log4j.Logger;
 
-import com.huawei.data.RoadMap;
 import com.huawei.handle.InputHandle;
+import com.huawei.handle.RoadMap;
 import com.huawei.view.MapFrame;
 
 public class Main {
@@ -45,8 +45,8 @@ public class Main {
     	InputHandle.readInputs("inputs/config_0");
     	logger.info("end read input files");
     	
-		MapFrame view = new MapFrame();
-		//RoadMap.runMapWithOutView();
+		//MapFrame view = new MapFrame();
+		RoadMap.runMapWithOutView();
 		logger.info("End...");
 		
     }
