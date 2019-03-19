@@ -70,7 +70,7 @@ public class Car {
 		nextRoad = roadList.get(0);
 		nextDistance = Math.min(maxSpeed, nextRoad.getLimitSpeed());
 		if(updateCarWhilePassCross(RoadMap.crosses.get(origin))) {
-			logger.info("car " + carId + " start off in Time " + RoadMap.termn);
+			logger.info("car " + carId + " start off in Time " + RoadMap.term);
 			isRunning = true;
 			RoadMap.outRoadCars.remove(this);
 			RoadMap.nowRunCars.add(this);
@@ -80,7 +80,7 @@ public class Car {
 	}
 	
 	protected void arrive() {
-		realEndTime = RoadMap.termn+1;
+		realEndTime = RoadMap.term+1;
 		nowRoad = null;
 		nextRoad = null;
 		isRunning = false;

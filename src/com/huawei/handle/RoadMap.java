@@ -32,7 +32,7 @@ public class RoadMap {
 	// ordered sequence from min to max
 	public static List<Integer> crossSequence = new ArrayList<>();
 
-	public static int termn = 0;
+	public static int term = 0;
 	public static List<Car> outRoadCars = new LinkedList<>();
 	public static Set<Car> nowRunCars = new HashSet<>();
 	public static Set<Car> finishCars = new HashSet<>();
@@ -43,12 +43,12 @@ public class RoadMap {
 		initMap();
 		while (finishCars.size() != cars.size()) {
 			updateMap();
-			termn++;
+			term++;
 		}
 	}
 
 	public static void initMap() {
-		logger.info("init map in " + termn);
+		logger.info("init map in " + term);
 		for (Car i : cars.values())
 			outRoadCars.add(i);
 		Collections.sort(outRoadCars, new Comparator<Car>() {
@@ -60,7 +60,7 @@ public class RoadMap {
 	}
 
 	public static void updateMap() {
-		logger.info("start updateMap in " + termn);
+		logger.info("start updateMap in " + term);
 		nowWaitedCars.addAll(nowRunCars);
 		for (Car car : nowWaitedCars) {
 			car.setWaited(true);
@@ -82,7 +82,7 @@ public class RoadMap {
 		// step three
 		for (int i = 0; i < outRoadCars.size(); i++) {
 			Car car = outRoadCars.get(i);
-			if (car.getStartTime() <= termn)
+			if (car.getStartTime() <= term)
 				if (car.startOff())
 					i--;
 		}

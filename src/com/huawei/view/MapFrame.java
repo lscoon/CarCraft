@@ -165,11 +165,11 @@ public class MapFrame extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 				if(RoadMap.finishCars.size()!=RoadMap.cars.size()) {
 					RoadMap.updateMap();
-					btMapRefresh.setText(Integer.toString(RoadMap.termn));
-					RoadMap.termn++;
+					btMapRefresh.setText(Integer.toString(RoadMap.term));
+					RoadMap.term++;
 					pMap.repaint();
 				}
-				else btMapRefresh.setText("End " + (RoadMap.termn-1));
+				else btMapRefresh.setText("End " + (RoadMap.term-1));
 			}
 			
 		});

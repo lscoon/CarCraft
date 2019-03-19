@@ -19,7 +19,7 @@ public class GlobalSolver {
 
 		while (!RoadMap.isDispatchFinished()) {
 			RoadMap.updateMap();
-			RoadMap.termn++;
+			RoadMap.term++;
 			updateCarRoadList();
 		}
 	}
