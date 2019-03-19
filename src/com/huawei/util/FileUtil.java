@@ -217,7 +217,7 @@ public class FileUtil {
 	}
 	
 	public static void outputAnswer(String answerPath) {
-		answerFile = answerPath;
+		//answerFile = answerPath;
 		FileWriter output = null;
 		BufferedWriter writer = null;
 		try {

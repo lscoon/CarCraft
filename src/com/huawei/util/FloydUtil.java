@@ -1,35 +1,24 @@
 package com.huawei.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.huawei.entity.Car;
 import com.huawei.entity.Cross;
 import com.huawei.entity.Road;
 
 public class FloydUtil {
 	
-	public static void 
+	public static Map<Integer, Road[][]> pathMap = null;
+	public static Map<Integer, float[][]> distMap = null;
 	
-	public static void getSpeedPathMatrix() {
-		Map<Integer, Road[][]> matrixs = new HashMap<>();
-		for(int i=MapUtil.CarMinSpeed; i<=MapUtil.CarIdMaxLength; i++)
-			matrixs.put(i, floyd(i));
-		
-		for(Car car : MapUtil.cars.values()) {
-			Road[][] matrix = matrixs.get(car.getMaxSpeed());
-			int originSeq = MapUtil.crossSequence.indexOf(car.getOrigin());
-			int destinationSeq = MapUtil.crossSequence.indexOf(car.getDestination());
-			
-			List<Road> roadList = new ArrayList<>();
-			// to do
-			roadList.add(matrix[originSeq][destinationSeq]);
-		}
+	public static void initPathAndDistMatrixMap() {
+		pathMap = new LinkedHashMap<>();
+		distMap = new LinkedHashMap<>();
+		for(int i=MapUtil.CarMinSpeed; i<=MapUtil.CarMaxSpeed; i++)
+			floyd(i);
 	}
 	
-	private static Road[][] floyd(int speed) {
+	private static void floyd(int speed) {
 		Road[][] path = new Road[MapUtil.crosses.size()][MapUtil.crosses.size()];
 		float[][] dist = new float[MapUtil.crosses.size()][MapUtil.crosses.size()];
 		for(int i=0; i<MapUtil.crosses.size(); i++)
@@ -43,8 +32,8 @@ public class FloydUtil {
 					path[i][j] = null;
 				}
 				else {
-					speed = Math.min(speed, road.getLimitSpeed());
-					dist[i][j] = ((float) road.getLength())/speed;
+					int nowSpeed = Math.min(speed, road.getLimitSpeed());
+					dist[i][j] = ((float) road.getLength())/nowSpeed;
 					path[i][j] = road;
 				}
 			}
@@ -63,7 +52,8 @@ public class FloydUtil {
 	            }
 	        }
 	    }
-		return path;
+		pathMap.put(speed, path);
+		distMap.put(speed, dist);
 	}
 	
 	private static Road computeRoad(Cross crossOne, Cross crossTwo) {

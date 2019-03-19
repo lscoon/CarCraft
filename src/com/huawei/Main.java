@@ -2,6 +2,7 @@ package com.huawei;
 
 import org.apache.log4j.Logger;
 
+import com.huawei.service.GlobalSolver;
 import com.huawei.service.MapSimulator;
 import com.huawei.ui.MapFrame;
 import com.huawei.util.FileUtil;
@@ -42,11 +43,14 @@ public class Main {
     	logger.info("Start...");
     	
     	logger.info("start read input files");
-    	FileUtil.readInputs("inputs/config_0");
+    	FileUtil.readInputs("inputs/config");
     	logger.info("end read input files");
     	
-		//MapFrame view = new MapFrame();
-		MapSimulator.runMapWithOutView();
+    	logger.info("start floyd init");
+    	GlobalSolver.initCarRoadList();
+    	logger.info("end floyd init");
+    	
+		MapSimulator.runMapWithView();
 		logger.info("End...");
 		
     }

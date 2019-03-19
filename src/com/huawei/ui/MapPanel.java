@@ -131,9 +131,9 @@ public class MapPanel extends JPanel{
 		int roadId = road.getRoadId();
 		if(paintedRoads.contains(roadId))
 			return;
-		g.drawString(Integer.toString(roadId), (x_1+x_2-20)/2, (y_1+y_2)/2);
+		g.drawString(Integer.toString(roadId), (x_1+x_2-30)/2, (y_1+y_2)/2);
 		g.setColor(Color.red);
-		g.drawString(Integer.toString(road.getCarNum()), (x_1+x_2+10)/2, (y_1+y_2)/2);
+		g.drawString(Integer.toString(road.getCarNum()), (x_1+x_2+20)/2, (y_1+y_2)/2);
 		g.setColor(Color.black);
 		g.drawLine(x_1, y_1, x_2, y_2);
 		paintedRoads.add(roadId);

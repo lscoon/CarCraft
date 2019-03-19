@@ -79,9 +79,11 @@ public class Cross{
 		return -1;
 	}
 	
-	public void updateCross() {
+	public int updateCross() {
 		initFirstCarDirection();
-		int count, num=0;
+		int count=0;
+		int num=0;
+		int sum=0;
 		do {
 			count = 0;
 			num++;
@@ -91,9 +93,10 @@ public class Cross{
 				Road road = roads.get(sequenceRoadIds[i]);
 				count += road.updateWaitedCars(this);
 			}
+			sum += count;
 			logger.info("step2: cross " + crossId + ", " + count + " cars passed in iterator " + num);
 		} while(count!=0);
-		
+		return sum;
 	}
 	
 	private void initFirstCarDirection() {
@@ -104,8 +107,9 @@ public class Cross{
 	
 	public Road findLinkedRoad(Cross crossTwo) {
 		for(Road road :roads) {
-			if(road.getAnOtherCross(crossId) == crossTwo.crossId)
-				return road;
+			if(road != null)
+				if(road.getAnOtherCross(crossId) == crossTwo.crossId)
+					return road;
 		}
 		return null;
 	}

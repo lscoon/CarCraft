@@ -43,6 +43,7 @@ public class Car {
 		destination = Integer.valueOf(strs[2].trim()).intValue();
 		maxSpeed = Integer.valueOf(strs[3].trim()).intValue();
 		startTime = Integer.valueOf(strs[4].trim()).intValue();
+		realStartTime = startTime;
 		
 		if(carId/MapUtil.CarIdMaxLength > 0)
 			MapUtil.CarIdMaxLength = MapUtil.CarIdMaxLength*10;
@@ -60,13 +61,17 @@ public class Car {
 		info = info.concat(maxSpeed + "\n");
 		info = info.concat(startTime + "\n");
 		info = info.concat(realStartTime + "\n");
-		info = info.concat(nowRoad + "\n");
+		if(nowRoad!=null)
+			info = info.concat(nowRoad.getRoadId() + "\n");
+		else info = info.concat("n\n");
+		if(nextRoad!=null)
+			info = info.concat(nextRoad.getRoadId() + "\n");
+		else info = info.concat("n\n");
 		
 		return info;
 	}
 	
 	public boolean startOff() {
-		nextRoad = roadList.get(0);
 		nextDistance = Math.min(maxSpeed, nextRoad.getLimitSpeed());
 		if(updateCarWhilePassCross(MapUtil.crosses.get(origin))) {
 			logger.info("car " + carId + " start off in Time " + MapSimulator.term);
@@ -75,6 +80,7 @@ public class Car {
 			MapSimulator.nowRunCars.add(this);
 			return true;
 		}
+		realStartTime++;
 		return false;
 	}
 	

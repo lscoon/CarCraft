@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import com.huawei.entity.Car;
 import com.huawei.entity.Cross;
 import com.huawei.entity.Road;
+import com.huawei.ui.MapFrame;
 import com.huawei.util.MapUtil;
 
 public class MapSimulator {
@@ -27,6 +28,11 @@ public class MapSimulator {
 
 	public static Set<Car> nowWaitedCars = new HashSet<>();
 
+	public static void runMapWithView() {
+		initMap();
+		MapUtil.mapView = new MapFrame();
+	}
+	
 	public static void runMapWithOutView() {
 		initMap();
 		while (finishCars.size() != MapUtil.cars.size()) {
@@ -62,18 +68,32 @@ public class MapSimulator {
 		}
 		// step two
 		while (nowWaitedCars.size() != 0) {
+			int count = 0;
 			for (int i = 0; i < MapUtil.crossSequence.size(); i++) {
 				Cross cross = MapUtil.crosses.get(MapUtil.crossSequence.get(i));
-				cross.updateCross();
+				count += cross.updateCross();
 			}
+			if(count==0)
+				findDeadLock();
 		}
 		// step three
 		for (int i = 0; i < outRoadCars.size(); i++) {
 			Car car = outRoadCars.get(i);
-			if (car.getStartTime() <= term)
+			if (car.getRealStartTime() <= term)
 				if (car.startOff())
 					i--;
 		}
+	}
+	
+	private static void findDeadLock() {
+		if(MapUtil.mapView!=null) {
+			String temp = "dead lock find\nnow waited cars\n";
+			for(Car car : nowWaitedCars) {
+				temp = temp.concat(car.getCarId()+"\n");
+			}
+			MapUtil.mapView.pControl.info.setText(temp);
+		}
+		logger.info("dead lock happen");
 	}
 
 	public static boolean isDispatchFinished() {

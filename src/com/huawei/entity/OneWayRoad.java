@@ -226,6 +226,10 @@ public class OneWayRoad {
 		return carNum;
 	}
 	
+	protected int getLanesNum() {
+		return lanesNum;
+	}
+	
 	protected int getLength() {
 		return len;
 	}

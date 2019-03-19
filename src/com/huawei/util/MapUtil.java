@@ -8,6 +8,7 @@ import java.util.Map;
 import com.huawei.entity.Car;
 import com.huawei.entity.Cross;
 import com.huawei.entity.Road;
+import com.huawei.ui.MapFrame;
 
 public class MapUtil {
 	// id max = 312 -> CarIdMaxLength = 1000
@@ -19,6 +20,8 @@ public class MapUtil {
 	
 	public static final int IntMax = Integer.MAX_VALUE;
 	public static final float FloatMax = Float.MAX_VALUE;
+	
+	public static MapFrame mapView = null;
 	
 	public static Map<Integer, Cross> crosses = new HashMap<>();
 	public static Map<Integer, Road> roads = new HashMap<>();

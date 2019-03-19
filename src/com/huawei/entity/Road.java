@@ -48,6 +48,8 @@ public class Road {
 		info = info.concat(limitSpeed + "\n");
 		info = info.concat(origin.getCrossId() + "\n");
 		info = info.concat(destination.getCrossId() + "\n");
+		info = info.concat(forwardRoad.getLanesNum() + "\n");
+		info = info.concat(forwardRoad.getLength() + "\n");
 		return info;
 	}
 	
