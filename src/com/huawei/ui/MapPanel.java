@@ -1,4 +1,4 @@
-package com.huawei.view;
+package com.huawei.ui;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -17,9 +17,10 @@ import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
 
-import com.huawei.data.Cross;
-import com.huawei.data.Road;
-import com.huawei.handle.RoadMap;
+import com.huawei.entity.Cross;
+import com.huawei.entity.Road;
+import com.huawei.service.MapSimulator;
+import com.huawei.util.MapUtil;
 
 public class MapPanel extends JPanel{
 	private static final Logger logger = Logger.getLogger(MapPanel.class);
@@ -52,21 +53,21 @@ public class MapPanel extends JPanel{
 	}
 	
 	private void BFSCrosses() {
-		int startCrossId = RoadMap.crossSequence.get(0);
+		int startCrossId = MapUtil.crossSequence.get(0);
 		crossLocationMap.put(startCrossId, new int[]{0,0});
 		
 		Queue<Integer> queue = new LinkedList<>();
 		queue.add(startCrossId);
 		while(!queue.isEmpty()) {
 			Integer crossId = queue.poll();
-			Cross cross = RoadMap.crosses.get(crossId);
+			Cross cross = MapUtil.crosses.get(crossId);
 			for(int i=0; i<4; i++) {
 				Road road = cross.getRoads().get(i);
 				if(road == null)
 					continue;
 				int nextCrossId = road.getAnOtherCross(crossId);
 				if(!crossLocationMap.containsKey(nextCrossId)) {
-					Cross nextCross = RoadMap.crosses.get(nextCrossId);
+					Cross nextCross = MapUtil.crosses.get(nextCrossId);
 					nextCross.setRotationStatus(cross.getRotationStatus()
 							+ rotationMatrix[i][nextCross.getRotation(road.getRoadId())]);
 					crossLocationMap.put(nextCrossId, getNextLocation(
@@ -96,7 +97,7 @@ public class MapPanel extends JPanel{
 		super.paintComponent(g);
 		paintedRoads.clear();
 		
-		Iterator<Map.Entry<Integer, Cross>> iterator = RoadMap.crosses.entrySet().iterator();
+		Iterator<Map.Entry<Integer, Cross>> iterator = MapUtil.crosses.entrySet().iterator();
 		while (iterator.hasNext()) {
 		    Map.Entry<Integer, Cross> entry = iterator.next();
 		    paintCross(g, entry.getValue());

@@ -1,9 +1,9 @@
-package com.huawei.data;
+package com.huawei.entity;
 
 import org.apache.log4j.Logger;
 
-import com.huawei.data.Car.Direction;
-import com.huawei.util.Util;
+import com.huawei.entity.Car.Direction;
+import com.huawei.util.MapUtil;
 
 public class OneWayRoad {
 	
@@ -27,7 +27,7 @@ public class OneWayRoad {
 	}
 	
 	protected String showForwardStatus() {
-		int carIdMaxLength = countNum(Util.CarIdMaxLength);
+		int carIdMaxLength = countNum(MapUtil.CarIdMaxLength);
 		String temp = "";
 		for(int i=0; i<lanesNum; i++) {
 			for(int j=0; j<len; j++) 
@@ -47,7 +47,7 @@ public class OneWayRoad {
 	}
 	
 	protected String showBackwardStatus() {
-		int carIdMaxLength = countNum(Util.CarIdMaxLength);
+		int carIdMaxLength = countNum(MapUtil.CarIdMaxLength);
 		String temp = "";
 		for(int i=lanesNum-1; i>=0; i--) {
 			for(int j=len-1; j>=0; j--) 

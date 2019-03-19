@@ -1,12 +1,11 @@
-package com.huawei.data;
+package com.huawei.entity;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.huawei.handle.RoadMap;
+import com.huawei.util.MapUtil;
 
 public class Cross{
 	
@@ -59,7 +58,7 @@ public class Cross{
 		roads = new ArrayList<Road>(4);
 		for(int i=0; i<4; i++)
 			if(roadIds[i]!=-1)
-				roads.add(RoadMap.roads.get(roadIds[i]));
+				roads.add(MapUtil.roads.get(roadIds[i]));
 			else roads.add(null);
 	}
 	

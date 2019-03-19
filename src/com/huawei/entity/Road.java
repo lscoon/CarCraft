@@ -1,13 +1,13 @@
-package com.huawei.data;
+package com.huawei.entity;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.huawei.data.Car.Direction;
-import com.huawei.handle.RoadMap;
-import com.huawei.util.Util;
+import com.huawei.entity.Car.Direction;
+import com.huawei.service.MapSimulator;
+import com.huawei.util.MapUtil;
 
 public class Road {
 
@@ -29,8 +29,8 @@ public class Road {
 		}
 		roadId = Integer.valueOf(strs[0].trim()).intValue();
 		limitSpeed = Integer.valueOf(strs[2].trim()).intValue();
-		origin = RoadMap.crosses.get(Integer.valueOf(strs[4].trim()).intValue());
-		destination = RoadMap.crosses.get(Integer.valueOf(strs[5].trim()).intValue());
+		origin = MapUtil.crosses.get(Integer.valueOf(strs[4].trim()).intValue());
+		destination = MapUtil.crosses.get(Integer.valueOf(strs[5].trim()).intValue());
 		if(Integer.valueOf(strs[6].trim()).intValue()==1)
 			isBiDirect = true;
 		else isBiDirect = false;
