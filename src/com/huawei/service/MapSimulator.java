@@ -1,5 +1,6 @@
 package com.huawei.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -47,6 +48,25 @@ public class MapSimulator {
 		}
 	}
 
+	public static void runMapWithCarList(ArrayList<Car> carList) {
+		logger.info("init map in " + term);
+		for (Car car : carList)
+			if(car != null)
+				outRoadCars.add(car);
+		Collections.sort(outRoadCars, new Comparator<Car>() {
+			@Override
+			public int compare(Car o1, Car o2) {
+				return o1.getCarId() - o2.getCarId();
+			}
+		});
+		while (finishCars.size() != carList.size()) {
+			updateMap();
+			term++;
+		}
+		finishCars.clear();
+		logger.info("end map in " + term);
+	}
+	
 	public static void initMap() {
 		logger.info("init map in " + term);
 		for (Car i : MapUtil.cars.values())

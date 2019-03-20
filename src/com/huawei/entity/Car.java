@@ -76,6 +76,7 @@ public class Car {
 		if(updateCarWhilePassCross(MapUtil.crosses.get(origin))>=0) {
 			//logger.info("car " + carId + " start off in Time " + MapSimulator.term);
 			isRunning = true;
+			realStartTime = MapSimulator.term;
 			MapSimulator.outRoadCars.remove(this);
 			MapSimulator.nowRunCars.add(this);
 			return true;
@@ -207,6 +208,7 @@ public class Car {
 
 	public void setRoadList(List<Road> runRoadList) {
 		this.roadList = runRoadList;
+		this.nextRoad = roadList.get(0);
 	}
 
 	public Road getNowRoad() {

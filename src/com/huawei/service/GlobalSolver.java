@@ -24,10 +24,11 @@ public class GlobalSolver {
 	private static ArrayList<Set<Integer>> conflictFreeCarPathSets = null;
 
 	public static void initSolver() {
-		MapSimulator.initMap();
+		//MapSimulator.initMap();
 //		initSortedRoads();
 		// initialize with shortest path
 		initCarRoadList();
+		initCarClusters();
 		logger.info("Solver init finished!");
 	}
 
@@ -39,11 +40,17 @@ public class GlobalSolver {
 	 */
 	public static void invokeSolver() {
 		initSolver();
-
+		/*
 		while (!MapSimulator.isDispatchFinished()) {
 			MapSimulator.updateMap();
 			MapSimulator.term++;
 			updateCarRoadList();
+		}*/
+		
+		for(ArrayList<Car> carList : conflictFreeCarClusters) {
+			if(carList == null)
+				continue;
+			MapSimulator.runMapWithCarList(carList);
 		}
 	}
 

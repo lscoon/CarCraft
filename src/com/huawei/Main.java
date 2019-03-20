@@ -1,12 +1,9 @@
 package com.huawei;
 
-import java.io.File;
-
 import org.apache.log4j.Logger;
 
 import com.huawei.service.GlobalSolver;
 import com.huawei.service.MapSimulator;
-import com.huawei.ui.MapFrame;
 import com.huawei.util.FileUtil;
 
 public class Main {
@@ -35,17 +32,25 @@ public class Main {
         
         // TODO: calc
         logger.info("start floyd init");
-    	GlobalSolver.initCarRoadList();
+    	GlobalSolver.initSolver();
     	logger.info("end floyd init");
     	
+    	GlobalSolver.invokeSolver();
+    	logger.info("end in term " + MapSimulator.term + "\n");
     	//MapSimulator.runMapWithView();
-    	MapSimulator.runMapWithOutView();
+    	//MapSimulator.runMapWithOutView();
     	
         // TODO: write answer.txt
         logger.info("Start write output file");
-
-        logger.info("end in term " + MapSimulator.term);
+        FileUtil.outputAnswer(answerPath);
         logger.info("End...");
+        
+        // Simulator test 
+        FileUtil.inputAnswer();
+        MapSimulator.term = 0;
+        MapSimulator.runMapWithOutView();
+        logger.info("end in term " + MapSimulator.term);
+        
     }
     
 }

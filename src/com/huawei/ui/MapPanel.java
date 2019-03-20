@@ -19,7 +19,6 @@ import org.apache.log4j.Logger;
 
 import com.huawei.entity.Cross;
 import com.huawei.entity.Road;
-import com.huawei.service.MapSimulator;
 import com.huawei.util.MapUtil;
 
 public class MapPanel extends JPanel{

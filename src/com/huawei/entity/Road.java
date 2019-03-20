@@ -1,12 +1,8 @@
 package com.huawei.entity;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 
 import com.huawei.entity.Car.Direction;
-import com.huawei.service.MapSimulator;
 import com.huawei.util.MapUtil;
 
 public class Road {
