@@ -35,7 +35,7 @@ public class ControlPanel extends JPanel{
 	private static final String CrossInfo = "cross \ncrossId: \nroad0Id: \n"
 			+ "road1Id: \nroad2Id: \nroad3Id: ";
 	private static final String RoadInfo = "road \nroadId: \nlimitSpeed: \n"
-			+ "origin: \ndestination: \nlanNum: \nlen:";
+			+ "origin: \ndestination: \nlanNum: \nlen: \nforwCar: \nbackCar";
 	
 	public JTextArea info = null;
 	

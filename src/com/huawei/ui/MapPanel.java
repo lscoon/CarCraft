@@ -119,13 +119,13 @@ public class MapPanel extends JPanel{
 		List<Road> roads = cross.getRoads();
 		int roSta = cross.getRotationStatus();
 		
-		paintRoad(g, roads.get((4-roSta)%4), locationX, locationY, locationX, locationY-Distance);
-		paintRoad(g, roads.get((5-roSta)%4), locationX, locationY, locationX+Distance, locationY);
-		paintRoad(g, roads.get((6-roSta)%4), locationX, locationY, locationX, locationY+Distance);
-		paintRoad(g, roads.get((7-roSta)%4), locationX, locationY, locationX-Distance, locationY);
+		paintRoad(g, cross, roads.get((4-roSta)%4), locationX, locationY, locationX, locationY-Distance);
+		paintRoad(g, cross, roads.get((5-roSta)%4), locationX, locationY, locationX+Distance, locationY);
+		paintRoad(g, cross, roads.get((6-roSta)%4), locationX, locationY, locationX, locationY+Distance);
+		paintRoad(g, cross, roads.get((7-roSta)%4), locationX, locationY, locationX-Distance, locationY);
 	}
 	
-	private void paintRoad(Graphics g, Road road, int x_1, int y_1, int x_2, int y_2) {
+	private void paintRoad(Graphics g, Cross cross, Road road, int x_1, int y_1, int x_2, int y_2) {
 		if(road==null)
 			return;
 		int roadId = road.getRoadId();
@@ -134,8 +134,18 @@ public class MapPanel extends JPanel{
 		g.drawString(Integer.toString(roadId), (x_1+x_2-30)/2, (y_1+y_2)/2);
 		g.setColor(Color.red);
 		g.drawString(Integer.toString(road.getCarNum()), (x_1+x_2+20)/2, (y_1+y_2)/2);
+		
 		g.setColor(Color.black);
 		g.drawLine(x_1, y_1, x_2, y_2);
+		
+		if(!road.isBiDirect()) {
+			g.setColor(Color.pink);
+			if(cross.getCrossId() == road.getDestination().getCrossId())
+				g.drawLine(((x_1+x_2))/2, ((y_1+y_2))/2, x_1, y_1);
+			else g.drawLine((x_1+x_2)/2, (y_1+y_2)/2, x_2, y_2);
+		}
+		g.setColor(Color.black);
+		
 		paintedRoads.add(roadId);
 	}
 	

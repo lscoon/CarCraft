@@ -50,6 +50,10 @@ public class Road {
 		info = info.concat(destination.getCrossId() + "\n");
 		info = info.concat(forwardRoad.getLanesNum() + "\n");
 		info = info.concat(forwardRoad.getLength() + "\n");
+		info = info.concat(forwardRoad.getFirstCarDirection() + "\n");
+		if(isBiDirect)
+			info = info.concat(backwardRoad.getFirstCarDirection() + "\n");
+		else info = info.concat("null\n");
 		return info;
 	}
 	
@@ -57,8 +61,8 @@ public class Road {
 		String temp = "";
 		if(isBiDirect) {
 			temp = temp.concat(backwardRoad.showBackwardStatus());
-			temp = temp.concat("---------------------------------------------------\n");
 		}
+		temp = temp.concat("---------------------------------------------------\n");
 		temp = temp.concat(forwardRoad.showForwardStatus());
 		return temp;
 	}
@@ -83,7 +87,7 @@ public class Road {
 			return forwardRoad.updateWaitedCars(cross, getNeighbourDirections(cross));
 		else if(isBiDirect)
 			return backwardRoad.updateWaitedCars(cross,getNeighbourDirections(cross));
-		else logger.error("step2: update invalid road cars " + roadId);
+		logger.error("step2: update invalid road cars " + roadId);
 		return -1;
 	}
 	
@@ -108,10 +112,16 @@ public class Road {
 	private Direction[] getNeighbourDirections(Cross cross) {
 		Direction[] directions = new Direction[3];
 		int index = cross.getRoads().indexOf(this);
-		for(int i=1; i<4; i++)
-			if(cross.getRoads().get((index+i)%4)!=null)
-				directions[i-1] = cross.getRoads().get((index+i)%4).getFirstCarDirection(cross);
+		for(int i=1; i<4; i++) {
+			Road road = cross.getRoads().get((index+i)%4);
+			if(road!=null) {
+				if(road.getOrigin().getCrossId()==cross.getCrossId() 
+						&& !road.isBiDirect)
+					directions[i-1] = Direction.unknown;
+				else directions[i-1] = road.getFirstCarDirection(cross);
+			}
 			else directions[i-1] = Direction.unknown;
+		}
 		return directions;
 	}
 	

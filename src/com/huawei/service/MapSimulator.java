@@ -88,6 +88,7 @@ public class MapSimulator {
 			}
 			if(count==0) {
 				findDeadLock();
+				System.exit(term);
 			}
 			stepTwoCount += count;
 			stepTwoTimes++;
@@ -112,10 +113,19 @@ public class MapSimulator {
 	
 	private static void findDeadLock() {
 		if(MapUtil.mapView!=null) {
-			String temp = "dead lock find\nnow waited cars\n";
-			for(Car car : nowWaitedCars) {
+			String temp = "dead lock " + nowWaitedCars.size() + " cars\n";
+			List<Car> tempCarSet = new LinkedList<>();
+			for(Car car : nowWaitedCars)
+				tempCarSet.add(car);
+			Collections.sort(tempCarSet, new Comparator<Car>() {
+				@Override
+				public int compare(Car o1, Car o2) {
+					return o1.getCarId() - o2.getCarId();
+				}
+			});
+			
+			for(Car car : tempCarSet)
 				temp = temp.concat(car.getCarId()+"\n");
-			}
 			MapUtil.mapView.pControl.info.setText(temp);
 		}
 		logger.info("dead lock happen");

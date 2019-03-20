@@ -91,6 +91,8 @@ public class Cross{
 				if(sequenceRoadIds[i]==-1)
 					break;
 				Road road = roads.get(sequenceRoadIds[i]);
+				if(road.getOrigin().getCrossId()==crossId && !road.isBiDirect())
+					continue;
 				count += road.updateWaitedCars(this);
 			}
 			sum += count;
@@ -101,8 +103,12 @@ public class Cross{
 	
 	private void initFirstCarDirection() {
 		for(int i=0; i<4; i++)
-			if(roads.get(i)!=null)
-				roads.get(i).updateRoadDirections(this);
+			if(roads.get(i)!=null) {
+				Road road = roads.get(i);
+				if(road.getOrigin().getCrossId()==crossId && !road.isBiDirect())
+					continue;
+				road.updateRoadDirections(this);
+			}
 	}
 	
 	public Road findLinkedRoad(Cross crossTwo) {
