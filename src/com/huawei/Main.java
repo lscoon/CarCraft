@@ -1,5 +1,7 @@
 package com.huawei;
 
+import java.io.File;
+
 import org.apache.log4j.Logger;
 
 import com.huawei.service.GlobalSolver;
@@ -8,10 +10,12 @@ import com.huawei.ui.MapFrame;
 import com.huawei.util.FileUtil;
 
 public class Main {
-    private static final Logger logger = Logger.getLogger(Main.class);
-    public static void main(String[] args)
-    {
-        /*
+    
+	private static final Logger logger = Logger.getLogger(Main.class);
+    
+	public static void main(String[] args) {
+        args = FileUtil.initFiles("inputs/1-map-training-2/");
+		
     	if (args.length != 4) {
             logger.error("please input args: inputFilePath, resultFilePath");
             return;
@@ -27,34 +31,21 @@ public class Main {
 
         // TODO:read input files
         logger.info("start read input files");
-        
-        InputHandle.readInputs(carPath, roadPath, crossPath);
+        FileUtil.readInputs(carPath, roadPath, crossPath);
         
         // TODO: calc
-        MapFrame view = new MapFrame();
-        // TODO: write answer.txt
-        logger.info("Start write output file");
-
-        logger.info("End...");
-    	
-    	//logger info show program process
-    	//logger error show program bugs
-    	*/
-    	logger.info("Start...");
-    	
-    	logger.info("start read input files");
-    	FileUtil.readInputs("inputs/1-map-training-2");
-    	logger.info("end read input files");
-    	
-    	logger.info("start floyd init");
+        logger.info("start floyd init");
     	GlobalSolver.initCarRoadList();
     	logger.info("end floyd init");
     	
     	//MapSimulator.runMapWithView();
-		MapSimulator.runMapWithOutView();
-		
-		logger.info("end in term " + MapSimulator.term);
-		logger.info("End...");
-		
+    	MapSimulator.runMapWithOutView();
+    	
+        // TODO: write answer.txt
+        logger.info("Start write output file");
+
+        logger.info("end in term " + MapSimulator.term);
+        logger.info("End...");
     }
+    
 }

@@ -21,21 +21,18 @@ import com.huawei.entity.Road;
 public class FileUtil {
 	
 	private static final Logger logger = Logger.getLogger(FileUtil.class);
-	private static String inputFilesPath = "";
-	private static String roadFile = inputFilesPath + "road.txt";
-	private static String carFile = inputFilesPath + "car.txt";
-	private static String crossFile = inputFilesPath + "cross.txt";
-	private static String answerFile = "outputs/answer.txt";
+	private static String carFile = "";
+	private static String roadFile = "";
+	private static String crossFile = "";
+	private static String answerFile = "";
 	
-	public static void readInputs(String inputFiles) {
-		inputFilesPath = inputFiles + File.separator;
-		roadFile = inputFilesPath + "road.txt";
-		carFile = inputFilesPath + "car.txt";
-		crossFile = inputFilesPath + "cross.txt";
-		inputCross();
-		inputRoad();
-		bindRoadToCross();
-		inputCar();
+	public static String[] initFiles(String filePath) {
+		String[] temp = new String[4];
+    	temp[0] = filePath + "car.txt";
+    	temp[1] = filePath + "road.txt";
+    	temp[2] = filePath + "cross.txt";
+    	temp[3] = filePath + "answer.txt";
+    	return temp;
 	}
 	
 	public static void readInputs(String carPath, String roadPath, String crossPath) {
@@ -217,7 +214,7 @@ public class FileUtil {
 	}
 	
 	public static void outputAnswer(String answerPath) {
-		//answerFile = answerPath;
+		answerFile = answerPath;
 		FileWriter output = null;
 		BufferedWriter writer = null;
 		try {
