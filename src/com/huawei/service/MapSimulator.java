@@ -27,7 +27,13 @@ public class MapSimulator {
 	public static Set<Car> finishCars = new HashSet<>();
 
 	public static Set<Car> nowWaitedCars = new HashSet<>();
-
+	
+	private static int stepOneCount = 0;
+	private static int stepTwoCount = 0;
+	private static int stepTwoTimes = 0;
+	private static int stepThreeCount = 0;
+	public static int stepFinishCount = 0;
+	
 	public static void runMapWithView() {
 		initMap();
 		MapUtil.mapView = new MapFrame();
@@ -59,30 +65,49 @@ public class MapSimulator {
 		for (Car car : nowWaitedCars) {
 			car.setWaited(true);
 		}
-		// step one
-		// only consider and update cars that will not pass the cross
+		stepFinishCount = 0;
+
+		logger.info("start step one");
+		stepOneCount = 0;
 		Iterator<Map.Entry<Integer, Road>> iterator = MapUtil.roads.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Map.Entry<Integer, Road> entry = iterator.next();
-			entry.getValue().updateRunnableCars();
+			stepOneCount += entry.getValue().updateRunnableCars();
 		}
-		// step two
+		logger.info("end step one: update " + stepOneCount + " cars");
+		//logger.info("leave " + nowWaitedCars.size() + " cars waited");
+		
+		logger.info("start step two");
+		stepTwoCount = 0;
+		stepTwoTimes = 0;
 		while (nowWaitedCars.size() != 0) {
 			int count = 0;
 			for (int i = 0; i < MapUtil.crossSequence.size(); i++) {
 				Cross cross = MapUtil.crosses.get(MapUtil.crossSequence.get(i));
 				count += cross.updateCross();
 			}
-			if(count==0)
+			if(count==0) {
 				findDeadLock();
+			}
+			stepTwoCount += count;
+			stepTwoTimes++;
 		}
-		// step three
+		logger.info("end step two: update " + stepTwoCount + " cars in "
+				+ stepTwoTimes + " iterators");
+		
+		logger.info("start step three");
+		stepThreeCount = 0;
 		for (int i = 0; i < outRoadCars.size(); i++) {
 			Car car = outRoadCars.get(i);
 			if (car.getRealStartTime() <= term)
-				if (car.startOff())
+				if (car.startOff()) {
+					stepThreeCount++;
 					i--;
+				}
 		}
+		logger.info("end step three: startoff " + stepThreeCount + " cars");
+		logger.info("finish " + stepFinishCount + " cars");
+		logger.info("end updateMap\n");
 	}
 	
 	private static void findDeadLock() {

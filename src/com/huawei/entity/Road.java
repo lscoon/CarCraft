@@ -57,7 +57,7 @@ public class Road {
 		String temp = "";
 		if(isBiDirect) {
 			temp = temp.concat(backwardRoad.showBackwardStatus());
-			temp = temp.concat("------------------------\n");
+			temp = temp.concat("---------------------------------------------------\n");
 		}
 		temp = temp.concat(forwardRoad.showForwardStatus());
 		return temp;
@@ -69,12 +69,13 @@ public class Road {
 		else return origin.getCrossId();
 	}
 	
-	public void updateRunnableCars() {
+	public int updateRunnableCars() {
 		int count = 0;
 		count = forwardRoad.updateRunnableCars();
 		if(isBiDirect)
 			count += backwardRoad.updateRunnableCars();
-		logger.info("step1: road " + roadId + ", " + count + " cars updated");
+		//logger.info("step1: road " + roadId + ", " + count + " cars updated");
+		return count;
 	}
 	
 	public int updateWaitedCars(Cross cross) {
@@ -118,7 +119,7 @@ public class Road {
 	// -1, waited, means road has no enough space or ahead car is not updated
 	// -2, error, invalid
 	protected int getInRoadLaneNum(Cross cross, int nextDistance) {
-		if(cross.getCrossId() == destination.getCrossId())
+		if(cross.getCrossId() == origin.getCrossId())
 			return forwardRoad.getInRoadLaneNum(nextDistance);
 		else if(isBiDirect)
 			return backwardRoad.getInRoadLaneNum(nextDistance);
@@ -129,7 +130,7 @@ public class Road {
 	
 	// num means car in road lane num
 	protected void updateRoadWhilePassCross(Cross cross, Car car, int num) {
-		if(cross.getCrossId() == destination.getCrossId())
+		if(cross.getCrossId() == origin.getCrossId())
 			forwardRoad.updateRoadWhilePassCross(car, num);
 		else if(isBiDirect)
 			backwardRoad.updateRoadWhilePassCross(car, num);

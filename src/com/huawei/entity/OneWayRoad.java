@@ -30,17 +30,19 @@ public class OneWayRoad {
 		int carIdMaxLength = countNum(MapUtil.CarIdMaxLength);
 		String temp = "";
 		for(int i=0; i<lanesNum; i++) {
-			for(int j=0; j<len; j++) 
+			for(int j=0; j<len; j++) {
 				if(status[i][j]!=null){
-					int blankCount = carIdMaxLength-countNum(status[i][j].getCarId());
+					int blankCount = carIdMaxLength-countNum(status[i][j].getCarId())-1;
 					for(int k=0; k<blankCount; k++)
-						temp = temp.concat(" ");
+						temp = temp.concat("0");
 					temp = temp.concat(status[i][j].getCarId()+"");
 				}
 				else {
-					for(int k=0; k<carIdMaxLength; k++)
-						temp = temp.concat(" ");
+					for(int k=0; k<carIdMaxLength-1; k++)
+						temp = temp.concat("0");
 				}
+				temp = temp.concat(" ");
+			}
 			temp = temp.concat("\n");
 		}
 		return temp;
@@ -50,17 +52,19 @@ public class OneWayRoad {
 		int carIdMaxLength = countNum(MapUtil.CarIdMaxLength);
 		String temp = "";
 		for(int i=lanesNum-1; i>=0; i--) {
-			for(int j=len-1; j>=0; j--) 
+			for(int j=len-1; j>=0; j--) {
 				if(status[i][j]!=null){
-					int blankCount = carIdMaxLength-countNum(status[i][j].getCarId());
+					int blankCount = carIdMaxLength-countNum(status[i][j].getCarId())-1;
 					for(int k=0; k<blankCount; k++)
-						temp = temp.concat(" ");
+						temp = temp.concat("0");
 					temp = temp.concat(status[i][j].getCarId()+"");
 				}
 				else {
-					for(int k=0; k<carIdMaxLength; k++)
-						temp = temp.concat(" ");
+					for(int k=0; k<carIdMaxLength-1; k++)
+						temp = temp.concat("0");
 				}
+				temp = temp.concat(" ");
+			}
 			temp = temp.concat("\n");
 		}
 		return temp;
@@ -87,7 +91,7 @@ public class OneWayRoad {
 			 return count;
 		for(int j=len-1;j>=0;j--) {
 			Car car = status[i][j];
-			if(car == null)
+			if(car == null || !car.isWaited())
 				continue;
 			int s1 = len-1-j;
 			car.computeNowAndNextDistance(s1);
@@ -151,23 +155,40 @@ public class OneWayRoad {
 			// jammed means car could not pass the cross because of other roads' directs
 			if(jammedTag)
 				return count;
-			// false means could not pass the cross because of ahead not updated cars
-			if(!car.updateCarWhilePassCross(cross))
+			int flag = car.updateCarWhilePassCross(cross);
+			// -1 means could not pass the cross because of ahead not updated cars
+			if(flag == -1)
 				return count;
-			// true means could in nextRoad
-			status[firstCarLocation[0]][firstCarLocation[1]] = null;
-			updateLaneRunnableCars(firstCarLocation[0]);
-			updateRoadDirection();
-			carNum--;
-			count++;
+			// -2 means could not pass the cross because of no enough space
+			else if(flag == -2) {
+				if(firstCarLocation[1] != len-1) {
+					status[firstCarLocation[0]][len-1] = status[firstCarLocation[0]][firstCarLocation[1]];
+					status[firstCarLocation[0]][firstCarLocation[1]] = null;
+				}
+				count++;
+				count += updateLaneRunnableCars(firstCarLocation[0]);
+				updateRoadDirection();
+			}
+			// >= 0 means could in nextRoad
+			else{
+				status[firstCarLocation[0]][firstCarLocation[1]] = null;
+				carNum--;
+				count++;
+				count += updateLaneRunnableCars(firstCarLocation[0]);
+				updateRoadDirection();
+			}
 		}
 		return count;
 	}
 	
 	// pass cross order, means z
 	protected void updateRoadDirection() {
-		if(carNum==0)
+		if(carNum==0) {
+			firstCarLocation[0] = 0;
+			firstCarLocation[1] = len-1;
+			firstCarDirection = Direction.unknown;
 			return;
+		}
 		for(int j=firstCarLocation[1]; j>=0; j--)
 			for(int i=firstCarLocation[0]; i<lanesNum; i++) {
 				if(status[i][j]!=null && status[i][j].isWaited()) {
@@ -183,6 +204,8 @@ public class OneWayRoad {
 		firstCarDirection = Direction.unknown;
 	}
 	
+	// -1 means ahead car is waited
+	// -2 means all road have no enough space
 	protected int getInRoadLaneNum(int nextDistance) {
 		for(int i=0; i<lanesNum; i++) {
 			int j=0;
@@ -202,7 +225,7 @@ public class OneWayRoad {
 				return i;
 		}
 		// all road has no enough space
-		return -1;
+		return -2;
 	}
 	
 	protected void updateRoadWhilePassCross(Car car, int lanenum) {

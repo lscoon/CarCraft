@@ -43,14 +43,15 @@ public class Main {
     	logger.info("Start...");
     	
     	logger.info("start read input files");
-    	FileUtil.readInputs("inputs/config");
+    	FileUtil.readInputs("inputs/config_7");
     	logger.info("end read input files");
     	
     	logger.info("start floyd init");
     	GlobalSolver.initCarRoadList();
     	logger.info("end floyd init");
     	
-		MapSimulator.runMapWithView();
+    	MapSimulator.runMapWithView();
+		//MapSimulator.runMapWithOutView();
 		logger.info("End...");
 		
     }

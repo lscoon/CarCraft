@@ -82,11 +82,11 @@ public class Cross{
 	public int updateCross() {
 		initFirstCarDirection();
 		int count=0;
-		int num=0;
+		//int num=0;
 		int sum=0;
 		do {
 			count = 0;
-			num++;
+			//num++;
 			for(int i=0; i<4; i++) {
 				if(sequenceRoadIds[i]==-1)
 					break;
@@ -94,7 +94,7 @@ public class Cross{
 				count += road.updateWaitedCars(this);
 			}
 			sum += count;
-			logger.info("step2: cross " + crossId + ", " + count + " cars passed in iterator " + num);
+			//logger.info("step2: cross " + crossId + ", " + count + " cars passed in iterator " + num);
 		} while(count!=0);
 		return sum;
 	}

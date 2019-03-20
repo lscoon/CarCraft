@@ -73,8 +73,8 @@ public class Car {
 	
 	public boolean startOff() {
 		nextDistance = Math.min(maxSpeed, nextRoad.getLimitSpeed());
-		if(updateCarWhilePassCross(MapUtil.crosses.get(origin))) {
-			logger.info("car " + carId + " start off in Time " + MapSimulator.term);
+		if(updateCarWhilePassCross(MapUtil.crosses.get(origin))>=0) {
+			//logger.info("car " + carId + " start off in Time " + MapSimulator.term);
 			isRunning = true;
 			MapSimulator.outRoadCars.remove(this);
 			MapSimulator.nowRunCars.add(this);
@@ -93,6 +93,7 @@ public class Car {
 		MapSimulator.nowRunCars.remove(this);
 		MapSimulator.finishCars.add(this);
 		MapSimulator.nowWaitedCars.remove(this);
+		MapSimulator.stepFinishCount++;
 	}
 	
 	protected void stepForward() {
@@ -147,17 +148,21 @@ public class Car {
 	}
 	
 	// from nowRoad to nextRoad
-	protected boolean updateCarWhilePassCross(Cross cross) {
+	protected int updateCarWhilePassCross(Cross cross) {
 		if(nextRoad==null)
 			logger.error("next road " + nextRoad.getRoadId() + " not exists");
 		int laneNum = nextRoad.getInRoadLaneNum(cross, nextDistance);
-		if(laneNum < 0)
-			return false;
-		else {
+		
+		// could pass the cross
+		if(laneNum >= 0){
 			nextRoad.updateRoadWhilePassCross(cross, this, laneNum);
 			stepPassCross();
-			return true;
 		}
+		// will not pass the cross because no enough space
+		else if(laneNum == -2)
+			stepForward();
+		
+		return laneNum;
 	}
 	
 	public int getCarId() {

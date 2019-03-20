@@ -7,6 +7,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -42,6 +43,14 @@ public class ControlPanel extends JPanel{
 	protected JPanel pCen = new JPanel(new BorderLayout());
 	protected JPanel pSou = new JPanel(new GridLayout(1,4));
 	
+	protected JTextArea carInfo = new JTextArea();
+	protected JComboBox<Integer> carBox = new JComboBox<>();
+	protected JComboBox<Integer> crossBox = new JComboBox<>();
+	protected JComboBox<Integer> roadBox = new JComboBox<>();
+	protected JComboBox<Integer> roadBoxTwo = new JComboBox<>();
+	
+	protected JTextArea roadText0 = null;
+	protected JTextArea roadText1 = null;
 	protected JScrollPane roadView0 = null;
 	protected JScrollPane roadView1 = null;
 	
@@ -68,10 +77,16 @@ public class ControlPanel extends JPanel{
 				if(MapSimulator.finishCars.size()!=MapUtil.cars.size()) {
 					Thread t = new Thread(new Runnable(){  
 			            public void run(){
+			            	btMapRefresh.setEnabled(false);
 			            	MapSimulator.updateMap();
-							btMapRefresh.setText(Integer.toString(MapSimulator.term));
-							MapSimulator.term++;
+			            	MapSimulator.term++;
+			            	
+			            	carInfo.setText(MapUtil.cars.get(carBox.getSelectedItem()).info());
+			            	roadText0.setText(MapUtil.roads.get(roadBox.getSelectedItem()).showStatus());
+			            	roadText1.setText(MapUtil.roads.get(roadBoxTwo.getSelectedItem()).showStatus());
+							btMapRefresh.setText(Integer.toString(MapSimulator.term-1));
 							pMap.repaint();
+							btMapRefresh.setEnabled(true);
 			            }
 					});
 			        t.start();  
@@ -83,11 +98,11 @@ public class ControlPanel extends JPanel{
 	}
 	
 	private void initCarInfo() {
-		JTextArea carInfo = new JTextArea();
+		carInfo = new JTextArea();
 		carInfo.setPreferredSize(new Dimension(CarInfoX, InfoY));
 		carInfo.setEditable(false);
 		
-		JComboBox<Integer> carBox = new JComboBox<>();
+		carBox = new JComboBox<>();
 		for(int i : MapUtil.cars.keySet())
 			carBox.addItem(i);
 		carBox.addActionListener(
@@ -115,7 +130,7 @@ public class ControlPanel extends JPanel{
 		crossInfo.setPreferredSize(new Dimension(CarInfoX, InfoY));
 		crossInfo.setEditable(false);
 		
-		JComboBox<Integer> crossBox = new JComboBox<>();
+		crossBox = new JComboBox<>();
 		for(int i : MapUtil.crosses.keySet())
 			crossBox.addItem(i);
 		crossBox.addActionListener(
@@ -156,15 +171,15 @@ public class ControlPanel extends JPanel{
 		roadInfoTwo.setPreferredSize(new Dimension(CarInfoX, RoadInfoY));
 		roadInfoTwo.setEditable(false);
 		
-		JComboBox<Integer> roadBox = new JComboBox<>();
-		JComboBox<Integer> roadBoxTwo = new JComboBox<>();
+		roadBox = new JComboBox<>();
+		roadBoxTwo = new JComboBox<>();
 		
-		JTextArea roadText0 = new JTextArea();
+		roadText0 = new JTextArea();
 		roadView0 = new JScrollPane(roadText0);
 		roadView0.setPreferredSize(new Dimension(RoadViewX, RoadViewY));
 		roadText0.setEditable(false);
 		
-		JTextArea roadText1 = new JTextArea();
+		roadText1 = new JTextArea();
 		roadView1 = new JScrollPane(roadText1);
 		roadView1.setPreferredSize(new Dimension(RoadViewX, RoadViewY));
 		roadText1.setEditable(false);
