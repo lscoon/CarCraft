@@ -45,12 +45,15 @@ public class Main {
         FileUtil.outputAnswer(answerPath);
         logger.info("End...");
         
-        // Simulator test 
+    }
+	
+	// Simulator test 
+	private void testAnswer() {
+		logger.info("start test answer");
         FileUtil.inputAnswer();
         MapSimulator.term = 0;
         MapSimulator.runMapWithOutView();
         logger.info("end in term " + MapSimulator.term);
-        
-    }
+	}
     
 }
