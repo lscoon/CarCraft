@@ -241,6 +241,18 @@ public class OneWayRoad {
 		carNum++;
 	}
 	
+	protected int getBlankNum(int speed) {
+		int count = 0;
+		for(int i=0; i<lanesNum; i++) {
+			int j;
+			for(j=0; j<speed; j++)
+				if(status[i][j] != null)
+					break;
+			count += j;
+		}
+		return count;
+	}
+	
 	protected Direction getFirstCarDirection() {
 		return firstCarDirection;
 	}

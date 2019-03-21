@@ -36,20 +36,23 @@ public class MapSimulator {
 	public static int stepFinishCount = 0;
 	
 	public static void runMapWithView() {
+		logger.info("start run map in " + term + "\n");
 		initMap();
 		MapUtil.mapView = new MapFrame();
 	}
 	
 	public static void runMapWithOutView() {
+		logger.info("start run map in " + term + "\n");
 		initMap();
 		while (finishCars.size() != MapUtil.cars.size()) {
 			updateMap();
 			term++;
 		}
+		logger.info("end run map in " + term + "\n");
 	}
 
 	public static void runMapWithCarList(ArrayList<Car> carList) {
-		logger.info("init map in " + term);
+		logger.info("start run map with car list in " + term + "\n");
 		for (Car car : carList)
 			if(car != null)
 				outRoadCars.add(car);
@@ -64,11 +67,35 @@ public class MapSimulator {
 			term++;
 		}
 		finishCars.clear();
-		logger.info("end map in " + term);
+		logger.info("end run map with car list in " + term + "\n");
+	}
+	
+	public static void runMapWithCarSet(ArrayList<ArrayList<Car>> carLists) {
+		logger.info("start run map with car set in " + term + "\n");
+		int carSum = 0;
+		for (ArrayList<Car> carlist : carLists)
+			if(carlist != null)
+				carSum += carlist.size();
+		while(finishCars.size() != carSum) {
+			for (ArrayList<Car> carlist : carLists)
+				if (carlist != null) {
+					getNowStartOffCars(carlist);
+				}
+			updateMap();
+			term++;
+		}
+		finishCars.clear();
+		logger.info("end run map with car set in " + term + "\n");
+	}
+	
+	private static ArrayList<Car> getNowStartOffCars(ArrayList<Car> carList) {
+		ArrayList<Car> startOffCarList = new ArrayList<>();
+		Car car = carList.get(0);
+		int blankNum = car.getNextRoad().getBlankNum(car.getOrigin(), car.getMaxSpeed());
+		return startOffCarList;
 	}
 	
 	public static void initMap() {
-		logger.info("init map in " + term);
 		for (Car i : MapUtil.cars.values())
 			outRoadCars.add(i);
 		Collections.sort(outRoadCars, new Comparator<Car>() {

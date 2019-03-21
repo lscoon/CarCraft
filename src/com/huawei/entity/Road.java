@@ -121,6 +121,23 @@ public class Road {
 		return directions;
 	}
 	
+	public Direction computeDirection(Road r2) {
+		if(r2 == null)
+			return Direction.direct;
+		Cross cross = null;
+		if(origin.getRoads().contains(r2))
+			cross = origin;
+		else cross = destination;
+		switch((cross.getRoads().indexOf(this)-
+				cross.getRoads().indexOf(r2)+4)%4) {
+			case 1: return Direction.right;
+			case 2: return Direction.direct;
+			case 3: return Direction.left;
+			default: logger.error("something error while computing directions");
+		}
+		return Direction.unknown;
+	}
+	
 	// 0, 1... in road lan num
 	// -1, waited, means road has no enough space or ahead car is not updated
 	// -2, error, invalid
@@ -142,6 +159,13 @@ public class Road {
 			backwardRoad.updateRoadWhilePassCross(car, num);
 		else
 			logger.error("step2: invalid car " + car.getCarId() + " in " + roadId);
+	}
+	
+	public int getBlankNum(int crossId, int speed) {
+		speed = Math.min(speed, limitSpeed);
+		if(origin.getCrossId() == crossId)
+			return forwardRoad.getBlankNum(speed);
+		else return backwardRoad.getBlankNum(speed);
 	}
 	
 	public int getRoadId() {

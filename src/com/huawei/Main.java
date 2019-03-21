@@ -45,10 +45,11 @@ public class Main {
         FileUtil.outputAnswer(answerPath);
         logger.info("End...");
         
+        testAnswer();
     }
 	
 	// Simulator test 
-	private void testAnswer() {
+	private static void testAnswer() {
 		logger.info("start test answer");
         FileUtil.inputAnswer();
         MapSimulator.term = 0;
