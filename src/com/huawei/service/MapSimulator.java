@@ -13,6 +13,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.huawei.entity.Car;
+import com.huawei.entity.CarFlow;
 import com.huawei.entity.Cross;
 import com.huawei.entity.Road;
 import com.huawei.ui.MapFrame;
@@ -28,6 +29,8 @@ public class MapSimulator {
 	public static Set<Car> finishCars = new HashSet<>();
 
 	public static Set<Car> nowWaitedCars = new HashSet<>();
+	
+	public static List<CarFlow> nowRunCarFlows = new LinkedList<>();
 	
 	private static int stepOneCount = 0;
 	private static int stepTwoCount = 0;
@@ -70,29 +73,38 @@ public class MapSimulator {
 		logger.info("end run map with car list in " + term + "\n");
 	}
 	
-	public static void runMapWithCarSet(ArrayList<ArrayList<Car>> carLists) {
-		logger.info("start run map with car set in " + term + "\n");
-		int carSum = 0;
-		for (ArrayList<Car> carlist : carLists)
-			if(carlist != null)
-				carSum += carlist.size();
-		while(finishCars.size() != carSum) {
-			for (ArrayList<Car> carlist : carLists)
-				if (carlist != null) {
-					getNowStartOffCars(carlist);
-				}
+	public static void runMapWithCarFlow() {
+		logger.info("start run map with car flow in " + term + "\n");
+		
+		addRunCarFlows();
+		while (finishCars.size() != MapUtil.cars.size()) {
 			updateMap();
+			
+			for(Car car : outRoadCars)
+				car.carFlow.putback(car);
+			outRoadCars.clear();
+			
+			int count=0;
+			for(int i=0; i<nowRunCarFlows.size(); i++) {
+				CarFlow carflow = nowRunCarFlows.get(i);
+				if(carflow.checkIfFinished()) {
+					nowRunCarFlows.remove(i);
+					i--;
+					count++;
+				}
+			}
+			if(count > 0)
+				addRunCarFlows();
 			term++;
 		}
-		finishCars.clear();
 		logger.info("end run map with car set in " + term + "\n");
 	}
 	
-	private static ArrayList<Car> getNowStartOffCars(ArrayList<Car> carList) {
-		ArrayList<Car> startOffCarList = new ArrayList<>();
-		Car car = carList.get(0);
-		int blankNum = car.getNextRoad().getBlankNum(car.getOrigin(), car.getMaxSpeed());
-		return startOffCarList;
+	private static void addRunCarFlows() {
+		for(CarFlow carflow : GlobalSolver.carFlows)
+			if(!carflow.isFinished() && !carflow.isRunning())
+				if(carflow.startoff())
+					nowRunCarFlows.add(carflow);
 	}
 	
 	public static void initMap() {
@@ -142,6 +154,9 @@ public class MapSimulator {
 		}
 		logger.info("end step two: update " + stepTwoCount + " cars in "
 				+ stepTwoTimes + " iterators");
+		
+		for (CarFlow carFlow : nowRunCarFlows)
+			outRoadCars.addAll(carFlow.getNowStartOffCars());
 		
 		logger.info("start step three");
 		stepThreeCount = 0;

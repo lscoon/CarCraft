@@ -11,6 +11,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.huawei.entity.Car;
+import com.huawei.entity.CarFlow;
 import com.huawei.entity.Road;
 import com.huawei.util.FloydUtil;
 import com.huawei.util.MapUtil;
@@ -18,6 +19,8 @@ import com.huawei.util.MapUtil;
 public class GlobalSolver {
 	private static final Logger logger = Logger.getLogger(GlobalSolver.class);
 
+	public static LinkedList<CarFlow> carFlows = new LinkedList<>();
+	
 	private static LinkedList<ArrayList<Car>> startTimeSortedCars = null;
 
 	private static ArrayList<ArrayList<Car>> conflictFreeCarClusters = null;

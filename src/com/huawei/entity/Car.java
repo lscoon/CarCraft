@@ -12,7 +12,7 @@ public class Car {
 	
 	private static final Logger logger = Logger.getLogger(Car.class);
 	// left right direct no
-	public static enum Direction {left,right,direct,unknown};
+	public static enum Direction {right,left,direct,unknown};
 	
 	private int carId;
 	private int origin;
@@ -23,6 +23,7 @@ public class Car {
 	private int realStartTime = 0;
 	private int realEndTime = 0;
 	
+	public CarFlow carFlow = null;
 	private List<Road> roadList = new ArrayList<Road>();
 	
 	private Road nowRoad = null;
