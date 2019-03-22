@@ -17,8 +17,8 @@ import com.huawei.util.MapUtil;
 public class GlobalSolver {
 	private static final Logger logger = Logger.getLogger(GlobalSolver.class);
 
-	public static ArrayList<CarFlow> carFlows = new ArrayList<CarFlow>();
-	public static ArrayList<List<Road>> conflictFreePathSets = new ArrayList<List<Road>>();
+//	public static ArrayList<CarFlow> carFlows = new ArrayList<CarFlow>();
+//	public static ArrayList<List<Road>> conflictFreePathSets = new ArrayList<List<Road>>();
 
 	private static LinkedList<ArrayList<Car>> startTimeSortedCars = null;
 
@@ -175,7 +175,7 @@ public class GlobalSolver {
 	 * @description: key function
 	 * @return: void
 	 */
-	public static boolean isDeadLockFree(List<Road> queryPath, List<List<Road>> pathSets) {
+	public static boolean isDeadLockFree(CarFlow queryPath, List<CarFlow> pathSets) {
 		
 		return true;
 	}

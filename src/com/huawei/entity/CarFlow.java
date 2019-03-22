@@ -20,23 +20,24 @@ public class CarFlow {
 	private ArrayList<Car> outRoadCars = new ArrayList<>();
 	private ArrayList<Car> runCars = new ArrayList<>();
 
-	public boolean startoff() {
-		if (MapSimulator.term < minTerm)
-			return false;
-		// compute if conflict or not
-		// if true
+	public void startoff() {
 		isRunning = true;
-		return true;
-
-		// if false
-		// return false;
 	}
 
 	public ArrayList<Car> getNowStartOffCars() {
 		ArrayList<Car> startOffCarList = new ArrayList<>();
 		int blankNum = roadList.get(0).getBlankNum(origin, maxSpeed);
 
-		// select cars
+		for(int i=0; i<outRoadCars.size(); i++) {
+			Car car = outRoadCars.get(i);
+			if(car.getStartTime() <= MapSimulator.term) {
+				startOffCarList.add(car);
+				blankNum--;
+			}
+			if(blankNum==0)
+				break;
+		}
+		
 
 		outRoadCars.removeAll(startOffCarList);
 		runCars.addAll(startOffCarList);
@@ -59,7 +60,7 @@ public class CarFlow {
 	}
 
 	public boolean checkIfFinished() {
-		if (runCars.size() == 0) {
+		if (outRoadCars.size() == 0 && runCars.size() == 0) {
 			isRunning = false;
 			isFinished = true;
 			return true;
@@ -78,7 +79,6 @@ public class CarFlow {
 	public void setDestination(int destination) {
 		this.destination = destination;
 	}
-	
 
 	public void setOrigin(int origin) {
 		this.origin = origin;
@@ -106,6 +106,22 @@ public class CarFlow {
 	
 	public int getCarFlowSize() {
 		return outRoadCars.size();
+	}
+
+	public int getMinTerm() {
+		return minTerm;
+	}
+
+	public void setMinTerm(int minTerm) {
+		this.minTerm = minTerm;
+	}
+
+	public int getMaxSpeed() {
+		return maxSpeed;
+	}
+
+	public void setMaxSpeed(int maxSpeed) {
+		this.maxSpeed = maxSpeed;
 	}
 
 }

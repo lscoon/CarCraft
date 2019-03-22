@@ -30,7 +30,8 @@ public class MapSimulator {
 
 	public static Set<Car> nowWaitedCars = new HashSet<>();
 	
-	public static List<CarFlow> nowRunCarFlows = new LinkedList<>();
+	public static ArrayList<CarFlow> carFlows = new ArrayList<CarFlow>();
+	public static List<CarFlow> nowRunCarFlows = new ArrayList<>();
 	
 	private static int stepOneCount = 0;
 	private static int stepTwoCount = 0;
@@ -101,10 +102,13 @@ public class MapSimulator {
 	}
 	
 	private static void addRunCarFlows() {
-		for(CarFlow carflow : GlobalSolver.carFlows)
-			if(!carflow.isFinished() && !carflow.isRunning())
-				if(carflow.startoff())
+		for(CarFlow carflow : carFlows)
+			if(!carflow.isFinished() && !carflow.isRunning()) {
+				if(carflow.getMinTerm() <= term && GlobalSolver.isDeadLockFree(carflow, nowRunCarFlows)) {
+					carflow.startoff();
 					nowRunCarFlows.add(carflow);
+				}
+			}
 	}
 	
 	public static void initMap() {
