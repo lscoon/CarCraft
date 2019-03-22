@@ -156,8 +156,9 @@ public class Road {
 	
 	private boolean getForwardOrBackward(Road roadBefore) {
 		for(Road r: origin.getRoads())
-			if(roadBefore.getRoadId() == r.getRoadId())
-				return true;
+			if(r != null)
+				if(roadBefore.getRoadId() == r.getRoadId())
+					return true;
 		return false;
 	}
 	
@@ -184,6 +185,8 @@ public class Road {
 	public int computePriority(CarFlow carFlow1, CarFlow carFlow2) {
 		List<Road> roadList1= carFlow1.getRoadList();
 		List<Road> roadList2= carFlow2.getRoadList();
+		if(!roadList2.contains(this)) //|| (roadList2.indexOf(this)==(roadList2.size()-1)))
+			return 0;
 		int index1 = roadList1.indexOf(this);
 		int index2 = roadList2.indexOf(this);
 		Road roadBefore1 = null;
@@ -194,8 +197,8 @@ public class Road {
 			roadBefore2 = roadList2.get(index2-1);
 		if(!isSameDirection(carFlow1, carFlow2, roadBefore1, roadBefore2))
 			return 0;
-		Direction direct1 = computeDirection(roadList1.get(index1-1));
-		Direction direct2 = computeDirection(roadList2.get(index2-1));
+		Direction direct1 = computeDirection(roadBefore1);
+		Direction direct2 = computeDirection(roadBefore2);
 		if(direct1==direct2)
 			return 0;
 		return compareDirection(direct1, direct2);

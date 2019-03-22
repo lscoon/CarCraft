@@ -81,6 +81,7 @@ public class MapSimulator {
 		while (finishCars.size() != MapUtil.cars.size()) {
 			updateMap();
 			
+			logger.info("put back " + outRoadCars.size() + " cars");
 			for(Car car : outRoadCars)
 				car.getCarFlow().putback(car);
 			outRoadCars.clear();
@@ -94,21 +95,30 @@ public class MapSimulator {
 					count++;
 				}
 			}
-			if(count > 0)
-				addRunCarFlows();
 			term++;
+			if(count > 0) {
+				logger.info("finish " + count + " car flows");
+				addRunCarFlows();
+			}
+			else if(nowRunCarFlows.size() == 0) {
+				logger.info("no now car flow");
+				addRunCarFlows();
+			}
 		}
 		logger.info("end run map with car set in " + term + "\n");
 	}
 	
 	private static void addRunCarFlows() {
+		int count = 0;
 		for(CarFlow carflow : carFlows)
 			if(!carflow.isFinished() && !carflow.isRunning()) {
 				if(carflow.getMinTerm() <= term && GlobalSolver.isDeadLockFree(carflow, nowRunCarFlows)) {
 					carflow.startoff();
 					nowRunCarFlows.add(carflow);
+					count++;
 				}
 			}
+		logger.info("add " + count + " car flows");
 	}
 	
 	public static void initMap() {
@@ -159,8 +169,13 @@ public class MapSimulator {
 		logger.info("end step two: update " + stepTwoCount + " cars in "
 				+ stepTwoTimes + " iterators");
 		
-		for (CarFlow carFlow : nowRunCarFlows)
-			outRoadCars.addAll(carFlow.getNowStartOffCars());
+		int count = 0;
+		for (CarFlow carFlow : nowRunCarFlows) {
+			ArrayList<Car> list = carFlow.getNowStartOffCars();
+			outRoadCars.addAll(list);
+			count += list.size();
+		}
+		logger.info("add " + count + " cars to outRoadCars");
 		
 		logger.info("start step three");
 		stepThreeCount = 0;
@@ -172,9 +187,9 @@ public class MapSimulator {
 					i--;
 				}
 		}
-		logger.info("end step three: startoff " + stepThreeCount + " cars");
+		logger.info("end step three: start off " + stepThreeCount + " cars");
 		logger.info("finish " + stepFinishCount + " cars");
-		logger.info("end updateMap\n");
+		logger.info("end updateMap");
 	}
 	
 	private static void findDeadLock() {
