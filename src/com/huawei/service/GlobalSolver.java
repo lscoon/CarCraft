@@ -4,8 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 
 import com.huawei.entity.Car;
@@ -131,31 +136,39 @@ public class GlobalSolver {
 	public static void initCarClusters() {
 
 		for (Car car : MapUtil.cars.values()) {
-			for(CarFlow carflow : MapSimulator.carFlows) {
-				
-				if(carflow.getOrigin() == car.getOrigin() && carflow.getDestination() == car.getDestination()) {
+			for (CarFlow carflow : MapSimulator.carFlows) {
+
+				if (carflow.getOrigin() == car.getOrigin() && carflow.getDestination() == car.getDestination()) {
 					carflow.addCar(car);
+					if (carflow.getMaxSpeed() < car.getMaxSpeed()) {
+						carflow.setMaxSpeed(car.getMaxSpeed());
+					}
+					if (carflow.getMinTerm() > car.getStartTime()) {
+						carflow.setMinTerm(car.getStartTime());
+					}
 					car.setCarFlow(carflow);
 					car = null;
 					break;
 				}
 			}
-			
-			if(car != null) {
+
+			if (car != null) {
 				CarFlow carFlow = new CarFlow();
 				carFlow.setOrigin(car.getOrigin());
 				carFlow.setDestination(car.getDestination());
-				
-				//using independent roadList
+
+				// using independent roadList
 				ArrayList<Road> list = new ArrayList<>();
 				list.addAll(car.getRoadList());
 				carFlow.setRoadList(list);
-				
+				carFlow.setMaxSpeed(car.getMaxSpeed());
+				carFlow.setMinTerm(car.getStartTime());
+				carFlow.addCar(car);
 				car.setCarFlow(carFlow);
 				MapSimulator.carFlows.add(carFlow);
 			}
 		}
-		
+
 		Collections.sort(MapSimulator.carFlows, new Comparator<CarFlow>() {
 
 			@Override
@@ -164,12 +177,22 @@ public class GlobalSolver {
 				return o2.getCarFlowSize() - o1.getCarFlowSize();
 			}
 		});
-		
-//		for(CarFlow carFlow:MapSimulator.carFlows) {
-//			Collections.sort(carFlow.get, new Comparator<>() {
-//			});
-//		}
-		
+
+		for (CarFlow carFlow : MapSimulator.carFlows) {
+			Collections.sort(carFlow.getOutRoadCars(), new Comparator<Car>() {
+
+				@Override
+				public int compare(Car arg0, Car arg1) {
+					// TODO Auto-generated method stub
+					if (arg0.getMaxSpeed() == arg1.getMaxSpeed()) {
+						return arg0.getStartTime() - arg1.getStartTime();
+					}
+					return arg1.getMaxSpeed() - arg0.getMaxSpeed();
+				}
+			});
+		}
+
+//		logger.info("size::"+MapSimulator.carFlows.get(MapSimulator.carFlows.size()-1).getCarFlowSize());
 		logger.info("max cluster: " + MapSimulator.carFlows.get(0).getCarFlowSize() + " cars");
 		logger.info(MapUtil.cars.values().size() + " cars to " + MapSimulator.carFlows.size() + " clusters!");
 	}
@@ -177,21 +200,104 @@ public class GlobalSolver {
 	/**
 	 * @version: v1.0
 	 * @modified: 2019年3月22日 下午8:00:11
-	 * @description: key function
+	 * @description: key function, do not try to change anything!
 	 * @return: void
 	 */
 	public static boolean isDeadLockFree(CarFlow queryPath, List<CarFlow> pathSets) {
 		
+		// Map<roadList id, road index>
+		Map<Integer, Set<Integer>> visitedPoints = new HashMap<>();
+		// Map<roadList id, road index>
+		Map<Integer, Integer> contradictingSets = new HashMap<>();
+		// linkedList to simulate stack
+		LinkedList<AccessPoint> stack = new LinkedList<>();
+
+		List<Road> mainRoad = queryPath.getRoadList();		
+		
+
+		for (Road road : mainRoad) {
+			//visitedPoints.clear();
+			stack.clear();
+			for (int i = 0;i<pathSets.size();++i) {
+				CarFlow carFlow = pathSets.get(i);
+				int priority = road.computePriority(queryPath, carFlow);
+				int index = carFlow.getRoadList().indexOf(road);
+				if(priority  > 0) {
+					// below relation	
+					if(index == -1) logger.error("unexpected error");
+					contradictingSets.put(i,index);
+				}else if(priority < 0) {
+					// above relation
+					stack.addFirst(new AccessPoint(carFlow.getRoadList(), index, i));
+				}
+			}
+			// iterative invoke
+			while (stack.size() > 0) {
+				AccessPoint node = stack.getFirst();
+				stack.removeFirst();
+
+				if(visitedPoints.get(node.roadId) == null) {
+					// not visited, label it
+					Set<Integer> sets = new HashSet<>();
+					sets.add(node.index);
+					visitedPoints.put(node.roadId, sets);
+				}else if(visitedPoints.get(node.roadId).contains(node.index)) {
+					// visited
+					continue;
+				}else {
+					// not visited, label it
+					visitedPoints.get(node.roadId).add(node.index);
+				}
+				
+				//check if loop exist
+				if(contradictingSets.get(node.roadId) != null && node.index <= contradictingSets.get(node.roadId)) {
+					return false;
+				}
+				
+//				if(node.index == node.roadList.size() - 1) {
+//					//last road of roadList
+//					continue;
+//				}
+				CarFlow carFlow = pathSets.get(node.roadId);
+				Road road1 = carFlow.getRoadList().get(node.index);
+				for (int i = 0;i<pathSets.size();++i) {
+					int priority = road1.computePriority(carFlow, pathSets.get(i));
+					int index = pathSets.get(i).getRoadList().indexOf(road1);
+					
+					if(priority < 0 && (visitedPoints.get(i) == null || !visitedPoints.get(i).contains(index))) {
+						// above relation
+						stack.addFirst(new AccessPoint(carFlow.getRoadList(), index, i));
+					}
+				}
+				// add itself's successor
+				if(node.index < (node.roadList.size()-1)) {
+					stack.addFirst(new AccessPoint(carFlow.getRoadList(), node.index + 1, node.roadId));
+				}
+				
+			}
+		}
+
 		return true;
 	}
 
-
 	public static void main(String[] args) {
-		Integer a = new Integer(3);
-		ArrayList<Integer> list = new ArrayList<>();
-		list.add(a);
-		System.out.println(list.size());
-		list.clear();
-		System.out.println(a + " list size: " + list.size());
+		Map<Integer, Integer> dict = new HashMap<>();
+		dict.put(new Integer(10), 5);
+
+		System.out.println(dict.get(10));
+		System.out.println(dict.get(new Integer(10)));
+	}
+}
+
+class AccessPoint {
+	public List<Road> roadList = null;
+	public int index = 0;
+	public int roadId = 0;
+
+	public AccessPoint(List<Road> roadList, int index, int roadId) {
+		// TODO Auto-generated constructor stub
+		this.roadList = roadList;
+		this.index = index;
+		this.roadId = roadId;
 	}
 }
