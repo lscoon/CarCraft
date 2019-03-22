@@ -27,21 +27,32 @@ public class CarFlow {
 	public ArrayList<Car> getNowStartOffCars() {
 		ArrayList<Car> startOffCarList = new ArrayList<>();
 		int blankNum = roadList.get(0).getBlankNum(origin, maxSpeed);
-
+		
+		// find blankNum cars to start
 		for(int i=0; i<outRoadCars.size(); i++) {
 			Car car = outRoadCars.get(i);
-			if()
-			if(car.getStartTime() <= MapSimulator.term) {
-				startOffCarList.add(car);
-				outRoadCars.set(i, null);
-				blankNum--;
+			if(car != null) {
+				if (car.getStartTime() <= MapSimulator.term) {
+					startOffCarList.add(car);
+					outRoadCars.set(i, null);
+					blankNum--;
+				}
 			}
 			if(blankNum==0)
 				break;
 		}
-		
-
-		outRoadCars.removeAll(startOffCarList);
+		// reset maxSpeed
+		for(int i=0; i<outRoadCars.size(); i++)
+			if(outRoadCars.get(i)!=null) {
+				Car car = outRoadCars.get(i);
+				if(car.getMaxSpeed() < maxSpeed)
+					maxSpeed = car.getMaxSpeed();
+				break;
+			}
+		for(Car car:startOffCarList) {
+			if(car.isRunning())
+				System.out.println("11");
+		}
 		runCars.addAll(startOffCarList);
 		return startOffCarList;
 	}
@@ -55,13 +66,24 @@ public class CarFlow {
 	 * @return: void
 	 */
 	public void putback(Car car) {
-		outRoadCars.add(car);
+		for(int i=0; i<outRoadCars.size(); i++)
+			if(outRoadCars.get(i)==null) {
+				outRoadCars.set(i, car);
+				break;
+			}
 		runCars.remove(car);
 		if (car.getMaxSpeed() > maxSpeed)
 			maxSpeed = car.getMaxSpeed();
 	}
 
 	public boolean checkIfFinished() {
+		for(int i=0; i<outRoadCars.size(); i++) {
+			Car car = outRoadCars.get(i);
+			if(car==null) {
+				outRoadCars.remove(car);
+				i--;
+			}
+		}
 		if (outRoadCars.size() == 0 && runCars.size() == 0) {
 			isRunning = false;
 			isFinished = true;

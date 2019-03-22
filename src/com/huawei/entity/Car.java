@@ -92,6 +92,7 @@ public class Car {
 		nextRoad = null;
 		isRunning = false;
 		isWaited = false;
+		carFlow.getRunCars().remove(this);
 		MapSimulator.nowRunCars.remove(this);
 		MapSimulator.finishCars.add(this);
 		MapSimulator.nowWaitedCars.remove(this);
