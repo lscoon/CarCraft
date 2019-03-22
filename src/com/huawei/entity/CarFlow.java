@@ -30,8 +30,10 @@ public class CarFlow {
 
 		for(int i=0; i<outRoadCars.size(); i++) {
 			Car car = outRoadCars.get(i);
+			if()
 			if(car.getStartTime() <= MapSimulator.term) {
 				startOffCarList.add(car);
+				outRoadCars.set(i, null);
 				blankNum--;
 			}
 			if(blankNum==0)
@@ -122,6 +124,30 @@ public class CarFlow {
 
 	public void setMaxSpeed(int maxSpeed) {
 		this.maxSpeed = maxSpeed;
+	}
+
+	public ArrayList<Car> getOutRoadCars() {
+		return outRoadCars;
+	}
+
+	public void setOutRoadCars(ArrayList<Car> outRoadCars) {
+		this.outRoadCars = outRoadCars;
+	}
+
+	public ArrayList<Car> getRunCars() {
+		return runCars;
+	}
+
+	public void setRunCars(ArrayList<Car> runCars) {
+		this.runCars = runCars;
+	}
+
+	public void setRunning(boolean isRunning) {
+		this.isRunning = isRunning;
+	}
+
+	public void setFinished(boolean isFinished) {
+		this.isFinished = isFinished;
 	}
 
 }
