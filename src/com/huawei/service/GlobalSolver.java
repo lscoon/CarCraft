@@ -131,7 +131,7 @@ public class GlobalSolver {
 	public static void initCarClusters() {
 
 		for (Car car : MapUtil.cars.values()) {
-			for(CarFlow carflow : carFlows) {
+			for(CarFlow carflow : MapSimulator.carFlows) {
 				
 				if(carflow.getOrigin() == car.getOrigin() && carflow.getDestination() == car.getDestination()) {
 					carflow.addCar(car);
@@ -152,11 +152,11 @@ public class GlobalSolver {
 				carFlow.setRoadList(list);
 				
 				car.setCarFlow(carFlow);
-				carFlows.add(carFlow);
+				MapSimulator.carFlows.add(carFlow);
 			}
 		}
 		
-		Collections.sort(carFlows, new Comparator<CarFlow>() {
+		Collections.sort(MapSimulator.carFlows, new Comparator<CarFlow>() {
 
 			@Override
 			public int compare(CarFlow o1, CarFlow o2) {
@@ -165,8 +165,13 @@ public class GlobalSolver {
 			}
 		});
 		
-		logger.info("max cluster: " + carFlows.get(0).getCarFlowSize() + " cars");
-		logger.info(MapUtil.cars.values().size() + " cars to " + carFlows.size() + " clusters!");
+//		for(CarFlow carFlow:MapSimulator.carFlows) {
+//			Collections.sort(carFlow.get, new Comparator<>() {
+//			});
+//		}
+		
+		logger.info("max cluster: " + MapSimulator.carFlows.get(0).getCarFlowSize() + " cars");
+		logger.info(MapUtil.cars.values().size() + " cars to " + MapSimulator.carFlows.size() + " clusters!");
 	}
 
 	/**
