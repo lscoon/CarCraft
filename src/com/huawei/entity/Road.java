@@ -1,6 +1,5 @@
 package com.huawei.entity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -183,8 +182,8 @@ public class Road {
 	}
 	
 	public int computePriority(CarFlow carFlow1, CarFlow carFlow2) {
-		ArrayList<Road> roadList1= carFlow1.getRoadList();
-		ArrayList<Road> roadList2= carFlow2.getRoadList();
+		List<Road> roadList1= carFlow1.getRoadList();
+		List<Road> roadList2= carFlow2.getRoadList();
 		int index1 = roadList1.indexOf(this);
 		int index2 = roadList2.indexOf(this);
 		Road roadBefore1 = null;

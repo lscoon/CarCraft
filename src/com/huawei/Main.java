@@ -30,11 +30,7 @@ public class Main {
         logger.info("start read input files");
         FileUtil.readInputs(carPath, roadPath, crossPath);
         
-        // TODO: calc
-        logger.info("start floyd init");
-    	GlobalSolver.initSolver();
-    	logger.info("end floyd init");
-    	
+        
     	GlobalSolver.invokeSolver();
     	logger.info("end in term " + MapSimulator.term + "\n");
     	//MapSimulator.runMapWithView();

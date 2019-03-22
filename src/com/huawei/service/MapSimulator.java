@@ -81,7 +81,7 @@ public class MapSimulator {
 			updateMap();
 			
 			for(Car car : outRoadCars)
-				car.carFlow.putback(car);
+				car.getCarFlow().putback(car);
 			outRoadCars.clear();
 			
 			int count=0;

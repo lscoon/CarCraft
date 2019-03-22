@@ -23,7 +23,7 @@ public class Car {
 	private int realStartTime = 0;
 	private int realEndTime = 0;
 	
-	public CarFlow carFlow = null;
+	private CarFlow carFlow = null;
 	private List<Road> roadList = new ArrayList<Road>();
 	
 	private Road nowRoad = null;
@@ -262,6 +262,20 @@ public class Car {
 
 	public void setRunning(boolean isRunning) {
 		this.isRunning = isRunning;
+	}
+
+	/**
+	 * @return the carFlow
+	 */
+	public CarFlow getCarFlow() {
+		return carFlow;
+	}
+
+	/**
+	 * @param carFlow the carFlow to set
+	 */
+	public void setCarFlow(CarFlow carFlow) {
+		this.carFlow = carFlow;
 	}
 	
 }
