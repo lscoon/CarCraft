@@ -266,7 +266,7 @@ public class GlobalSolver {
 					
 					if(priority < 0 && (visitedPoints.get(i) == null || !visitedPoints.get(i).contains(index))) {
 						// above relation
-						stack.addFirst(new AccessPoint(carFlow.getRoadList(), index, i));
+						stack.addFirst(new AccessPoint(pathSets.get(i).getRoadList(), index, i));
 					}
 				}
 				// add itself's successor
