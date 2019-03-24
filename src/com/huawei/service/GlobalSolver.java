@@ -23,15 +23,14 @@ import com.huawei.util.MapUtil;
 public class GlobalSolver {
 	private static final Logger logger = Logger.getLogger(GlobalSolver.class);
 
-//	public static ArrayList<CarFlow> carFlows = new ArrayList<CarFlow>();
-//	public static ArrayList<List<Road>> conflictFreePathSets = new ArrayList<List<Road>>();
+
 
 	private static LinkedList<ArrayList<Car>> startTimeSortedCars = null;
 
 	public static void initSolver() {
 //		MapSimulator.initMap();
 //		initSortedRoads();
-		// initialize with shortest path
+
 		initCarRoadList();
 		initCarClusters();
 		logger.info("Solver init finished!");
@@ -66,7 +65,7 @@ public class GlobalSolver {
 			int originSeq = MapUtil.crossSequence.indexOf(car.getOrigin());
 			int destinationSeq = MapUtil.crossSequence.indexOf(car.getDestination());
 
-			Road[][] pathMatrix = FloydUtil.pathMap.get((Integer) car.getMaxSpeed());
+			Road[][] pathMatrix = FloydUtil.pathMap.get((Integer) MapUtil.CarMaxSpeed);
 			List<Road> roadList = new ArrayList<>();
 
 			while (originSeq != destinationSeq) {
@@ -84,49 +83,6 @@ public class GlobalSolver {
 		// To Do
 	}
 
-	/**
-	 * @version: v1.0
-	 * @modified: 2019年3月19日 上午11:45:46
-	 * @description: sort roads by startTime and speed
-	 * @return: void
-	 */
-	public static void initSortedRoads() {
-		// first sort road by startTime only
-		ArrayList<Car> sortedCars = new ArrayList<Car>();
-		for (Car car : MapUtil.cars.values()) {
-			sortedCars.add(car);
-		}
-		Collections.sort(sortedCars, new Comparator<Car>() {
-			@Override
-			public int compare(Car o1, Car o2) {
-				if (o1.getStartTime() == o2.getStartTime()) {
-					// ascending sort
-					// return o1.getMaxSpeed() - o2.getMaxSpeed();
-					// descending sort
-					return o2.getMaxSpeed() - o1.getMaxSpeed();
-				}
-				// ascending sort;
-				return o1.getStartTime() - o2.getStartTime();
-			}
-		});
-
-		startTimeSortedCars = new LinkedList<ArrayList<Car>>();
-
-		int index = 0, startTime = 0;
-		ArrayList<Car> cars = null;
-		while (index < sortedCars.size()) {
-			cars = new ArrayList<>();
-			cars.add(sortedCars.get(index++));
-			startTime = cars.get(0).getStartTime();
-
-			while (index < sortedCars.size() && sortedCars.get(index).getStartTime() == startTime) {
-				cars.add(sortedCars.get(index));
-				++index;
-			}
-			startTimeSortedCars.addLast(cars);
-		}
-
-	}
 
 	/**
 	 * @version: v1.0
@@ -194,109 +150,10 @@ public class GlobalSolver {
 			});
 		}
 
-//		logger.info("size::"+MapSimulator.carFlows.get(MapSimulator.carFlows.size()-1).getCarFlowSize());
 		logger.info("max cluster: " + MapSimulator.carFlows.get(0).getCarFlowSize() + " cars");
 		logger.info(MapUtil.cars.values().size() + " cars to " + MapSimulator.carFlows.size() + " clusters!");
 	}
 
-	/**
-	 * @Deprecated
-	 * @version: v1.0
-	 * @modified: 2019年3月22日 下午8:00:11
-	 * @description: key function, do not try to change anything!
-	 * @return: void
-	 */
-	public static boolean isDeadLockFree(CarFlow queryPath, List<CarFlow> pathSets) {
-
-		// Map<roadList id, road index>
-		Map<Integer, Set<Integer>> visitedPoints = new HashMap<>();
-		// Map<roadList id, road index>
-		Map<Integer, Integer> contradictingSets = new HashMap<>();
-		// linkedList to simulate stack
-		LinkedList<AccessPoint> stack = new LinkedList<>();
-
-		List<Road> mainRoad = queryPath.getRoadList();
-
-		if (queryPath.getRoadList().size() == 1)
-			return true;
-		for (CarFlow flow : pathSets) {
-			if (flow.getRoadList().containsAll(queryPath.getRoadList())) {
-				// 同向
-				if (flow.getRoadList().indexOf(queryPath.getRoadList().get(0)) < flow.getRoadList()
-						.indexOf(queryPath.getRoadList().get(1))) {
-					return true;
-				}
-			}
-		}
-
-		for (Road road : mainRoad) {
-			// visitedPoints.clear();
-			stack.clear();
-			for (int i = 0; i < pathSets.size(); ++i) {
-				CarFlow carFlow = pathSets.get(i);
-				int priority = road.computePriority(queryPath, carFlow);
-				int index = carFlow.getRoadList().indexOf(road);
-				if (priority > 0) {
-					// below relation
-					if (index == -1)
-						logger.error("unexpected error");
-					contradictingSets.put(i, index);
-				} else if (priority < 0) {
-					// above relation
-					stack.addFirst(new AccessPoint(carFlow.getRoadList(), index, i));
-				}
-			}
-			// iterative invoke
-			while (stack.size() > 0) {
-				AccessPoint node = stack.getFirst();
-				stack.removeFirst();
-
-				if (visitedPoints.get(node.roadId) == null) {
-					// not visited, label it
-					Set<Integer> sets = new HashSet<>();
-					sets.add(node.index);
-					visitedPoints.put(node.roadId, sets);
-				} else if (visitedPoints.get(node.roadId).contains(node.index)) {
-					// visited
-					continue;
-				} else {
-					// not visited, label it
-					visitedPoints.get(node.roadId).add(node.index);
-				}
-
-				// check if loop exist
-				if (contradictingSets.get(node.roadId) != null && node.index <= contradictingSets.get(node.roadId)) {
-					return false;
-				}
-
-//				if(node.index == node.roadList.size() - 1) {
-//					//last road of roadList
-//					continue;
-//				}
-				CarFlow carFlow = pathSets.get(node.roadId);
-				Road road1 = carFlow.getRoadList().get(node.index);
-				for (int i = 0; i < pathSets.size(); ++i) {
-					int priority = road1.computePriority(carFlow, pathSets.get(i));
-					int index = pathSets.get(i).getRoadList().indexOf(road1);
-
-					if (priority < 0 && (visitedPoints.get(i) == null || !visitedPoints.get(i).contains(index))) {
-						// above relation
-						stack.addFirst(new AccessPoint(pathSets.get(i).getRoadList(), index, i));
-					}
-				}
-				// add itself's successor
-				if (node.index < (node.roadList.size() - 1)) {
-					if (visitedPoints.get(node.roadId) == null
-							|| !visitedPoints.get(node.roadId).contains(node.index + 1)) {
-						stack.addFirst(new AccessPoint(carFlow.getRoadList(), node.index + 1, node.roadId));
-					}
-				}
-
-			}
-		}
-
-		return true;
-	}
 
 	/**
 	 * @version: v1.0
@@ -308,12 +165,10 @@ public class GlobalSolver {
 	 */
 	public static boolean isOverlayLoopFree(CarFlow queryPath, List<CarFlow> pathSets) {
 
-		Map<Integer, Set<Integer>> visitedPoints = new HashMap<>();
 		Map<Integer, Integer> contradictingSets = new HashMap<>();
 		Stack<AccessPoint> stack = new Stack<>();
-
-
-		Stack<AccessPoint> loop = new Stack<>();
+		
+		Map<Integer, Set<Boolean>> visitedRoads = new HashMap<>();
 
 		List<Road> mainRoad = queryPath.getRoadList();
 
@@ -333,10 +188,11 @@ public class GlobalSolver {
 
 		for (int j = 0; j < mainRoad.size(); ++j) {
 			Road road = mainRoad.get(j);
-			visitedPoints.clear();
-			for (int i = 0; i < pathSets.size(); ++i) {
-				Set<Integer> set = new HashSet<>();
-				visitedPoints.put(i, set);
+
+			visitedRoads.clear();
+			for(Road r:MapUtil.roads.values()) {
+				Set<Boolean> set = new HashSet<>();
+				visitedRoads.put(r.getRoadId(), set);
 			}
 
 			stack.clear();
@@ -358,22 +214,28 @@ public class GlobalSolver {
 
 					if ((index + 1) < carFlow.getRoadList().size() && ((j + 1) == mainRoad.size()
 							|| (carFlow.getRoadList().get(index + 1) != mainRoad.get(j + 1)))) {
-						if (!visitedPoints.get(i).contains(index + 1)) {
+
+						Road r1 = carFlow.getRoadList().get(index);
+						Road r2 = carFlow.getRoadList().get(index+1);
+						if(!visitedRoads.get(r2.getRoadId()).contains(r2.getForwardOrBackward(r1))) {
 							stack.push(new AccessPoint(carFlow.getRoadList(), index + 1, i));
 						}
+						
 					}
 				}
 			}
-
+			Road r1,r2;
+			boolean dir;
 			while (stack.size() > 0) {
 				AccessPoint node = stack.pop();
 
-				if (visitedPoints.get(node.roadId).contains(node.index)) {
-					// visited
+				r1 = node.roadList.get(node.index-1);
+				r2 = node.roadList.get(node.index);
+				dir = r2.getForwardOrBackward(r1);
+				if(visitedRoads.get(r2.getRoadId()).contains(dir)) {
 					continue;
-				} else {
-					// not visited, label it
-					visitedPoints.get(node.roadId).add(node.index);
+				}else {
+					visitedRoads.get(r2.getRoadId()).add(dir);
 				}
 
 				if (contradictingSets.get(node.roadId) != null && node.index <= contradictingSets.get(node.roadId)) {
@@ -396,7 +258,9 @@ public class GlobalSolver {
 						if ((index + 1) < roadList2.size() && ((node.index + 1) == roadList1.size()
 								|| (roadList2.get(index + 1) != roadList1.get(node.index + 1)))) {
 
-							if (!visitedPoints.get(i).contains(index + 1)) {
+							r2 = roadList2.get(index+1);
+							r1 = roadList2.get(index);
+							if(!visitedRoads.get(r2.getRoadId()).contains(r2.getForwardOrBackward(r1))) {
 								stack.push(new AccessPoint(roadList2, index + 1, i));
 							}
 						}
@@ -405,17 +269,16 @@ public class GlobalSolver {
 				}
 				// add itself's successor
 				if ((node.index + 1) < node.roadList.size()) {
-					
-					if (!visitedPoints.get(node.roadId).contains(node.index + 1)) {
+					r2 = roadList1.get(node.index+1);
+					r1 = roadList1.get(node.index);
+					if(!visitedRoads.get(r2.getRoadId()).contains(r2.getForwardOrBackward(r1))) {
 						stack.push(new AccessPoint(roadList1, node.index + 1, node.roadId));
 					}
-
 				}
 			}
 		}
 		return true;
 	}
-
 }
 
 class AccessPoint {
