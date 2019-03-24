@@ -2,11 +2,15 @@ package com.huawei.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.huawei.service.MapSimulator;
+import com.huawei.util.MapUtil;
 
 public class CarFlow {
 
+	private static final Logger logger = Logger.getGlobal();
+	
 	private int origin;
 	private int destination;
 	private List<Road> roadList;
@@ -27,7 +31,13 @@ public class CarFlow {
 	public ArrayList<Car> getNowStartOffCars() {
 		ArrayList<Car> startOffCarList = new ArrayList<>();
 		int blankNum = roadList.get(0).getBlankNum(origin, maxSpeed);
-		
+		if(blankNum==0)
+			return startOffCarList;
+		int nowSize = getNowSize();
+		if(nowSize!=1)
+			blankNum = (blankNum / nowSize)+1;
+		//if(blankNum==0)
+		//	blankNum = 1;
 		// find blankNum cars to start
 		for(int i=0; i<outRoadCars.size(); i++) {
 			Car car = outRoadCars.get(i);
@@ -57,6 +67,15 @@ public class CarFlow {
 		return startOffCarList;
 	}
 
+	private int getNowSize() {
+		if(!MapSimulator.carFlowOriginRoadNummap.containsKey(roadList.get(0)))
+			logger.info("error in car flow get now size");
+		int num = MapSimulator.carFlowOriginRoadNummap.get(roadList.get(0));
+		if(roadList.get(0).getOrigin().getCrossId() == origin)
+			num = num % MapUtil.CarFlowNumTag;
+		else num = num / MapUtil.CarFlowNumTag;
+		return num;
+	}
 	
 	/**
 	 * @version: v1.0

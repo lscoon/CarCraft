@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.transform.Templates;
+
 import com.huawei.entity.Car;
 import com.huawei.entity.Cross;
 import com.huawei.entity.Road;
@@ -17,6 +19,10 @@ public class MapUtil {
 	
 	public static int CarMinSpeed = 10;
 	public static int CarMaxSpeed = 0;
+	
+	public static int CarFlowNumTag = 1000;
+	public static int DelayTerm = 0;
+	public static int MaxFailCount = 20;
 	
 	public static final int IntMax = Integer.MAX_VALUE;
 	public static final float FloatMax = Float.MAX_VALUE;
@@ -37,4 +43,16 @@ public class MapUtil {
 		System.out.println(cars.size() + " cars");
 	}
 	
+	public static int getCrossBetweenRoads(Road road1, Road road2) {
+		for(Road temp : road1.getOrigin().getRoads())
+			if(temp!=null)
+				if(temp.getRoadId() == road2.getRoadId())
+					return road1.getOrigin().getCrossId();
+		
+		for(Road temp: road1.getDestination().getRoads())
+			if(temp!=null)
+				if(temp.getRoadId() == road2.getRoadId())
+					return road1.getDestination().getCrossId();
+		return 0;
+	}
 }

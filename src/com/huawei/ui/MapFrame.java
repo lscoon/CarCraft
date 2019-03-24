@@ -41,7 +41,7 @@ public class MapFrame extends JFrame{
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
-		setResizable(false);
+//		setResizable(false);
 		// important!!! take control of keyboard listener
 		requestFocus();
 	}

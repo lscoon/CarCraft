@@ -76,7 +76,8 @@ public class ControlPanel extends JPanel{
 					Thread t = new Thread(new Runnable(){  
 			            public void run(){
 			            	btMapRefresh.setEnabled(false);
-			            	MapSimulator.updateMap();
+//			            	MapSimulator.updateMap();
+			            	MapSimulator.updateMapWithCarFlow();
 			            	MapSimulator.term++;
 			            	
 			            	carInfo.setText(MapUtil.cars.get(carBox.getSelectedItem()).info());
