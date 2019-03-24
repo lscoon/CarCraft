@@ -32,9 +32,12 @@ public class MapSimulator {
 	public static Set<Car> nowWaitedCars = new HashSet<>();
 	
 	public static ArrayList<CarFlow> carFlows = new ArrayList<CarFlow>();
+	private static ArrayList<CarFlow> outRoadCarFlows = new ArrayList<>();
 	public static List<CarFlow> nowRunCarFlows = new ArrayList<>();
-	
 	public static Map<Road,Integer> carFlowOriginRoadNummap = new HashMap<>();
+	
+	public static int carFlowFinishCount = 0;
+	
 	private static int stepOneCount = 0;
 	private static int stepTwoCount = 0;
 	private static int stepTwoTimes = 0;
@@ -43,12 +46,14 @@ public class MapSimulator {
 	
 	public static void runMapWithView() {
 		logger.info("start run map in " + term + "\n");
+		finishCars.clear();
 		initMap();
 		MapUtil.mapView = new MapFrame();
 	}
 	
 	public static void runMapWithOutView() {
 		logger.info("start run map in " + term + "\n");
+		finishCars.clear();
 		initMap();
 		while (finishCars.size() != MapUtil.cars.size()) {
 			updateMap();
@@ -78,6 +83,9 @@ public class MapSimulator {
 	
 	public static void runMapWithCarFlow() {
 		logger.info("start run map with car flow in " + term + "\n");
+		for(CarFlow carFlow : carFlows) {
+			outRoadCarFlows.add(carFlow);
+		}
 		addRunCarFlows();
 		while (finishCars.size() != MapUtil.cars.size()) {
 			updateMapWithCarFlow();
@@ -88,6 +96,9 @@ public class MapSimulator {
 	
 	public static void runMapWithCarFlowWithView() {
 		logger.info("start run map with car flow in " + term + "\n");
+		for(CarFlow carFlow : carFlows) {
+			outRoadCarFlows.add(carFlow);
+		}
 		addRunCarFlows();
 		MapUtil.mapView = new MapFrame();
 		logger.info("end run map with car set in " + term + "\n");
@@ -96,12 +107,14 @@ public class MapSimulator {
 	private static void addRunCarFlows() {
 		int count = 0;
 		int failCount = 0;
-		for(CarFlow carflow : carFlows)
-			if(!carflow.isFinished() && !carflow.isRunning()) {
+		for(int i=0; i<outRoadCarFlows.size(); i++) {
+			CarFlow carflow = outRoadCarFlows.get(i);
 				if(carflow.getMinTerm()+MapUtil.DelayTerm <= term) {
 					if(GlobalSolver.isOverlayLoopFree(carflow, nowRunCarFlows)) {
 						carflow.startoff();
+						outRoadCarFlows.remove(carflow);
 						nowRunCarFlows.add(carflow);
+						i--;
 						
 						Road road = carflow.getRoadList().get(0);
 						if(carflow.getOrigin() == road.getOrigin().getCrossId()) {
@@ -118,17 +131,9 @@ public class MapSimulator {
 					else failCount++;
 					if(failCount > MapUtil.MaxFailCount)
 						break;
-				}
-//				
-			}
+				}				
+		}	
 		logger.info("add " + count + " car flows");
-		
-//		Iterator<Map.Entry<Road, Integer>> iterator = carFlowOriginRoadNummap.entrySet().iterator();
-//		while (iterator.hasNext()) {
-//			Map.Entry<Road, Integer> entry = iterator.next();
-//			logger.info(entry.getKey().getRoadId() + "," + entry.getValue());
-//		}
-//		logger.info("11");
 	}
 	
 	public static void initMap() {
@@ -187,7 +192,7 @@ public class MapSimulator {
 		}
 		logger.info("add " + count + " cars to outRoadCars");
 		
-		logger.info("start step three");
+//		logger.info("start step three");
 		stepThreeCount = 0;
 		for (int i = 0; i < outRoadCars.size(); i++) {
 			Car car = outRoadCars.get(i);
@@ -225,15 +230,19 @@ public class MapSimulator {
 					carFlowOriginRoadNummap.remove(road);
 				i--;
 				count++;
+				carFlowFinishCount++;
 			}
 		}
 		term++;
 		if(count > 0) {
 			logger.info("finish " + count + " car flows");
-			addRunCarFlows();
+			if(carFlowFinishCount > MapUtil.MaxCarFlowFinishCount || outRoadCarFlows.size() <= MapUtil.MaxCarFlowFinishCount) {
+				carFlowFinishCount = 0;
+				addRunCarFlows();
+			}	
 		}
 		else if(nowRunCarFlows.size() == 0) {
-			logger.info("no now car flow");
+			logger.info("now no car flow");
 			addRunCarFlows();
 		}
 		term--;
@@ -255,30 +264,6 @@ public class MapSimulator {
 			for(Car car : tempCarSet)
 				temp = temp.concat(car.getCarId()+"\n");
 			MapUtil.mapView.pControl.info.setText(temp);
-		}
-		for(int i=0; i<carFlows.size(); i++) {
-			CarFlow carFlow = carFlows.get(i);
-			if(carFlow.isRunning()) {
-				List<Road> rlist = carFlow.getRoadList();
-				for(int j=0; j<rlist.size(); j++) {
-//					if(rlist.get(j).getRoadId()==5031)
-//						if(j+1<rlist.size())
-//							if(rlist.get(j+1).getRoadId()==5037)
-//								System.out.print(i+",");
-					if(rlist.get(j).getRoadId()==5064)
-						if(j+1<rlist.size())
-							if(rlist.get(j+1).getRoadId()==5072)
-								System.out.print(i+",");
-					if(rlist.get(j).getRoadId()==5072)
-						if(j+1<rlist.size())
-							if(rlist.get(j+1).getRoadId()==5065)
-								System.out.print(i+",");
-					if(rlist.get(j).getRoadId()==5038)
-						if(j+1<rlist.size())
-							if(rlist.get(j+1).getRoadId()==5031)
-								System.out.print(i+",");
-				}
-			}
 		}
 		logger.info("dead lock happen");
 	}
