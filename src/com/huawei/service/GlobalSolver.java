@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.apache.log4j.Logger;
 
@@ -44,10 +45,11 @@ public class GlobalSolver {
 	 */
 	public static void invokeSolver() {
 		initSolver();
-		/*
-		 * while (!MapSimulator.isDispatchFinished()) { MapSimulator.updateMap();
-		 * MapSimulator.term++; updateCarRoadList(); }
-		 */
+
+//		  while (!MapSimulator.isDispatchFinished()) { 
+//			  MapSimulator.updateMap();
+//			  MapSimulator.term++; updateCarRoadList(); 
+//		  }
 
 //		for(ArrayList<Car> carList : conflictFreeCarClusters) {
 //			if(carList == null)
@@ -198,13 +200,14 @@ public class GlobalSolver {
 	}
 
 	/**
+	 * @Deprecated
 	 * @version: v1.0
 	 * @modified: 2019年3月22日 下午8:00:11
 	 * @description: key function, do not try to change anything!
 	 * @return: void
 	 */
 	public static boolean isDeadLockFree(CarFlow queryPath, List<CarFlow> pathSets) {
-		
+
 		// Map<roadList id, road index>
 		Map<Integer, Set<Integer>> visitedPoints = new HashMap<>();
 		// Map<roadList id, road index>
@@ -212,21 +215,33 @@ public class GlobalSolver {
 		// linkedList to simulate stack
 		LinkedList<AccessPoint> stack = new LinkedList<>();
 
-		List<Road> mainRoad = queryPath.getRoadList();		
-		
+		List<Road> mainRoad = queryPath.getRoadList();
+
+		if (queryPath.getRoadList().size() == 1)
+			return true;
+		for (CarFlow flow : pathSets) {
+			if (flow.getRoadList().containsAll(queryPath.getRoadList())) {
+				// 同向
+				if (flow.getRoadList().indexOf(queryPath.getRoadList().get(0)) < flow.getRoadList()
+						.indexOf(queryPath.getRoadList().get(1))) {
+					return true;
+				}
+			}
+		}
 
 		for (Road road : mainRoad) {
-			//visitedPoints.clear();
+			// visitedPoints.clear();
 			stack.clear();
-			for (int i = 0;i<pathSets.size();++i) {
+			for (int i = 0; i < pathSets.size(); ++i) {
 				CarFlow carFlow = pathSets.get(i);
 				int priority = road.computePriority(queryPath, carFlow);
 				int index = carFlow.getRoadList().indexOf(road);
-				if(priority  > 0) {
-					// below relation	
-					if(index == -1) logger.error("unexpected error");
-					contradictingSets.put(i,index);
-				}else if(priority < 0) {
+				if (priority > 0) {
+					// below relation
+					if (index == -1)
+						logger.error("unexpected error");
+					contradictingSets.put(i, index);
+				} else if (priority < 0) {
 					// above relation
 					stack.addFirst(new AccessPoint(carFlow.getRoadList(), index, i));
 				}
@@ -236,57 +251,171 @@ public class GlobalSolver {
 				AccessPoint node = stack.getFirst();
 				stack.removeFirst();
 
-				if(visitedPoints.get(node.roadId) == null) {
+				if (visitedPoints.get(node.roadId) == null) {
 					// not visited, label it
 					Set<Integer> sets = new HashSet<>();
 					sets.add(node.index);
 					visitedPoints.put(node.roadId, sets);
-				}else if(visitedPoints.get(node.roadId).contains(node.index)) {
+				} else if (visitedPoints.get(node.roadId).contains(node.index)) {
 					// visited
 					continue;
-				}else {
+				} else {
 					// not visited, label it
 					visitedPoints.get(node.roadId).add(node.index);
 				}
-				
-				//check if loop exist
-				if(contradictingSets.get(node.roadId) != null && node.index <= contradictingSets.get(node.roadId)) {
+
+				// check if loop exist
+				if (contradictingSets.get(node.roadId) != null && node.index <= contradictingSets.get(node.roadId)) {
 					return false;
 				}
-				
+
 //				if(node.index == node.roadList.size() - 1) {
 //					//last road of roadList
 //					continue;
 //				}
 				CarFlow carFlow = pathSets.get(node.roadId);
 				Road road1 = carFlow.getRoadList().get(node.index);
-				for (int i = 0;i<pathSets.size();++i) {
+				for (int i = 0; i < pathSets.size(); ++i) {
 					int priority = road1.computePriority(carFlow, pathSets.get(i));
 					int index = pathSets.get(i).getRoadList().indexOf(road1);
-					
-					if(priority < 0 && (visitedPoints.get(i) == null || !visitedPoints.get(i).contains(index))) {
+
+					if (priority < 0 && (visitedPoints.get(i) == null || !visitedPoints.get(i).contains(index))) {
 						// above relation
 						stack.addFirst(new AccessPoint(pathSets.get(i).getRoadList(), index, i));
 					}
 				}
 				// add itself's successor
-				if(node.index < (node.roadList.size()-1)) {
-					stack.addFirst(new AccessPoint(carFlow.getRoadList(), node.index + 1, node.roadId));
+				if (node.index < (node.roadList.size() - 1)) {
+					if (visitedPoints.get(node.roadId) == null
+							|| !visitedPoints.get(node.roadId).contains(node.index + 1)) {
+						stack.addFirst(new AccessPoint(carFlow.getRoadList(), node.index + 1, node.roadId));
+					}
 				}
-				
+
 			}
 		}
 
 		return true;
 	}
 
-	public static void main(String[] args) {
-		Map<Integer, Integer> dict = new HashMap<>();
-		dict.put(new Integer(10), 5);
+	/**
+	 * @version: v1.0
+	 * @modified: 2019年3月23日 下午3:15:54
+	 * @description: more strict than isDeadLockFree, very fast
+	 * @param queryPath
+	 * @param pathSets
+	 * @return: boolean
+	 */
+	public static boolean isOverlayLoopFree(CarFlow queryPath, List<CarFlow> pathSets) {
 
-		System.out.println(dict.get(10));
-		System.out.println(dict.get(new Integer(10)));
+		Map<Integer, Set<Integer>> visitedPoints = new HashMap<>();
+		Map<Integer, Integer> contradictingSets = new HashMap<>();
+		Stack<AccessPoint> stack = new Stack<>();
+
+
+		Stack<AccessPoint> loop = new Stack<>();
+
+		List<Road> mainRoad = queryPath.getRoadList();
+
+		if (queryPath.getRoadList().size() == 1) {
+			return true;
+		}
+
+		for (CarFlow flow : pathSets) {
+			if (flow.getRoadList().containsAll(queryPath.getRoadList())) {
+				// 同向包含
+				if (flow.getRoadList().indexOf(queryPath.getRoadList().get(0)) < flow.getRoadList()
+						.indexOf(queryPath.getRoadList().get(1))) {
+					return true;
+				}
+			}
+		}
+
+		for (int j = 0; j < mainRoad.size(); ++j) {
+			Road road = mainRoad.get(j);
+			visitedPoints.clear();
+			for (int i = 0; i < pathSets.size(); ++i) {
+				Set<Integer> set = new HashSet<>();
+				visitedPoints.put(i, set);
+			}
+
+			stack.clear();
+			for (int i = 0; i < pathSets.size(); ++i) {
+				CarFlow carFlow = pathSets.get(i);
+				boolean isOverlay = road.isOverlay(queryPath, carFlow);
+				if (isOverlay) {
+					int index = carFlow.getRoadList().indexOf(road);
+					if (contradictingSets.get(i) == null) {
+						// and unvisited
+						contradictingSets.put(i, index);
+					} else {
+						if (index <= contradictingSets.get(i))
+							return false;
+						else {
+							contradictingSets.put(i, index);
+						}
+					}
+
+					if ((index + 1) < carFlow.getRoadList().size() && ((j + 1) == mainRoad.size()
+							|| (carFlow.getRoadList().get(index + 1) != mainRoad.get(j + 1)))) {
+						if (!visitedPoints.get(i).contains(index + 1)) {
+							stack.push(new AccessPoint(carFlow.getRoadList(), index + 1, i));
+						}
+					}
+				}
+			}
+
+			while (stack.size() > 0) {
+				AccessPoint node = stack.pop();
+
+				if (visitedPoints.get(node.roadId).contains(node.index)) {
+					// visited
+					continue;
+				} else {
+					// not visited, label it
+					visitedPoints.get(node.roadId).add(node.index);
+				}
+
+				if (contradictingSets.get(node.roadId) != null && node.index <= contradictingSets.get(node.roadId)) {
+					return false;
+				}
+
+				CarFlow carFlow = pathSets.get(node.roadId);
+				List<Road> roadList1 = carFlow.getRoadList();
+				Road road1 = roadList1.get(node.index);
+				for (int i = 0; i < pathSets.size(); ++i) {
+					if (node.roadId == i) {
+						continue;
+					}
+					boolean isOverlay = road1.isOverlay(carFlow, pathSets.get(i));
+					List<Road> roadList2 = pathSets.get(i).getRoadList();
+					int index = roadList2.indexOf(road1);
+
+					if (isOverlay) {
+						// check if loop exist
+						if ((index + 1) < roadList2.size() && ((node.index + 1) == roadList1.size()
+								|| (roadList2.get(index + 1) != roadList1.get(node.index + 1)))) {
+
+							if (!visitedPoints.get(i).contains(index + 1)) {
+								stack.push(new AccessPoint(roadList2, index + 1, i));
+							}
+						}
+					}
+
+				}
+				// add itself's successor
+				if ((node.index + 1) < node.roadList.size()) {
+					
+					if (!visitedPoints.get(node.roadId).contains(node.index + 1)) {
+						stack.push(new AccessPoint(roadList1, node.index + 1, node.roadId));
+					}
+
+				}
+			}
+		}
+		return true;
 	}
+
 }
 
 class AccessPoint {
@@ -300,4 +429,5 @@ class AccessPoint {
 		this.index = index;
 		this.roadId = roadId;
 	}
+
 }

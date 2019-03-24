@@ -154,7 +154,7 @@ public class Road {
 		return -1;
 	}
 	
-	private boolean getForwardOrBackward(Road roadBefore) {
+	public boolean getForwardOrBackward(Road roadBefore) {
 		for(Road r: origin.getRoads())
 			if(r != null)
 				if(roadBefore.getRoadId() == r.getRoadId())
@@ -202,6 +202,27 @@ public class Road {
 		if(direct1==direct2)
 			return 0;
 		return compareDirection(direct1, direct2);
+	}
+	
+	public boolean isOverlay(CarFlow carFlow1, CarFlow carFlow2) {
+		List<Road> roadList1= carFlow1.getRoadList();
+		List<Road> roadList2= carFlow2.getRoadList();
+		if(!roadList2.contains(this)) //|| (roadList2.indexOf(this)==(roadList2.size()-1)))
+			return false;
+		
+		int index1 = roadList1.indexOf(this);
+		int index2 = roadList2.indexOf(this);
+		Road roadBefore1 = null;
+		Road roadBefore2 = null;
+		if(index1 != 0)
+			roadBefore1 = roadList1.get(index1-1);
+		if(index2 != 0)
+			roadBefore2 = roadList2.get(index2-1);
+		
+		if(!isSameDirection(carFlow1, carFlow2, roadBefore1, roadBefore2))
+			return false;
+		
+		return true;
 	}
 	
 	// 0, 1... in road lan num
