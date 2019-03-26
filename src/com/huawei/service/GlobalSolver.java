@@ -23,15 +23,12 @@ import com.huawei.util.MapUtil;
 public class GlobalSolver {
 	private static final Logger logger = Logger.getLogger(GlobalSolver.class);
 
-
-
 	private static LinkedList<ArrayList<Car>> startTimeSortedCars = null;
 
 	public static void initSolver() {
 //		MapSimulator.initMap();
 //		initSortedRoads();
 
-		initCarRoadList();
 		initCarClusters();
 		logger.info("Solver init finished!");
 	}
@@ -58,24 +55,55 @@ public class GlobalSolver {
 	}
 
 	// calculate shortest path road sequence
-	public static void initCarRoadList() {
+	private static void initCarRoadListWithGlobalMaxSpeed() {
 		FloydUtil.initPathAndDistMatrixMap();
-
-		for (Car car : MapUtil.cars.values()) {
-			int originSeq = MapUtil.crossSequence.indexOf(car.getOrigin());
-			int destinationSeq = MapUtil.crossSequence.indexOf(car.getDestination());
-
+		
+		for (CarFlow carflow : MapUtil.carFlows) {
+			int originSeq = MapUtil.crossSequence.indexOf(carflow.getOrigin());
+			int destinationSeq = MapUtil.crossSequence.indexOf(carflow.getDestination());
 			Road[][] pathMatrix = FloydUtil.pathMap.get((Integer) MapUtil.CarMaxSpeed);
 			List<Road> roadList = new ArrayList<>();
-
+			
 			while (originSeq != destinationSeq) {
 				Road road = pathMatrix[originSeq][destinationSeq];
 				roadList.add(road);
 				// get another road cross sequence
 				originSeq = MapUtil.crossSequence.indexOf(road.getAnOtherCross(MapUtil.crossSequence.get(originSeq)));
 			}
-			car.setRoadList(roadList);
-			car.setNextRoad(roadList.get(0));
+			carflow.setRoadList(roadList);
+			
+			for(Car car : carflow.getOutRoadCars()) {
+				ArrayList<Road> list = new ArrayList<>();
+				list.addAll(roadList);
+				car.setRoadList(list);
+				car.setNextRoad(list.get(0));
+			}
+		}
+	}
+	
+	private static void initCarRoadListWithCarFlowMaxSpeed() {
+		FloydUtil.initPathAndDistMatrixMap();
+		
+		for (CarFlow carflow : MapUtil.carFlows) {
+			int originSeq = MapUtil.crossSequence.indexOf(carflow.getOrigin());
+			int destinationSeq = MapUtil.crossSequence.indexOf(carflow.getDestination());
+			Road[][] pathMatrix = FloydUtil.pathMap.get((Integer) carflow.getMaxSpeed());
+			List<Road> roadList = new ArrayList<>();
+			
+			while (originSeq != destinationSeq) {
+				Road road = pathMatrix[originSeq][destinationSeq];
+				roadList.add(road);
+				// get another road cross sequence
+				originSeq = MapUtil.crossSequence.indexOf(road.getAnOtherCross(MapUtil.crossSequence.get(originSeq)));
+			}
+			carflow.setRoadList(roadList);
+			
+			for(Car car : carflow.getOutRoadCars()) {
+				ArrayList<Road> list = new ArrayList<>();
+				list.addAll(roadList);
+				car.setRoadList(list);
+				car.setNextRoad(list.get(0));
+			}
 		}
 	}
 
@@ -94,7 +122,7 @@ public class GlobalSolver {
 	public static void initCarClusters() {
 
 		for (Car car : MapUtil.cars.values()) {
-			for (CarFlow carflow : MapSimulator.carFlows) {
+			for (CarFlow carflow : MapUtil.carFlows) {
 
 				if (carflow.getOrigin() == car.getOrigin() && carflow.getDestination() == car.getDestination()) {
 					carflow.addCar(car);
@@ -116,18 +144,21 @@ public class GlobalSolver {
 				carFlow.setDestination(car.getDestination());
 
 				// using independent roadList
-				ArrayList<Road> list = new ArrayList<>();
-				list.addAll(car.getRoadList());
-				carFlow.setRoadList(list);
+//				ArrayList<Road> list = new ArrayList<>();
+//				list.addAll(car.getRoadList());
+//				carFlow.setRoadList(list);
 				carFlow.setMaxSpeed(car.getMaxSpeed());
 				carFlow.setMinTerm(car.getStartTime());
 				carFlow.addCar(car);
 				car.setCarFlow(carFlow);
-				MapSimulator.carFlows.add(carFlow);
+				MapUtil.carFlows.add(carFlow);
 			}
 		}
 
-		Collections.sort(MapSimulator.carFlows, new Comparator<CarFlow>() {
+		initCarRoadListWithGlobalMaxSpeed();
+//		initCarRoadListWithCarFlowMaxSpeed();
+		
+		Collections.sort(MapUtil.carFlows, new Comparator<CarFlow>() {
 
 			@Override
 			public int compare(CarFlow o1, CarFlow o2) {
@@ -136,7 +167,7 @@ public class GlobalSolver {
 			}
 		});
 
-		for (CarFlow carFlow : MapSimulator.carFlows) {
+		for (CarFlow carFlow : MapUtil.carFlows) {
 			Collections.sort(carFlow.getOutRoadCars(), new Comparator<Car>() {
 
 				@Override
@@ -150,8 +181,8 @@ public class GlobalSolver {
 			});
 		}
 
-		logger.info("max cluster: " + MapSimulator.carFlows.get(0).getCarFlowSize() + " cars");
-		logger.info(MapUtil.cars.values().size() + " cars to " + MapSimulator.carFlows.size() + " clusters!");
+		logger.info("max cluster: " + MapUtil.carFlows.get(0).getCarFlowSize() + " cars");
+		logger.info(MapUtil.cars.values().size() + " cars to " + MapUtil.carFlows.size() + " clusters!");
 	}
 
 

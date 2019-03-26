@@ -41,7 +41,6 @@ public class Main {
 //    	MapSimulator.runMapWithCarFlowWithView();
 //    	MapSimulator.runMapWithView();
 //    	MapSimulator.runMapWithOutView();
-    	logger.info("end in term " + MapSimulator.term + "\n");
     	
         // TODO: write answer.txt
         logger.info("Start write output file");

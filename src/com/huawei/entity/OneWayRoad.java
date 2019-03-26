@@ -5,6 +5,10 @@ import org.apache.log4j.Logger;
 import com.huawei.entity.Car.Direction;
 import com.huawei.util.MapUtil;
 
+/**
+ * @author sc
+ *
+ */
 public class OneWayRoad {
 	
 	private static final Logger logger = Logger.getLogger(OneWayRoad.class);
@@ -16,7 +20,9 @@ public class OneWayRoad {
 	private Car[][] status;
 	private int[] firstCarLocation;
 	private int carNum = 0;
-	private Direction firstCarDirection = Direction.unknown; 
+	private Direction firstCarDirection = Direction.unknown;
+	
+	private int isOccupied = 0;
 	
 	public OneWayRoad(int lanesNumber, int length, Road r) {
 		lanesNum = lanesNumber;
@@ -253,6 +259,15 @@ public class OneWayRoad {
 		return count;
 	}
 	
+	protected boolean containsCarFlow(CarFlow carflow) {
+		for(int i=0; i<lanesNum; i++)
+			for(int j=0; j<len; j++)
+				if(status[i][j]!=null)
+					if(status[i][j].getCarFlow()==carflow)
+						return true;
+		return false;
+	}
+	
 	protected Direction getFirstCarDirection() {
 		return firstCarDirection;
 	}
@@ -267,5 +282,13 @@ public class OneWayRoad {
 	
 	protected int getLength() {
 		return len;
+	}
+
+	public int isOccupied() {
+		return isOccupied;
+	}
+
+	public void setOccupied(int isOccupied) {
+		this.isOccupied += isOccupied;
 	}
 }
