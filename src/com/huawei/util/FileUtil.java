@@ -167,7 +167,8 @@ public class FileUtil {
 		}
 	}
 
-	public static void inputAnswer() {
+	public static void inputAnswer(String answerPath) {
+		answerFile = answerPath;
 		FileReader reader = null;
 		BufferedReader br = null;
 		try {

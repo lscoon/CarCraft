@@ -22,7 +22,7 @@ public class OneWayRoad {
 	private int carNum = 0;
 	private Direction firstCarDirection = Direction.unknown;
 	
-	private int isOccupied = 0;
+	private int load = 0;
 	
 	public OneWayRoad(int lanesNumber, int length, Road r) {
 		lanesNum = lanesNumber;
@@ -111,7 +111,7 @@ public class OneWayRoad {
 					if(!aheadCar.isWaited()) {
 						// forward k-j-1 step
 						car.stepForward();
-						if(k-j!=1) {
+						if(k!=j+1) {
 							status[i][k-1] = status[i][j];
 							status[i][j]=null;
 						}
@@ -122,15 +122,16 @@ public class OneWayRoad {
 			
 			// no ahead car
 			if(k==j+car.getNowDistance()+1) {
-				if(car.getNextDistance()==-1) {
-					car.arrive();
-					carNum--;
-					status[i][j]=null;
-					count++;
-				}
-				else if(car.getNextDistance()==0) {
+//				if(car.getNextDistance()==-1) {
+//					car.arrive();
+//					carNum--;
+//					status[i][j]=null;
+//					count++;
+//				}
+//				else 
+				if(car.getNextDistance()==0) {
 					car.stepForward();
-					if(k-j!=1) {
+					if(k!=j+1) {
 						status[i][k-1] = status[i][j];
 						status[i][j]=null;
 					}
@@ -162,10 +163,12 @@ public class OneWayRoad {
 			if(jammedTag)
 				return count;
 			int flag = car.updateCarWhilePassCross(cross);
-			// -1 means could not pass the cross because of ahead not updated cars
+			// >=0 could step in
+			// -1 waited ahead car
+			// -2 no enough space
+			// -3 arrive
 			if(flag == -1)
 				return count;
-			// -2 means could not pass the cross because of no enough space
 			else if(flag == -2) {
 				if(firstCarLocation[1] != len-1) {
 					status[firstCarLocation[0]][len-1] = status[firstCarLocation[0]][firstCarLocation[1]];
@@ -175,7 +178,13 @@ public class OneWayRoad {
 				count += updateLaneRunnableCars(firstCarLocation[0]);
 				updateRoadDirection();
 			}
-			// >= 0 means could in nextRoad
+			else if(flag == -3) {
+				carNum--;
+				status[firstCarLocation[0]][firstCarLocation[1]] = null;
+				count++;
+				count += updateLaneRunnableCars(firstCarLocation[0]);
+				updateRoadDirection();
+			}
 			else{
 				status[firstCarLocation[0]][firstCarLocation[1]] = null;
 				carNum--;
@@ -227,6 +236,8 @@ public class OneWayRoad {
 					else break;
 				}
 			// no ahead car
+			if(nextDistance == 0)
+				logger.error("arrive happen, not supposed to stepin this function");
 			if(j==nextDistance)
 				return i;
 		}
@@ -237,7 +248,7 @@ public class OneWayRoad {
 	protected void updateRoadWhilePassCross(Car car, int lanenum) {
 		for(int j=0; j<car.getNextDistance(); j++)
 			if(status[lanenum][j]!=null) {
-				if(j==0)
+				if(j==0 || status[lanenum][j].isWaited())
 					logger.error("invalid car "+car.getCarId()+" in road ");
 				status[lanenum][j-1] = car;
 				carNum++;
@@ -273,7 +284,7 @@ public class OneWayRoad {
 	}
 
 	public int getCarNum() {
-		return carNum;
+		return (int) load;
 	}
 	
 	protected int getLanesNum() {
@@ -284,11 +295,11 @@ public class OneWayRoad {
 		return len;
 	}
 
-	public int isOccupied() {
-		return isOccupied;
+	public int getLoad() {
+		return load;
 	}
 
-	public void setOccupied(int isOccupied) {
-		this.isOccupied += isOccupied;
+	public void changeLoad(int change) {
+		this.load += change;
 	}
 }

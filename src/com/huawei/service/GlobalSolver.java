@@ -30,7 +30,7 @@ public class GlobalSolver {
 //		initSortedRoads();
 
 		initCarClusters();
-		logger.info("Solver init finished!");
+//		logger.info("Solver init finished!");
 	}
 
 	/**
@@ -54,14 +54,18 @@ public class GlobalSolver {
 //		}
 	}
 
-	// calculate shortest path road sequence
-	private static void initCarRoadListWithGlobalMaxSpeed() {
+//	calculate shortest path road sequence
+//	0 means global, 1 means local
+	private static void initCarRoadList(int globalOrLocalTag) {
 		FloydUtil.initPathAndDistMatrixMap();
 		
 		for (CarFlow carflow : MapUtil.carFlows) {
 			int originSeq = MapUtil.crossSequence.indexOf(carflow.getOrigin());
 			int destinationSeq = MapUtil.crossSequence.indexOf(carflow.getDestination());
-			Road[][] pathMatrix = FloydUtil.pathMap.get((Integer) MapUtil.CarMaxSpeed);
+			int speed = MapUtil.CarMaxSpeed;
+			if(globalOrLocalTag == 1)
+				speed = carflow.getMaxSpeed();
+			Road[][] pathMatrix = FloydUtil.pathMap.get((Integer) speed);
 			List<Road> roadList = new ArrayList<>();
 			
 			while (originSeq != destinationSeq) {
@@ -72,38 +76,12 @@ public class GlobalSolver {
 			}
 			carflow.setRoadList(roadList);
 			
-			for(Car car : carflow.getOutRoadCars()) {
-				ArrayList<Road> list = new ArrayList<>();
-				list.addAll(roadList);
-				car.setRoadList(list);
-				car.setNextRoad(list.get(0));
-			}
-		}
-	}
-	
-	private static void initCarRoadListWithCarFlowMaxSpeed() {
-		FloydUtil.initPathAndDistMatrixMap();
-		
-		for (CarFlow carflow : MapUtil.carFlows) {
-			int originSeq = MapUtil.crossSequence.indexOf(carflow.getOrigin());
-			int destinationSeq = MapUtil.crossSequence.indexOf(carflow.getDestination());
-			Road[][] pathMatrix = FloydUtil.pathMap.get((Integer) carflow.getMaxSpeed());
-			List<Road> roadList = new ArrayList<>();
-			
-			while (originSeq != destinationSeq) {
-				Road road = pathMatrix[originSeq][destinationSeq];
-				roadList.add(road);
-				// get another road cross sequence
-				originSeq = MapUtil.crossSequence.indexOf(road.getAnOtherCross(MapUtil.crossSequence.get(originSeq)));
-			}
-			carflow.setRoadList(roadList);
-			
-			for(Car car : carflow.getOutRoadCars()) {
-				ArrayList<Road> list = new ArrayList<>();
-				list.addAll(roadList);
-				car.setRoadList(list);
-				car.setNextRoad(list.get(0));
-			}
+//			for(Car car : carflow.getOutRoadCars()) {
+//				ArrayList<Road> list = new ArrayList<>();
+//				list.addAll(roadList);
+//				car.setRoadList(list);
+//				car.setNextRoad(list.get(0));
+//			}
 		}
 	}
 
@@ -155,15 +133,17 @@ public class GlobalSolver {
 			}
 		}
 
-		initCarRoadListWithGlobalMaxSpeed();
-//		initCarRoadListWithCarFlowMaxSpeed();
+		initCarRoadList(0);
 		
 		Collections.sort(MapUtil.carFlows, new Comparator<CarFlow>() {
 
 			@Override
 			public int compare(CarFlow o1, CarFlow o2) {
 				// TODO Auto-generated method stub
-				return o2.getCarFlowSize() - o1.getCarFlowSize();
+				if(o2.getRoadList().size() == o1.getRoadList().size())
+					return o2.getCarFlowSize() - o1.getCarFlowSize();
+				return o2.getRoadList().size() - o1.getRoadList().size();
+				
 			}
 		});
 
@@ -179,10 +159,13 @@ public class GlobalSolver {
 					return arg1.getMaxSpeed() - arg0.getMaxSpeed();
 				}
 			});
+			if(carFlow.getOutRoadCars().get(0).getStartTime() > carFlow.getMinTerm())
+				carFlow.setMinTerm(carFlow.getOutRoadCars().get(0).getStartTime());
 		}
 
-		logger.info("max cluster: " + MapUtil.carFlows.get(0).getCarFlowSize() + " cars");
-		logger.info(MapUtil.cars.values().size() + " cars to " + MapUtil.carFlows.size() + " clusters!");
+		
+//		logger.info("max cluster: " + MapUtil.carFlows.get(0).getCarFlowSize() + " cars");
+//		logger.info(MapUtil.cars.values().size() + " cars to " + MapUtil.carFlows.size() + " clusters!");
 	}
 
 

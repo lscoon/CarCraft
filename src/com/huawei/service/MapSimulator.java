@@ -25,45 +25,41 @@ public class MapSimulator {
 
 	private static final Logger logger = Logger.getLogger(MapSimulator.class);
 
-	public static int term = 0;
+	public static int term = 5;
+	public static int realStartTerm = -1;
 	public static List<Car> outRoadCars = new LinkedList<>();
 	public static Set<Car> nowRunCars = new HashSet<>();
 	public static Set<Car> finishCars = new HashSet<>();
-
-	public static Set<Car> nowWaitedCars = new HashSet<>();
 	
 	private static ArrayList<CarFlow> outRoadCarFlows = new ArrayList<>();
 	public static List<CarFlow> nowRunCarFlows = new ArrayList<>();
-	public static Map<Road,Integer> carFlowOriginRoadNumMap = new HashMap<>();
 	
 	public static int carFlowFinishCount = 0;
 	
-	private static int stepOneCount = 0;
-	private static int stepTwoCount = 0;
-	private static int stepTwoTimes = 0;
-	private static int stepThreeCount = 0;
-	public static int stepFinishCount = 0;
-	
 	public static void runMapWithView() {
-		logger.info("start run map in " + term + "\n");
+		logger.info("start run map in " + term);
 		finishCars.clear();
 		initMap();
 		MapUtil.mapView = new MapFrame();
 	}
 	
 	public static void runMapWithOutView() {
-		logger.info("start run map in " + term + "\n");
+		logger.info("start run map in " + term);
 		finishCars.clear();
 		initMap();
 		while (finishCars.size() != MapUtil.cars.size()) {
-			updateMap();
+			MapUpdate.updateMap();
+			for(Car car: outRoadCars)
+				if(car.getRealStartTime() < term)
+					System.out.println("11");
 			term++;
 		}
-		logger.info("end run map in " + term + "\n");
+		logger.info("end run map in " + term);
 	}
 	
 	public static void runMapWithCarFlow() {
-		logger.info("start run map with car flow in " + term);
+		MapUtil.checkParameters();
+//		logger.info("start run map with car flow in " + term);
 		for(CarFlow carFlow : MapUtil.carFlows) {
 			outRoadCarFlows.add(carFlow);
 		}
@@ -72,7 +68,7 @@ public class MapSimulator {
 			updateMapWithCarFlow();
 			term++;
 		}
-		logger.info("end run map with car flow in " + term + "");
+//		logger.info("end run map with car flow in " + term + "");
 	}
 	
 	public static void runMapWithCarFlowWithView() {
@@ -86,62 +82,64 @@ public class MapSimulator {
 	}
 	
 	private static void addRunCarFlows() {
+//		for(Road road: MapUtil.roads.values()) {
+//			if(road.isBiDirect())
+//				if(road.getLoad(road.getDestination().getCrossId())!=0)
+//					logger.error("road load not zero");
+//			if(road.getLoad(road.getOrigin().getCrossId())!=0)
+//				logger.error("road load not zero");
+//		}
 		int count = 0;
 		int failCount = 0;
-		int carFlowCountLeaveForFill = 0;
 		for(int i=0; i<outRoadCarFlows.size(); i++) {
 			CarFlow carflow = outRoadCarFlows.get(i);
-			if(carflow.getMinTerm()+MapUtil.DelayTerm <= term) {
-				if(GlobalSolver.isOverlayLoopFree(carflow, nowRunCarFlows)) {
-					carflow.startoff();
-					outRoadCarFlows.remove(carflow);
-					nowRunCarFlows.add(carflow);
-					i--;
-					
-					Road road = carflow.getRoadList().get(0);
-					if(carflow.getOrigin() == road.getOrigin().getCrossId()) {
-						if(carFlowOriginRoadNumMap.containsKey(road))
-							carFlowOriginRoadNumMap.put(road, carFlowOriginRoadNumMap.get(road)+1);
-						else carFlowOriginRoadNumMap.put(road, 1);
-					} else {
-						if(carFlowOriginRoadNumMap.containsKey(road))
-							carFlowOriginRoadNumMap.put(road, carFlowOriginRoadNumMap.get(road)+MapUtil.CarFlowRoadMax);
-						else carFlowOriginRoadNumMap.put(road, MapUtil.CarFlowRoadMax);
-					}
-					count++;
-				}
-				else failCount++;
-				if(failCount > MapUtil.MaxFailCount)
-					break;
-			}				
-		}
-		
-		if(outRoadCarFlows.size() > MapUtil.CarFlowCountLeaveForFill) {
-			for(int i=outRoadCarFlows.size()-1, j=0; 
-					i>=outRoadCarFlows.size()-MapUtil.CarFlowCountLeaveForFill+j; i--) {
-				CarFlow carflow = outRoadCarFlows.get(i);
-				if(carflow.getMinTerm()+MapUtil.DelayTerm <= term) {
-					List<Road> roadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), carflow.getDestination(), MapUtil.CarMaxSpeed);
-					if(roadList!=null && GlobalSolver.isOverlayLoopFree(new CarFlow(roadList), nowRunCarFlows)) {
-						carflow.startoffFill(roadList);
+			if(carflow.getMinTerm() <= term) {
+				if(carflow.isLoadFree()) {
+					if(GlobalSolver.isOverlayLoopFree(carflow, nowRunCarFlows)) {
+						carflow.startoff();
 						outRoadCarFlows.remove(carflow);
 						nowRunCarFlows.add(carflow);
-						j++;
-						
-						Road road = carflow.getRoadList().get(0);
-						if(carflow.getOrigin() == road.getOrigin().getCrossId()) {
-							if(carFlowOriginRoadNumMap.containsKey(road))
-								carFlowOriginRoadNumMap.put(road, carFlowOriginRoadNumMap.get(road)+1);
-							else carFlowOriginRoadNumMap.put(road, 1);
-						} else {
-							if(carFlowOriginRoadNumMap.containsKey(road))
-								carFlowOriginRoadNumMap.put(road, carFlowOriginRoadNumMap.get(road)+MapUtil.CarFlowRoadMax);
-							else carFlowOriginRoadNumMap.put(road, MapUtil.CarFlowRoadMax);
+						i--;
+						count++;
+					}
+					else failCount++;
+				}
+				else {
+					List<Road> roadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), 
+							carflow.getDestination(), MapUtil.CarMaxSpeed, 0);
+					if(roadList!=null && roadList.size() - carflow.getRoadList().size() <= MapUtil.RoadListMaxIncrease) {
+						CarFlow tempCarFlow = new CarFlow(roadList, carflow);
+						if(tempCarFlow.isLoadFree()) {
+							if(GlobalSolver.isOverlayLoopFree(tempCarFlow, nowRunCarFlows)) {
+								carflow.newStartoff(roadList);
+								outRoadCarFlows.remove(carflow);
+								nowRunCarFlows.add(carflow);
+								i--;
+								count++;
+							}
+							else failCount++;
 						}
 					}
 				}
+				
+				if(failCount > MapUtil.MaxFailCount)
+					break;
 			}
 		}
+		
+//		if(outRoadCarFlows.size() > MapUtil.CarFlowCountLeaveForFill) {
+//			for(int i=outRoadCarFlows.size()-1, j=0; 
+//					i>=outRoadCarFlows.size()-MapUtil.CarFlowCountLeaveForFill+j; i--) {
+//				CarFlow carflow = outRoadCarFlows.get(i);
+//				if(carflow.getMinTerm() <= term) {
+//					List<Road> roadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), carflow.getDestination(), MapUtil.CarMaxSpeed);
+//					if(roadList!=null && GlobalSolver.isOverlayLoopFree(new CarFlow(roadList), nowRunCarFlows)) {
+//						
+//						j++;
+//					}
+//				}
+//			}
+//		}
 		
 //		logger.info("add " + count + " car flows");
 	}
@@ -157,68 +155,10 @@ public class MapSimulator {
 		});
 	}
 
-	public static void updateMap() {
-//		logger.info("start updateMap in " + term);
-		nowWaitedCars.addAll(nowRunCars);
-		for (Car car : nowWaitedCars) {
-			car.setWaited(true);
-		}
-		stepFinishCount = 0;
 
-//		logger.info("start step one");
-		stepOneCount = 0;
-		Iterator<Map.Entry<Integer, Road>> iterator = MapUtil.roads.entrySet().iterator();
-		while (iterator.hasNext()) {
-			Map.Entry<Integer, Road> entry = iterator.next();
-			stepOneCount += entry.getValue().updateRunnableCars();
-		}
-//		logger.info("end step one: update " + stepOneCount + " cars");
-		//logger.info("leave " + nowWaitedCars.size() + " cars waited");
-		
-//		logger.info("start step two");
-		stepTwoCount = 0;
-		stepTwoTimes = 0;
-		while (nowWaitedCars.size() != 0) {
-			int count = 0;
-			for (int i = 0; i < MapUtil.crossSequence.size(); i++) {
-				Cross cross = MapUtil.crosses.get(MapUtil.crossSequence.get(i));
-				count += cross.updateCross();
-			}
-			if(count==0) {
-				findDeadLock();
-				System.exit(term);
-			}
-			stepTwoCount += count;
-			stepTwoTimes++;
-		}
-//		logger.info("end step two: update " + stepTwoCount + " cars in "
-//				+ stepTwoTimes + " iterators");
-		
-		int count = 0;
-		for (CarFlow carFlow : nowRunCarFlows) {
-			ArrayList<Car> list = carFlow.getNowStartOffCars();
-			outRoadCars.addAll(list);
-			count += list.size();
-		}
-//		logger.info("add " + count + " cars to outRoadCars");
-		
-//		logger.info("start step three");
-		stepThreeCount = 0;
-		for (int i = 0; i < outRoadCars.size(); i++) {
-			Car car = outRoadCars.get(i);
-			if (car.getRealStartTime() <= term)
-				if (car.startOff()) {
-					stepThreeCount++;
-					i--;
-				}
-		}
-//		logger.info("end step three: start off " + stepThreeCount + " cars");
-//		logger.info("finish " + stepFinishCount + " cars");
-//		logger.info("end updateMap");
-	}
 	
 	public static void updateMapWithCarFlow() {
-		updateMap();
+		MapUpdate.updateMap();
 		
 //		logger.info("put back " + outRoadCars.size() + " cars");
 		for(Car car : outRoadCars)
@@ -230,14 +170,6 @@ public class MapSimulator {
 			CarFlow carflow = nowRunCarFlows.get(i);
 			if(carflow.checkIfFinished()) {
 				nowRunCarFlows.remove(i);
-				Road road = carflow.getRoadList().get(0);
-				if(carflow.getOrigin() == road.getOrigin().getCrossId()) {
-					carFlowOriginRoadNumMap.put(road, carFlowOriginRoadNumMap.get(road)-1);
-				} else {
-					carFlowOriginRoadNumMap.put(road, carFlowOriginRoadNumMap.get(road)-MapUtil.CarFlowRoadMax);
-				}
-				if(carFlowOriginRoadNumMap.get(road) == 0)
-					carFlowOriginRoadNumMap.remove(road);
 				i--;
 				count++;
 				carFlowFinishCount++;
@@ -248,6 +180,7 @@ public class MapSimulator {
 //			logger.info("finish " + count + " car flows");
 			if(carFlowFinishCount > MapUtil.MaxCarFlowFinishCount || outRoadCarFlows.size() <= MapUtil.MaxCarFlowFinishCount) {
 				carFlowFinishCount = 0;
+				
 				addRunCarFlows();
 			}	
 		}
@@ -258,25 +191,6 @@ public class MapSimulator {
 		term--;
 	}
 	
-	private static void findDeadLock() {
-		if(MapUtil.mapView!=null) {
-			String temp = "dead lock " + nowWaitedCars.size() + " cars\n";
-			List<Car> tempCarSet = new LinkedList<>();
-			for(Car car : nowWaitedCars)
-				tempCarSet.add(car);
-			Collections.sort(tempCarSet, new Comparator<Car>() {
-				@Override
-				public int compare(Car o1, Car o2) {
-					return o1.getCarId() - o2.getCarId();
-				}
-			});
-			
-			for(Car car : tempCarSet)
-				temp = temp.concat(car.getCarId()+"\n");
-			MapUtil.mapView.pControl.info.setText(temp);
-		}
-		logger.info("dead lock happen");
-	}
 
 	public static boolean isDispatchFinished() {
 		return finishCars.size() == MapUtil.cars.size();

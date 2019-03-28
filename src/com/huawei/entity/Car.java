@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.huawei.service.MapSimulator;
+import com.huawei.service.MapUpdate;
 import com.huawei.util.MapUtil;
 
 public class Car {
@@ -74,7 +75,7 @@ public class Car {
 	
 	public boolean startOff() {
 		nextDistance = Math.min(maxSpeed, nextRoad.getLimitSpeed());
-		if(updateCarWhilePassCross(MapUtil.crosses.get(origin))>=0) {
+		if(updateCarWhilePassCross(MapUtil.crosses.get(origin)) >= 0) {
 			//logger.info("car " + carId + " start off in Time " + MapSimulator.term);
 			isRunning = true;
 			realStartTime = MapSimulator.term;
@@ -87,24 +88,33 @@ public class Car {
 	}
 	
 	protected void arrive() {
-		realEndTime = MapSimulator.term+1;
+		if(roadList.size()==1)
+			nowRoad.changeLoad(origin, -1);
+		else nowRoad.changeLoad(roadList.get(roadList.indexOf(nowRoad)-1), -1);
+		realEndTime = MapSimulator.term;
 		nowRoad = null;
 		nextRoad = null;
 		isRunning = false;
 		isWaited = false;
-		carFlow.getRunCars().remove(this);
+		if(carFlow!=null)
+			carFlow.getRunCars().remove(this);
 		MapSimulator.nowRunCars.remove(this);
 		MapSimulator.finishCars.add(this);
-		MapSimulator.nowWaitedCars.remove(this);
-		MapSimulator.stepFinishCount++;
+		MapUpdate.nowWaitedCars.remove(this);
+		MapUpdate.stepFinishCount++;
 	}
 	
 	protected void stepForward() {
 		isWaited = false;
-		MapSimulator.nowWaitedCars.remove(this);
+		MapUpdate.nowWaitedCars.remove(this);
 	}
 	
 	private void stepPassCross() {
+		if(nowRoad != null) {
+			if(roadList.indexOf(nowRoad)==0)
+				nowRoad.changeLoad(origin, -1);
+			else nowRoad.changeLoad(roadList.get(roadList.indexOf(nowRoad)-1), -1);
+		}
 		nowRoad = nextRoad;
 		int index = roadList.indexOf(nowRoad);
 		if(index == roadList.size()-1)
@@ -112,7 +122,7 @@ public class Car {
 		else nextRoad = roadList.get(index+1);
 		direction = computeDirection();
 		isWaited = false;
-		MapSimulator.nowWaitedCars.remove(this);
+		MapUpdate.nowWaitedCars.remove(this);
 	}
 	
 	private Direction computeDirection() {
@@ -150,10 +160,18 @@ public class Car {
 		}
 	}
 	
+	
+	// >=0 could step in
+	// -1 waited ahead car
+	// -2 no enough space
+	// -3 arrive
 	// from nowRoad to nextRoad
 	protected int updateCarWhilePassCross(Cross cross) {
-		if(nextRoad==null)
-			logger.error("next road " + nextRoad.getRoadId() + " not exists");
+		if(nextRoad==null) {
+//			logger.error("next road " + nextRoad.getRoadId() + " not exists");
+			arrive();
+			return -3;
+		}
 		int laneNum = nextRoad.getInRoadLaneNum(cross, nextDistance);
 		
 		// could pass the cross

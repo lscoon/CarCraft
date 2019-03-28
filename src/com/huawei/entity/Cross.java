@@ -10,12 +10,11 @@ import com.huawei.util.MapUtil;
 public class Cross{
 	
 	private static final Logger logger = Logger.getLogger(Cross.class);
-	private static final int roadIdMax = 1000000;
 	
 	private int crossId;
 	private int[] roadIds = new int[4];
 	private int[] sequenceRoadIds = new int[] 
-			{roadIdMax, roadIdMax, roadIdMax, roadIdMax};;
+			{MapUtil.roadIdMax, MapUtil.roadIdMax, MapUtil.roadIdMax, MapUtil.roadIdMax};;
 	private List<Road> roads = null;
 	
 	private int rotationStatus=0;
@@ -32,26 +31,28 @@ public class Cross{
 		roadIds[3] = Integer.valueOf(strs[4].trim()).intValue();
 		
 		// compute id sequence from min to max
+		int temp = 0;
 		for(int i=0; i<4; i++)
-			for(int j=0; j<4; j++) {
-				if(roadIds[i]!=-1 && roadIds[i] < sequenceRoadIds[j]) {
-					for(int k=3; k>j; k--)
-						sequenceRoadIds[k] = sequenceRoadIds[k-1];
-					sequenceRoadIds[j] = roadIds[i];
+			if(roadIds[i] != -1) {
+				sequenceRoadIds[temp] = roadIds[i];
+				temp++;
+			}
+		for(int i=temp; i<4; i++)
+			sequenceRoadIds[temp] = -1;
+		
+		int i,j,v;
+		for (i=1; i<temp; i++) {
+			for (v=sequenceRoadIds[i], j=i-1; j>=0&&v<sequenceRoadIds[j]; j--)
+	            sequenceRoadIds[j+1]=sequenceRoadIds[j];
+	        sequenceRoadIds[j+1]=v;
+		}
+		
+		for(i=0; i<temp; i++)
+			for(j=0; j<4; j++)
+				if(roadIds[j] == sequenceRoadIds[i]) {
+					sequenceRoadIds[i] = j;
 					break;
-				}
-			}
-		// change sequenceRoadIds elements to roadId index or -1
-		for(int i=0; i<4; i++)
-			if(sequenceRoadIds[i]!=roadIdMax) {
-				for(int j=0; j<4; j++)
-					if(roadIds[j] == sequenceRoadIds[i]) {
-						sequenceRoadIds[i] = j;
-						break;
-					}
-			}
-			else sequenceRoadIds[i] = -1;
-					
+				}	
 	}
 	
 	public void initRoads() {
@@ -82,11 +83,11 @@ public class Cross{
 	public int updateCross() {
 		initFirstCarDirection();
 		int count=0;
-		//int num=0;
-		int sum=0;
-		do {
-			count = 0;
-			//num++;
+//		int num=0;
+//		int sum=0;
+//		do {
+//			count = 0;
+//			num++;
 			for(int i=0; i<4; i++) {
 				if(sequenceRoadIds[i]==-1)
 					break;
@@ -95,10 +96,11 @@ public class Cross{
 					continue;
 				count += road.updateWaitedCars(this);
 			}
-			sum += count;
+			return count;
+//			sum += count;
 			//logger.info("step2: cross " + crossId + ", " + count + " cars passed in iterator " + num);
-		} while(count!=0);
-		return sum;
+//		} while(count!=0);
+//		return sum;
 	}
 	
 	private void initFirstCarDirection() {

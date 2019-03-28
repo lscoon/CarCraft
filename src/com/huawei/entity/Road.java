@@ -279,32 +279,38 @@ public class Road {
 		return forwardRoad.getLength();
 	}
 
+	public int getLanesNum() {
+		return forwardRoad.getLanesNum();
+	}
+	
 	public int getCarNum() {
 		if(isBiDirect)
 			return backwardRoad.getCarNum() + forwardRoad.getCarNum();
 		return forwardRoad.getCarNum();
 	}
 	
-	public void setOccupied(Road roadBefore, int occupy) {
+	public void changeLoad(Road roadBefore, int change) {
 		if(getForwardOrBackward(roadBefore))
-			forwardRoad.setOccupied(occupy);
-		else backwardRoad.setOccupied(occupy);
+			forwardRoad.changeLoad(change);
+		else backwardRoad.changeLoad(change);
 	}
 	
-	public void setOccupied(int crossId, int occupy) {
+	public void changeLoad(int crossId, int change) {
 		if(getForwardOrBackward(crossId))
-			forwardRoad.setOccupied(occupy);
-		else backwardRoad.setOccupied(occupy);
+			forwardRoad.changeLoad(change);
+		else backwardRoad.changeLoad(change);;
 	}
 	
-	public boolean isOccupied(int crrossId) {
-		int occupy = 0;
+	public float getLoad(Road roadBefore) {
+		if(getForwardOrBackward(roadBefore))
+			return forwardRoad.getLoad();
+		else return backwardRoad.getLoad();
+	}
+	
+	public int getLoad(int crrossId) {
 		if(getForwardOrBackward(crrossId))
-			occupy =  forwardRoad.isOccupied();
-		else occupy =  backwardRoad.isOccupied();
-		if(occupy == 0)
-			return true;
-		else return false;
+			return forwardRoad.getLoad();
+		else return backwardRoad.getLoad();
 	}
 	
 	public boolean containsCarFlow(Road roadBefore, CarFlow carflow) {

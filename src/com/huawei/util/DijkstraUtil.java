@@ -19,7 +19,7 @@ public class DijkstraUtil {
 			dist = new float[MapUtil.crosses.size()][MapUtil.crosses.size()];
 		for(int i=0; i<MapUtil.crosses.size(); i++)
 			for(int j=0; j<MapUtil.crosses.size(); j++) {
-				Road road = reComputeRoad(MapUtil.crosses.get(MapUtil.crossSequence.get(i)),
+				Road road = existComputeRoad(MapUtil.crosses.get(MapUtil.crossSequence.get(i)),
 						MapUtil.crosses.get(MapUtil.crossSequence.get(j)));
 				if(road==null) {
 					if(i==j)
@@ -33,18 +33,20 @@ public class DijkstraUtil {
 			}
 	}
 	
-	private static Road reComputeRoad(Cross crossOne, Cross crossTwo) {
+	private static Road existComputeRoad(Cross crossOne, Cross crossTwo) {
 		Road road = crossOne.findLinkedRoad(crossTwo);
 		if (road == null)
 			return null;
 		if (road.getDestination() != crossTwo && !road.isBiDirect())
 			return null;
-		if(road.isOccupied(crossOne.getCrossId()))
+		if(road.getLoad(crossOne.getCrossId()) 
+				> (MapUtil.RoadMaxLoad*road.getLanesNum()*MapUtil.LoadParameter))
 			return null;
 		return road;
 	}
 	
-	public static List<Road> Dijkstra(int crossOneId, int crossTwoId, int speed) {
+	// tag=0 means exist, tag=1 means fill
+	public static List<Road> Dijkstra(int crossOneId, int crossTwoId, int speed, int loadExistOrFillTag) {
 		refreshDistMatrix(speed);
 		
 		int startSeq = MapUtil.crossSequence.indexOf(crossOneId);
@@ -93,7 +95,7 @@ public class DijkstraUtil {
 		while(endSeq != startSeq) {
 			Cross cross1 = MapUtil.crosses.get(MapUtil.crossSequence.get(prenode[endSeq]));
 			Cross cross2 = MapUtil.crosses.get(MapUtil.crossSequence.get(endSeq));
-			Road road = reComputeRoad(cross1, cross2);
+			Road road = existComputeRoad(cross1, cross2);
 			if(road==null)
 				logger.error("some thing wrong in dijkstra");
 			roads.push(road);

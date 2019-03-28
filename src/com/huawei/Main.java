@@ -8,13 +8,14 @@ import org.apache.log4j.Logger;
 import com.huawei.service.GlobalSolver;
 import com.huawei.service.MapSimulator;
 import com.huawei.util.FileUtil;
+import com.huawei.util.MapUtil;
 
 public class Main {
     
 	private static final Logger logger = Logger.getLogger(Main.class);
     
 	public static void main(String[] args) {
-		args = FileUtil.initFiles("inputs/1-map-training-2/");
+//		args = FileUtil.initFiles("inputs/1-map-training-1/");
 		
     	if (args.length != 4) {
             logger.error("please input args: inputFilePath, resultFilePath");
@@ -37,11 +38,13 @@ public class Main {
         FileUtil.readInputs(carPath, roadPath, crossPath);
         
     	GlobalSolver.invokeSolver();
+    	MapSimulator.term = MapUtil.DelayTerm;
     	MapSimulator.runMapWithCarFlow();
 //    	MapSimulator.runMapWithCarFlowWithView();
 //    	MapSimulator.runMapWithView();
 //    	MapSimulator.runMapWithOutView();
     	
+    	logger.info("End in term " + MapSimulator.term);
         // TODO: write answer.txt
         logger.info("Start write output file");
         FileUtil.outputAnswer(answerPath);
@@ -51,21 +54,6 @@ public class Main {
         logger.info("Take time " + timeDiff);
         
         logger.info("End...");
-        
-//        testAnswer();
     }
-	
-	// Simulator test 
-	private static void testAnswer() {
-		logger.info("start test answer");
-        FileUtil.inputAnswer();
-        MapSimulator.term = 0;
-        Date test_start_time = new Date();
-        MapSimulator.runMapWithOutView();
-        Date test_end_time = new Date();
-        long timeDiff = test_end_time.getTime() - test_start_time.getTime();
-        logger.info("Take time " + timeDiff);
-        logger.info("end in term " + MapSimulator.term);
-	}
     
 }
