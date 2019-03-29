@@ -15,6 +15,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 
 import com.huawei.service.MapSimulator;
+import com.huawei.service.MapUpdate;
 import com.huawei.util.MapUtil;
 
 public class ControlPanel extends JPanel{
@@ -76,7 +77,7 @@ public class ControlPanel extends JPanel{
 					Thread t = new Thread(new Runnable(){  
 			            public void run(){
 			            	btMapRefresh.setEnabled(false);
-//			            	MapSimulator.updateMap();
+//			            	MapUpdate.updateMap();
 			            	MapSimulator.updateMapWithCarFlow();
 			            	MapSimulator.term++;
 			            	

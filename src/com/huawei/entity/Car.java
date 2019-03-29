@@ -69,12 +69,14 @@ public class Car {
 		if(nextRoad!=null)
 			info = info.concat(nextRoad.getRoadId() + "\n");
 		else info = info.concat("n\n");
+		info.concat(direction + "\n");
 		
 		return info;
 	}
 	
 	public boolean startOff() {
 		nextDistance = Math.min(maxSpeed, nextRoad.getLimitSpeed());
+		
 		if(updateCarWhilePassCross(MapUtil.crosses.get(origin)) >= 0) {
 			//logger.info("car " + carId + " start off in Time " + MapSimulator.term);
 			isRunning = true;
@@ -142,6 +144,8 @@ public class Car {
 		return Direction.unknown;
 	}
 	
+	// -1 means destination
+	// -2 means could not arrive because of speed limit speed
 	protected void computeNowAndNextDistance(int s1) {
 		int nowSpeed = Math.min(maxSpeed, nowRoad.getLimitSpeed());
 		if(nowSpeed <= s1) {
@@ -155,7 +159,7 @@ public class Car {
 			nowDistance = s1;
 			int nextSpeed = Math.min(maxSpeed, nextRoad.getLimitSpeed());
 			if(s1 >= nextSpeed)
-				nextDistance = 0;
+				nextDistance = -2;
 			else nextDistance = nextSpeed-s1;
 		}
 	}
@@ -172,18 +176,23 @@ public class Car {
 			arrive();
 			return -3;
 		}
-		int laneNum = nextRoad.getInRoadLaneNum(cross, nextDistance);
-		
-		// could pass the cross
-		if(laneNum >= 0){
-			nextRoad.updateRoadWhilePassCross(cross, this, laneNum);
-			stepPassCross();
-		}
-		// will not pass the cross because no enough space
-		else if(laneNum == -2)
+		else if(nextDistance == -2) {
 			stepForward();
-		
-		return laneNum;
+			return -2;
+		}
+		else {
+			int laneNum = nextRoad.getInRoadLaneNum(cross, nextDistance);
+			
+			// could pass the cross
+			if(laneNum >= 0){
+				nextRoad.updateRoadWhilePassCross(cross, this, laneNum);
+				stepPassCross();
+			}
+			// will not pass the cross because no enough space
+			else if(laneNum == -2)
+				stepForward();
+			return laneNum;
+		}
 	}
 	
 	public int getCarId() {

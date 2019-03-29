@@ -3,6 +3,7 @@ package com.huawei.entity;
 import org.apache.log4j.Logger;
 
 import com.huawei.entity.Car.Direction;
+import com.huawei.service.MapSimulator;
 import com.huawei.util.MapUtil;
 
 /**
@@ -41,7 +42,7 @@ public class OneWayRoad {
 					int blankCount = carIdMaxLength-countNum(status[i][j].getCarId())-1;
 					for(int k=0; k<blankCount; k++)
 						temp = temp.concat("0");
-					temp = temp.concat(status[i][j].getCarId()+"");
+					temp = temp.concat(status[i][j].getCarId()+directToStr(status[i][j].getDirection()));
 				}
 				else {
 					for(int k=0; k<carIdMaxLength-1; k++)
@@ -63,7 +64,7 @@ public class OneWayRoad {
 					int blankCount = carIdMaxLength-countNum(status[i][j].getCarId())-1;
 					for(int k=0; k<blankCount; k++)
 						temp = temp.concat("0");
-					temp = temp.concat(status[i][j].getCarId()+"");
+					temp = temp.concat(status[i][j].getCarId()+directToStr(status[i][j].getDirection()));
 				}
 				else {
 					for(int k=0; k<carIdMaxLength-1; k++)
@@ -74,6 +75,16 @@ public class OneWayRoad {
 			temp = temp.concat("\n");
 		}
 		return temp;
+	}
+	
+	private String directToStr(Direction direct) {
+		switch (direct) {
+			case right:return "r";
+			case left: return "l";
+			case direct: return "d";
+			case unknown: return "u";
+			default:return "e";
+		}
 	}
 	
 	private int countNum(int input) {
@@ -95,13 +106,13 @@ public class OneWayRoad {
 		int count = 0;
 		if(carNum==0)
 			 return count;
+		
 		for(int j=len-1;j>=0;j--) {
 			Car car = status[i][j];
 			if(car == null || !car.isWaited())
 				continue;
 			int s1 = len-1-j;
 			car.computeNowAndNextDistance(s1);
-			
 			int k=j+1;
 			for(; k<=j+car.getNowDistance(); k++)
 				if(status[i][k]!=null) {
@@ -129,6 +140,7 @@ public class OneWayRoad {
 //					count++;
 //				}
 //				else 
+//				next distance = -1/-2 will not consider
 				if(car.getNextDistance()==0) {
 					car.stepForward();
 					if(k!=j+1) {
@@ -145,6 +157,8 @@ public class OneWayRoad {
 	protected int updateWaitedCars(Cross cross, Direction[] directions) {
 		int count = 0;
 		while(firstCarDirection!=Direction.unknown) {
+//			if(MapSimulator.term==14 && road.getRoadId()==5066)
+//				System.out.println("11");
 			Car car = status[firstCarLocation[0]][firstCarLocation[1]];
 			boolean jammedTag = false;
 			switch(firstCarDirection) {
@@ -165,7 +179,7 @@ public class OneWayRoad {
 			int flag = car.updateCarWhilePassCross(cross);
 			// >=0 could step in
 			// -1 waited ahead car
-			// -2 no enough space
+			// -2 no enough space or no enough speed
 			// -3 arrive
 			if(flag == -1)
 				return count;
@@ -204,8 +218,8 @@ public class OneWayRoad {
 			firstCarDirection = Direction.unknown;
 			return;
 		}
-		for(int j=firstCarLocation[1]; j>=0; j--)
-			for(int i=firstCarLocation[0]; i<lanesNum; i++) {
+		for(int j=len-1; j>=0; j--)
+			for(int i=0; i<lanesNum; i++) {
 				if(status[i][j]!=null && status[i][j].isWaited()) {
 					firstCarDirection = status[i][j].getDirection();
 					firstCarLocation[0] = i;
@@ -284,7 +298,7 @@ public class OneWayRoad {
 	}
 
 	public int getCarNum() {
-		return (int) load;
+		return (int) carNum;
 	}
 	
 	protected int getLanesNum() {

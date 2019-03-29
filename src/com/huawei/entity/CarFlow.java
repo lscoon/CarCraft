@@ -105,6 +105,7 @@ public class CarFlow {
 		for(Car car:startOffCarList) {
 			if(car.isRunning())
 				logger.error("start off running cars");;
+			car.setRealStartTime(MapSimulator.term);
 		}
 		runCars.addAll(startOffCarList);
 		return startOffCarList;
@@ -118,6 +119,7 @@ public class CarFlow {
 	 * @return: void
 	 */
 	public void putback(Car car) {
+//		car.setRealStartTime(car.getRealStartTime()+1);
 		for(int i=0; i<outRoadCars.size(); i++)
 			if(outRoadCars.get(i)==null) {
 				outRoadCars.set(i, car);
@@ -201,6 +203,12 @@ public class CarFlow {
 
 	public void setMinTerm(int minTerm) {
 		this.minTerm = minTerm;
+	}
+	
+	public void addMinTerm(int add) {
+		this.minTerm += add;
+		for(Car car : outRoadCars)
+			car.setRealStartTime(car.getRealStartTime()+add);
 	}
 
 	public int getMaxSpeed() {

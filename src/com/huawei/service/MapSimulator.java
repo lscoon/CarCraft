@@ -49,9 +49,9 @@ public class MapSimulator {
 		initMap();
 		while (finishCars.size() != MapUtil.cars.size()) {
 			MapUpdate.updateMap();
-			for(Car car: outRoadCars)
-				if(car.getRealStartTime() < term)
-					System.out.println("11");
+//			for(Car car: outRoadCars)
+//				if(car.getRealStartTime() < term)
+//					System.out.println("11");
 			term++;
 		}
 		logger.info("end run map in " + term);
@@ -102,7 +102,10 @@ public class MapSimulator {
 						i--;
 						count++;
 					}
-					else failCount++;
+					else{
+						failCount++;
+//						carflow.addMinTerm(1);
+					}
 				}
 				else {
 					List<Road> roadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), 
@@ -117,9 +120,14 @@ public class MapSimulator {
 								i--;
 								count++;
 							}
-							else failCount++;
+							else{
+//								carflow.addMinTerm(1);
+								failCount++;
+							}
 						}
+//						else carflow.addMinTerm(1);
 					}
+//					else carflow.addMinTerm(1);
 				}
 				
 				if(failCount > MapUtil.MaxFailCount)
@@ -178,7 +186,7 @@ public class MapSimulator {
 		term++;
 		if(count > 0) {
 //			logger.info("finish " + count + " car flows");
-			if(carFlowFinishCount > MapUtil.MaxCarFlowFinishCount || outRoadCarFlows.size() <= MapUtil.MaxCarFlowFinishCount) {
+			if(carFlowFinishCount >= MapUtil.MaxCarFlowFinishCount || outRoadCarFlows.size() < MapUtil.MaxCarFlowFinishCount) {
 				carFlowFinishCount = 0;
 				
 				addRunCarFlows();

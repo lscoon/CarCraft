@@ -81,9 +81,6 @@ public class MapUpdate {
 //		logger.info("start step three");
 		stepThreeCount = 0;
 		
-		if(MapSimulator.outRoadCars.size()!=0)
-			if(MapSimulator.realStartTerm == -1)
-				MapSimulator.realStartTerm = MapSimulator.term;
 		Collections.sort(MapSimulator.outRoadCars, new Comparator<Car>() {
 			@Override
 			public int compare(Car o1, Car o2) {
@@ -102,6 +99,9 @@ public class MapUpdate {
 					i--;
 				}
 		}
+		if(MapSimulator.nowRunCars.size()!=0)
+			if(MapSimulator.realStartTerm == -1)
+				MapSimulator.realStartTerm = MapSimulator.term;
 //		logger.info("end step three: start off " + stepThreeCount + " cars");
 //		logger.info("finish " + stepFinishCount + " cars");
 //		logger.info("end updateMap");

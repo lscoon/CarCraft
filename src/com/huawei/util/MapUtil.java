@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.omg.PortableInterceptor.IORInterceptor;
 
 import com.huawei.entity.Car;
 import com.huawei.entity.CarFlow;
@@ -39,7 +38,7 @@ public class MapUtil {
 	// when fail this nums, will not try judge overlay
 	public static int MaxFailCount = 200;
 	// when finish this nums carflows, will try to add carflows
-	public static int MaxCarFlowFinishCount = 1;
+	public static int MaxCarFlowFinishCount = 5;
 	// select this num reverse carflows to fill map
 	//public static int CarFlowCountLeaveForFill = 18;
 	
@@ -88,11 +87,17 @@ public class MapUtil {
         String answerPath = args[3];
         FileUtil.readInputs(carPath, roadPath, crossPath);
         GlobalSolver.invokeSolver();
-    	MapSimulator.runMapWithCarFlow();
-//    	FileUtil.outputAnswer(answerPath);
+        MapSimulator.term = DelayTerm;
+        MapSimulator.runMapWithCarFlow();
+//    	MapSimulator.runMapWithCarFlowWithView();
+    	FileUtil.outputAnswer(answerPath);
     	Date end_time = new Date();
         long timeDiff = end_time.getTime() - start_time.getTime();
-        System.out.println(arg + ":   " + (MapSimulator.term-MapSimulator.realStartTerm) + ",   " + timeDiff);
+        long count = 0;
+        for(Car car : cars.values()) {
+        	count += car.getRealEndTime()-car.getStartTime();
+        }
+        System.out.println(arg + ":   " + (MapSimulator.term-MapSimulator.realStartTerm) + ",   " + count + ",   "+ timeDiff);
 	}
 	
 	private static void testAnswer(String arg) {
@@ -103,25 +108,33 @@ public class MapUtil {
         String answerPath = args[3];
 		FileUtil.readInputs(carPath, roadPath, crossPath);
 		FileUtil.inputAnswer(answerPath);
-        MapSimulator.term = 0;
+        MapSimulator.term = DelayTerm;
 //        Date test_start_time = new Date();
         MapSimulator.runMapWithOutView();
+//        MapSimulator.runMapWithView();
 //        Date test_end_time = new Date();
 //        long timeDiff = test_end_time.getTime() - test_start_time.getTime();
 //        logger.info("Take time " + timeDiff);
-        logger.info("start in term " + MapSimulator.realStartTerm);
-        logger.info("end in term " + MapSimulator.term);
+        logger.info("Dispatcher time: " + (MapSimulator.term-MapSimulator.realStartTerm));
+        long count = 0;
+        for(Car car : cars.values()) {
+        	count += car.getRealEndTime()-car.getStartTime();
+        }
+        logger.info("Total time: " + count);
 	}
 		
 		
 	public static void main(String[] args) {
-		for(;LoadParameter<1; LoadParameter += 0.1) {
+//		for(LoadParameter=0.1;LoadParameter<=2; LoadParameter += 0.1) {
+//			System.out.pr
 			clear();
 			runFile("inputs/1-map-training-1/");
 			clear();
 			runFile("inputs/1-map-training-2/");
-		}
-//		clear();
-//		testAnswer("inputs/1-map-training-2/");
+//		}
+		clear();
+		testAnswer("inputs/1-map-training-1/");
+		clear();
+		testAnswer("inputs/1-map-training-2/");
     }
 }
