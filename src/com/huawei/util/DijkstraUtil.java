@@ -14,13 +14,13 @@ public class DijkstraUtil {
 	private static final Logger logger = Logger.getLogger(DijkstraUtil.class);
 	private static float[][] dist = null;
 	
-	private static void refreshDistMatrix(int speed) {
+	private static void refreshDistMatrix(int speed, List<Road> roadsFlag) {
 		if(dist==null)
 			dist = new float[MapUtil.crosses.size()][MapUtil.crosses.size()];
 		for(int i=0; i<MapUtil.crosses.size(); i++)
 			for(int j=0; j<MapUtil.crosses.size(); j++) {
 				Road road = existComputeRoad(MapUtil.crosses.get(MapUtil.crossSequence.get(i)),
-						MapUtil.crosses.get(MapUtil.crossSequence.get(j)));
+						MapUtil.crosses.get(MapUtil.crossSequence.get(j)), roadsFlag);
 				if(road==null) {
 					if(i==j)
 						dist[i][j]=0;
@@ -33,21 +33,27 @@ public class DijkstraUtil {
 			}
 	}
 	
-	private static Road existComputeRoad(Cross crossOne, Cross crossTwo) {
+	private static Road existComputeRoad(Cross crossOne, Cross crossTwo, List<Road> roadsFlag) {
 		Road road = crossOne.findLinkedRoad(crossTwo);
 		if (road == null)
 			return null;
 		if (road.getDestination() != crossTwo && !road.isBiDirect())
 			return null;
-		if(road.getLoad(crossOne.getCrossId()) 
+		if(roadsFlag==null && road.getLoad(crossOne.getCrossId()) 
 				> (MapUtil.RoadMaxLoad*road.getLanesNum()*MapUtil.LoadParameter))
 			return null;
+		if(roadsFlag!=null) {
+			for(Road road2 : roadsFlag) {
+				if(road.getRoadId() == road2.getRoadId())
+					return null;
+			}
+		}
 		return road;
 	}
 	
 	// tag=0 means exist, tag=1 means fill
-	public static List<Road> Dijkstra(int crossOneId, int crossTwoId, int speed, int loadExistOrFillTag) {
-		refreshDistMatrix(speed);
+	public static List<Road> Dijkstra(int crossOneId, int crossTwoId, int speed, List<Road> roadsFlag) {
+		refreshDistMatrix(speed, roadsFlag);
 		
 		int startSeq = MapUtil.crossSequence.indexOf(crossOneId);
 		int endSeq = MapUtil.crossSequence.indexOf(crossTwoId);
@@ -95,7 +101,7 @@ public class DijkstraUtil {
 		while(endSeq != startSeq) {
 			Cross cross1 = MapUtil.crosses.get(MapUtil.crossSequence.get(prenode[endSeq]));
 			Cross cross2 = MapUtil.crosses.get(MapUtil.crossSequence.get(endSeq));
-			Road road = existComputeRoad(cross1, cross2);
+			Road road = existComputeRoad(cross1, cross2, roadsFlag);
 			if(road==null)
 				logger.error("some thing wrong in dijkstra");
 			roads.push(road);

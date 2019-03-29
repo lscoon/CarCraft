@@ -27,6 +27,7 @@ public class MapSimulator {
 
 	public static int term = 5;
 	public static int realStartTerm = -1;
+	public static int splitFlowTag = -1;
 	public static List<Car> outRoadCars = new LinkedList<>();
 	public static Set<Car> nowRunCars = new HashSet<>();
 	public static Set<Car> finishCars = new HashSet<>();
@@ -104,12 +105,11 @@ public class MapSimulator {
 					}
 					else{
 						failCount++;
-//						carflow.addMinTerm(1);
 					}
 				}
 				else {
 					List<Road> roadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), 
-							carflow.getDestination(), MapUtil.CarMaxSpeed, 0);
+							carflow.getDestination(), MapUtil.CarMaxSpeed, null);
 					if(roadList!=null && roadList.size() - carflow.getRoadList().size() <= MapUtil.RoadListMaxIncrease) {
 						CarFlow tempCarFlow = new CarFlow(roadList, carflow);
 						if(tempCarFlow.isLoadFree()) {
@@ -121,33 +121,16 @@ public class MapSimulator {
 								count++;
 							}
 							else{
-//								carflow.addMinTerm(1);
 								failCount++;
 							}
 						}
-//						else carflow.addMinTerm(1);
 					}
-//					else carflow.addMinTerm(1);
 				}
 				
 				if(failCount > MapUtil.MaxFailCount)
 					break;
 			}
 		}
-		
-//		if(outRoadCarFlows.size() > MapUtil.CarFlowCountLeaveForFill) {
-//			for(int i=outRoadCarFlows.size()-1, j=0; 
-//					i>=outRoadCarFlows.size()-MapUtil.CarFlowCountLeaveForFill+j; i--) {
-//				CarFlow carflow = outRoadCarFlows.get(i);
-//				if(carflow.getMinTerm() <= term) {
-//					List<Road> roadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), carflow.getDestination(), MapUtil.CarMaxSpeed);
-//					if(roadList!=null && GlobalSolver.isOverlayLoopFree(new CarFlow(roadList), nowRunCarFlows)) {
-//						
-//						j++;
-//					}
-//				}
-//			}
-//		}
 		
 //		logger.info("add " + count + " car flows");
 	}
@@ -167,7 +150,7 @@ public class MapSimulator {
 	
 	public static void updateMapWithCarFlow() {
 		MapUpdate.updateMap();
-		
+//		System.out.println(nowRunCarFlows.size());
 //		logger.info("put back " + outRoadCars.size() + " cars");
 		for(Car car : outRoadCars)
 			car.getCarFlow().putback(car);
@@ -181,10 +164,18 @@ public class MapSimulator {
 				i--;
 				count++;
 				carFlowFinishCount++;
+				if(splitFlowTag != -1)
+					splitFlowTag++;
 			}
 		}
 		term++;
+		
+		// these car flows will start at next term
 		if(count > 0) {
+			if(splitFlowTag >= MapUtil.SplitFlowThreshhold) {
+//				splitFlow();
+				splitFlowTag = 0;
+			}
 //			logger.info("finish " + count + " car flows");
 			if(carFlowFinishCount >= MapUtil.MaxCarFlowFinishCount || outRoadCarFlows.size() < MapUtil.MaxCarFlowFinishCount) {
 				carFlowFinishCount = 0;
@@ -196,10 +187,49 @@ public class MapSimulator {
 //			logger.info("now no car flow");
 			addRunCarFlows();
 		}
+		if(splitFlowTag == -1)
+			if(outRoadCarFlows.size() ==0) {//< MapUtil.SplitBeginOutRoadCarFlowNum) {
+				splitFlowTag = 0;
+//				splitFlow();
+//				System.out.println(nowRunCarFlows.size());
+			}
 		term--;
 	}
 	
-
+	private static void splitFlow() {
+		Collections.sort(nowRunCarFlows, new Comparator<CarFlow>() {
+			@Override
+			public int compare(CarFlow o1, CarFlow o2) {
+				return o2.getOutRoadCars().size() - o1.getOutRoadCars().size();
+			}
+		});
+		int size = nowRunCarFlows.size();
+		for(int i=0; i<MapUtil.SelectedFlowNum && i<size; i++) {
+			CarFlow carflow = nowRunCarFlows.get(i);
+			if(carflow.getOutRoadCars().size() < 20) 
+				break;
+			List<Road> roadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), 
+					carflow.getDestination(), MapUtil.CarMaxSpeed, null);
+			if(roadList!=null) {
+				int num = carflow.getOutRoadCars().size()*carflow.getRoadList().size()/
+						(roadList.size()+carflow.getRoadList().size());
+				CarFlow tempCarFlow = new CarFlow(roadList, carflow, num);
+				if(tempCarFlow.isLoadFree()) {
+					if(GlobalSolver.isOverlayLoopFree(tempCarFlow, nowRunCarFlows)) {
+						tempCarFlow.refreshOutRoadCarCarFlows();
+						carflow.split(num);
+						System.out.println(tempCarFlow.getOutRoadCars().size()+","+carflow.getOutRoadCars().size());
+						MapUtil.carFlows.add(tempCarFlow);
+						nowRunCarFlows.add(tempCarFlow);
+						System.out.println("split carflow in term " + term);
+					}
+					else System.out.println("overlay error");
+				}
+				else System.out.println("load error");
+			}
+		}
+	}
+	
 	public static boolean isDispatchFinished() {
 		return finishCars.size() == MapUtil.cars.size();
 	}

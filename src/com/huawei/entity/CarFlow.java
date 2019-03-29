@@ -39,6 +39,39 @@ public class CarFlow {
 		outRoadCars = lastCarFlow.getOutRoadCars();
 	}
 	
+	public CarFlow(List<Road> newRoadList, CarFlow lastCarFlow, int num) {
+		origin = lastCarFlow.getOrigin();
+		destination = lastCarFlow.getDestination();
+		roadList = newRoadList;
+		
+		minTerm = MapSimulator.term;
+		maxSpeed = 0;
+		
+		for(int i=lastCarFlow.outRoadCars.size()-num; i<lastCarFlow.outRoadCars.size(); i++) {
+			Car car = lastCarFlow.getOutRoadCars().get(i);
+			outRoadCars.add(car);
+			if(car.getMaxSpeed()>maxSpeed)
+				maxSpeed = car.getMaxSpeed();
+			if(car.getRealStartTime()<minTerm)
+				minTerm = car.getRealStartTime();
+		}
+		totalCarCount = outRoadCars.size();
+	}
+	
+	public void refreshOutRoadCarCarFlows() {
+		for(Car car : outRoadCars) {
+			car.setCarFlow(this);
+		}
+	}
+	
+	public void split(int num) {
+//		updateLoad(-num);
+		while(num > 0) {
+			outRoadCars.remove(outRoadCars.get(outRoadCars.size()-1));
+			num--;
+		}
+	}
+	
 	public void startoff() {
 		isRunning = true;
 		updateLoad(outRoadCars.size());
@@ -85,7 +118,7 @@ public class CarFlow {
 		for(int i=0; i<outRoadCars.size(); i++) {
 			Car car = outRoadCars.get(i);
 			if(car != null) {
-				if (car.getStartTime() <= MapSimulator.term) {
+				if (car.getRealStartTime() <= MapSimulator.term) {
 					startOffCarList.add(car);
 					outRoadCars.set(i, null);
 					blankNum--;
@@ -203,12 +236,6 @@ public class CarFlow {
 
 	public void setMinTerm(int minTerm) {
 		this.minTerm = minTerm;
-	}
-	
-	public void addMinTerm(int add) {
-		this.minTerm += add;
-		for(Car car : outRoadCars)
-			car.setRealStartTime(car.getRealStartTime()+add);
 	}
 
 	public int getMaxSpeed() {

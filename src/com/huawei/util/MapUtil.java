@@ -30,17 +30,20 @@ public class MapUtil {
 	public static int CarMaxSpeed = 0;
 	public static int CarFlowMaxCarCount = 0;
 	
-	public static int NowStartOffCarsAdd = 1;
+	public static int NowStartOffCarsAdd = 3;
 	public static int DelayTerm = 0;
-	public static double LoadParameter = 0.8;
-	public static int RoadMaxLoad = 170;
+	public static double LoadParameter = 0.6;
+	public static int RoadMaxLoad = 100;
 	public static int RoadListMaxIncrease = 2;
 	// when fail this nums, will not try judge overlay
 	public static int MaxFailCount = 200;
 	// when finish this nums carflows, will try to add carflows
 	public static int MaxCarFlowFinishCount = 5;
-	// select this num reverse carflows to fill map
-	//public static int CarFlowCountLeaveForFill = 18;
+	
+	public static int ExpectedFlowSize = 30;
+	public static int SplitBeginOutRoadCarFlowNum = 20;
+	public static int SplitFlowThreshhold = 10;
+	public static int SelectedFlowNum = 3;
 	
 	public static MapFrame mapView = null;
 	
@@ -62,8 +65,33 @@ public class MapUtil {
 	
 	public static void checkParameters() {
 		if(CarFlowMaxCarCount > RoadMaxLoad) {
-			logger.info("CarFlowMaxCarCount > RoadMaxLoad, maybe error");
+			System.out.println("maybe error in road max load");
 		}
+		
+		int size = carFlows.size();
+		for(int i=0; i<size; i++) {
+			CarFlow carflow = carFlows.get(i);
+			while(carflow.getOutRoadCars().size() > ExpectedFlowSize) {
+				List<Road> newRoadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), 
+						carflow.getDestination(), MapUtil.CarMaxSpeed, carflow.getRoadList());
+				CarFlow tempCarFlow = new CarFlow(newRoadList, carflow, ExpectedFlowSize);
+				tempCarFlow.refreshOutRoadCarCarFlows();
+				
+				carFlows.add(tempCarFlow);
+				carflow.split(ExpectedFlowSize);
+			}
+		}
+		
+//		for(CarFlow carFlow :carFlows) {
+//			if(carFlow.getOutRoadCars().size() < 80)
+//				continue;
+//			for(Car car : carFlow.getOutRoadCars()) {
+//				
+//				if(car.getMaxSpeed() < (CarMaxSpeed/2)+1) {
+//					car.setRealStartTime(Math.max(10, car.getRealStartTime()));
+//				}
+//			}
+//		}
 	}
 	
 	private static void clear() {
@@ -127,14 +155,14 @@ public class MapUtil {
 	public static void main(String[] args) {
 //		for(LoadParameter=0.1;LoadParameter<=2; LoadParameter += 0.1) {
 //			System.out.pr
-			clear();
-			runFile("inputs/1-map-training-1/");
+//			clear();
+//			runFile("inputs/1-map-training-1/");
 			clear();
 			runFile("inputs/1-map-training-2/");
 //		}
-		clear();
-		testAnswer("inputs/1-map-training-1/");
-		clear();
-		testAnswer("inputs/1-map-training-2/");
+//		clear();
+//		testAnswer("inputs/1-map-training-1/");
+//		clear();
+//		testAnswer("inputs/1-map-training-2/");
     }
 }
