@@ -32,8 +32,8 @@ public class MapUpdate {
 	
 	public static void updateMap() {
 //		logger.info("start updateMap in " + MapSimulator.term);
-		if(MapSimulator.term==1000)
-			logger.error("reach " + MapSimulator.term);
+//		if(MapSimulator.term==1000)
+//			logger.error("reach " + MapSimulator.term);
 		nowWaitedCars.addAll(MapSimulator.nowRunCars);
 		for (Car car : nowWaitedCars) {
 			car.setWaited(true);

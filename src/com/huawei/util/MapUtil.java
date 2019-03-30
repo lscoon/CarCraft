@@ -30,15 +30,15 @@ public class MapUtil {
 	public static int CarMaxSpeed = 0;
 	public static int CarFlowMaxCarCount = 0;
 	
-	public static int NowStartOffCarsAdd = 3;
+	public static int NowStartOffCarsAdd = 2;
 	public static int DelayTerm = 0;
-	public static double LoadParameter = 0.6;
+	public static double LoadParameter = 0.9;
 	public static int RoadMaxLoad = 500;
 	public static int RoadListMaxIncrease = 2;
 	// when fail this nums, will not try judge overlay
 	public static int MaxFailCount = 20;
 	// when finish this nums carflows, will try to add carflows
-	public static int MaxCarFlowFinishCount = 5;
+	public static int MaxCarFlowFinishCount = 2;
 	
 	public static int ExpectedFlowSize = 1000;
 	public static int SplitBeginOutRoadCarFlowNum = 20;
@@ -64,7 +64,7 @@ public class MapUtil {
 	}
 	
 	public static void checkParameters() {
-		logger.info("CarFlowMaxCarCount " + CarFlowMaxCarCount);
+//		logger.info("CarFlowMaxCarCount " + CarFlowMaxCarCount);
 		if(CarFlowMaxCarCount > RoadMaxLoad) {
 			System.out.println("maybe error in road max load");
 		}
@@ -101,8 +101,10 @@ public class MapUtil {
 		CarMaxSpeed = 0;
 		crosses.clear();
 		roads.clear();
+		cars.clear();
 		carFlows.clear();
 		crossSequence.clear();
+		DijkstraUtil.dist = null;
 		MapSimulator.finishCars.clear();
 		MapSimulator.term = DelayTerm;
 	}
@@ -157,13 +159,13 @@ public class MapUtil {
 //		for(LoadParameter=0.1;LoadParameter<=2; LoadParameter += 0.1) {
 //			System.out.pr
 //			clear();
-//			runFile("inputs/1-map-training-1/");
+//			runFile("inputs/1-map-exam-1/");
 			clear();
 			runFile("inputs/1-map-exam-2/");
 //		}
 //		clear();
-//		testAnswer("inputs/1-map-training-1/");
+//		testAnswer("inputs/1-map-exam-1/");
 //		clear();
-//		testAnswer("inputs/1-map-training-2/");
+//		testAnswer("inputs/1-map-exam-2/");
     }
 }

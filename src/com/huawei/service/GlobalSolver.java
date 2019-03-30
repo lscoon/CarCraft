@@ -67,6 +67,8 @@ public class GlobalSolver {
 				speed = carflow.getMaxSpeed();
 			Road[][] pathMatrix = FloydUtil.pathMap.get((Integer) speed);
 			List<Road> roadList = new ArrayList<>();
+			if(originSeq == -1)
+				System.out.println("11");
 			
 			while (originSeq != destinationSeq) {
 				Road road = pathMatrix[originSeq][destinationSeq];
@@ -165,7 +167,7 @@ public class GlobalSolver {
 
 		
 //		logger.info("max cluster: " + MapUtil.carFlows.get(0).getCarFlowSize() + " cars");
-		logger.info(MapUtil.cars.values().size() + " cars to " + MapUtil.carFlows.size() + " clusters!");
+//		logger.info(MapUtil.cars.values().size() + " cars to " + MapUtil.carFlows.size() + " clusters!");
 	}
 
 

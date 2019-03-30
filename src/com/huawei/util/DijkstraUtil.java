@@ -12,7 +12,7 @@ import com.huawei.entity.Road;
 public class DijkstraUtil {
 
 	private static final Logger logger = Logger.getLogger(DijkstraUtil.class);
-	private static float[][] dist = null;
+	public static float[][] dist = null;
 	
 	private static void refreshDistMatrix(int speed, List<Road> roadsFlag) {
 		if(dist==null)

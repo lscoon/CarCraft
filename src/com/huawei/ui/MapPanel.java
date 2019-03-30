@@ -64,14 +64,23 @@ public class MapPanel extends JPanel{
 				Road road = cross.getRoads().get(i);
 				if(road == null)
 					continue;
+				if(cross.getCrossId()==1803)
+					logger.info("111");
 				int nextCrossId = road.getAnOtherCross(crossId);
 				if(!crossLocationMap.containsKey(nextCrossId)) {
+					
 					Cross nextCross = MapUtil.crosses.get(nextCrossId);
 					nextCross.setRotationStatus((cross.getRotationStatus()
 							+ rotationMatrix[i][nextCross.getRotation(road.getRoadId())])%4);
+//					int temp = 0;
+//					if(i==0 || i==3)
+//						temp=rotationMatrix[(i+2)%4][nextCross.getRotation(road.getRoadId())];
+//					else temp=rotationMatrix[i%4][nextCross.getRotation(road.getRoadId())];
 					crossLocationMap.put(nextCrossId, getNextLocation(
 							crossLocationMap.get(crossId),
-							cross.getRotationStatus()+i));
+							nextCross.getRotationStatus()+i));
+//							temp));
+							
 					queue.add(nextCrossId);
 				}
 			}

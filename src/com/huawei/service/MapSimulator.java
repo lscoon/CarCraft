@@ -45,7 +45,7 @@ public class MapSimulator {
 	}
 	
 	public static void runMapWithOutView() {
-		logger.info("start run map in " + term);
+//		logger.info("start run map in " + term);
 		finishCars.clear();
 		initMap();
 		while (finishCars.size() != MapUtil.cars.size()) {
