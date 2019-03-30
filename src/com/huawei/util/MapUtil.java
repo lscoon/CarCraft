@@ -33,14 +33,14 @@ public class MapUtil {
 	public static int NowStartOffCarsAdd = 3;
 	public static int DelayTerm = 0;
 	public static double LoadParameter = 0.6;
-	public static int RoadMaxLoad = 100;
+	public static int RoadMaxLoad = 500;
 	public static int RoadListMaxIncrease = 2;
 	// when fail this nums, will not try judge overlay
-	public static int MaxFailCount = 200;
+	public static int MaxFailCount = 20;
 	// when finish this nums carflows, will try to add carflows
 	public static int MaxCarFlowFinishCount = 5;
 	
-	public static int ExpectedFlowSize = 30;
+	public static int ExpectedFlowSize = 1000;
 	public static int SplitBeginOutRoadCarFlowNum = 20;
 	public static int SplitFlowThreshhold = 10;
 	public static int SelectedFlowNum = 3;
@@ -64,6 +64,7 @@ public class MapUtil {
 	}
 	
 	public static void checkParameters() {
+		logger.info("CarFlowMaxCarCount " + CarFlowMaxCarCount);
 		if(CarFlowMaxCarCount > RoadMaxLoad) {
 			System.out.println("maybe error in road max load");
 		}
@@ -116,8 +117,8 @@ public class MapUtil {
         FileUtil.readInputs(carPath, roadPath, crossPath);
         GlobalSolver.invokeSolver();
         MapSimulator.term = DelayTerm;
-        MapSimulator.runMapWithCarFlow();
-//    	MapSimulator.runMapWithCarFlowWithView();
+//        MapSimulator.runMapWithCarFlow();
+    	MapSimulator.runMapWithCarFlowWithView();
     	FileUtil.outputAnswer(answerPath);
     	Date end_time = new Date();
         long timeDiff = end_time.getTime() - start_time.getTime();
@@ -125,7 +126,7 @@ public class MapUtil {
         for(Car car : cars.values()) {
         	count += car.getRealEndTime()-car.getStartTime();
         }
-        System.out.println(arg + ":   " + (MapSimulator.term-MapSimulator.realStartTerm) + ",   " + count + ",   "+ timeDiff);
+        logger.info(arg + ":   " + (MapSimulator.term-MapSimulator.realStartTerm) + ",   " + count + ",   "+ timeDiff);
 	}
 	
 	private static void testAnswer(String arg) {
@@ -158,7 +159,7 @@ public class MapUtil {
 //			clear();
 //			runFile("inputs/1-map-training-1/");
 			clear();
-			runFile("inputs/1-map-training-2/");
+			runFile("inputs/1-map-exam-2/");
 //		}
 //		clear();
 //		testAnswer("inputs/1-map-training-1/");

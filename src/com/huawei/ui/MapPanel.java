@@ -30,7 +30,7 @@ public class MapPanel extends JPanel{
 	private static final int MapX = 500;
 	private static final int MapY = 500;
 	
-	private int Distance = 80;
+	private int Distance = 40;
 	private int TranslateX = 50;
 	private int TranslateY = 450;
 	
@@ -76,6 +76,7 @@ public class MapPanel extends JPanel{
 				}
 			}
 		}
+		logger.info("init bfs");
 	};
 	
 	private int[] getNextLocation(int[] location, int rotation) {
@@ -96,6 +97,9 @@ public class MapPanel extends JPanel{
 		super.paintComponent(g);
 		paintedRoads.clear();
 		
+//		for(Cross cross: MapUtil.crosses.values()) {
+//			paintCross(g, cross);
+//		}
 		Iterator<Map.Entry<Integer, Cross>> iterator = MapUtil.crosses.entrySet().iterator();
 		while (iterator.hasNext()) {
 		    Map.Entry<Integer, Cross> entry = iterator.next();
@@ -118,10 +122,10 @@ public class MapPanel extends JPanel{
 		List<Road> roads = cross.getRoads();
 		int roSta = cross.getRotationStatus();
 		
-		paintRoad(g, cross, roads.get((4-roSta)%4), locationX, locationY, locationX, locationY-Distance);
-		paintRoad(g, cross, roads.get((5-roSta)%4), locationX, locationY, locationX+Distance, locationY);
-		paintRoad(g, cross, roads.get((6-roSta)%4), locationX, locationY, locationX, locationY+Distance);
-		paintRoad(g, cross, roads.get((7-roSta)%4), locationX, locationY, locationX-Distance, locationY);
+//		paintRoad(g, cross, roads.get((524-roSta)%4), locationX, locationY, locationX, locationY-Distance);
+//		paintRoad(g, cross, roads.get((525-roSta)%4), locationX, locationY, locationX+Distance, locationY);
+//		paintRoad(g, cross, roads.get((526-roSta)%4), locationX, locationY, locationX, locationY+Distance);
+//		paintRoad(g, cross, roads.get((527-roSta)%4), locationX, locationY, locationX-Distance, locationY);
 	}
 	
 	private void paintRoad(Graphics g, Cross cross, Road road, int x_1, int y_1, int x_2, int y_2) {
@@ -132,7 +136,7 @@ public class MapPanel extends JPanel{
 			return;
 		g.drawString(Integer.toString(roadId), (x_1+x_2-30)/2, (y_1+y_2)/2);
 		g.setColor(Color.red);
-		g.drawString(Integer.toString(road.getCarNum()), (x_1+x_2+20)/2, (y_1+y_2)/2);
+//		g.drawString(Integer.toString(road.getCarNum()), (x_1+x_2+20)/2, (y_1+y_2)/2);
 		
 		g.setColor(Color.black);
 		g.drawLine(x_1, y_1, x_2, y_2);

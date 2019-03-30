@@ -31,7 +31,7 @@ public class MapUpdate {
 	public static int stepFinishCount = 0;
 	
 	public static void updateMap() {
-//		logger.info("start updateMap in " + term);
+//		logger.info("start updateMap in " + MapSimulator.term);
 		if(MapSimulator.term==1000)
 			logger.error("reach " + MapSimulator.term);
 		nowWaitedCars.addAll(MapSimulator.nowRunCars);

@@ -165,7 +165,7 @@ public class GlobalSolver {
 
 		
 //		logger.info("max cluster: " + MapUtil.carFlows.get(0).getCarFlowSize() + " cars");
-//		logger.info(MapUtil.cars.values().size() + " cars to " + MapUtil.carFlows.size() + " clusters!");
+		logger.info(MapUtil.cars.values().size() + " cars to " + MapUtil.carFlows.size() + " clusters!");
 	}
 
 
