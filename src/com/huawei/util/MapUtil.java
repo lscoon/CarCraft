@@ -30,17 +30,17 @@ public class MapUtil {
 	public static int CarMaxSpeed = 0;
 	public static int CarFlowMaxCarCount = 0;
 	
-	public static int NowStartOffCarsAdd = 2;
+	public static int NowStartOffCarsAdd = 1;
 	public static int DelayTerm = 0;
-	public static double LoadParameter = 0.9;
-	public static int RoadMaxLoad = 500;
-	public static int RoadListMaxIncrease = 2;
+	public static double LoadParameter = 0.6;
+	public static int RoadMaxLoad = 250;
+	public static int RoadListMaxIncrease = 1;
 	// when fail this nums, will not try judge overlay
-	public static int MaxFailCount = 20;
+	public static int MaxFailCount = 100;
 	// when finish this nums carflows, will try to add carflows
-	public static int MaxCarFlowFinishCount = 2;
+	public static int MaxCarFlowFinishCount = 1;
 	
-	public static int ExpectedFlowSize = 1000;
+	public static int ExpectedFlowSize = 230;
 	public static int SplitBeginOutRoadCarFlowNum = 20;
 	public static int SplitFlowThreshhold = 10;
 	public static int SelectedFlowNum = 3;
@@ -65,7 +65,7 @@ public class MapUtil {
 	
 	public static void checkParameters() {
 //		logger.info("CarFlowMaxCarCount " + CarFlowMaxCarCount);
-		if(CarFlowMaxCarCount > RoadMaxLoad) {
+		if(ExpectedFlowSize > RoadMaxLoad) {
 			System.out.println("maybe error in road max load");
 		}
 		
@@ -157,9 +157,10 @@ public class MapUtil {
 		
 	public static void main(String[] args) {
 //		for(LoadParameter=0.1;LoadParameter<=2; LoadParameter += 0.1) {
-//			System.out.pr
-//			clear();
-//			runFile("inputs/1-map-exam-1/");
+		
+			logger.info(NowStartOffCarsAdd+","+LoadParameter+","+RoadMaxLoad+","+RoadListMaxIncrease+","+MaxFailCount+","+MaxCarFlowFinishCount);
+			clear();
+			runFile("inputs/1-map-exam-1/");
 			clear();
 			runFile("inputs/1-map-exam-2/");
 //		}
