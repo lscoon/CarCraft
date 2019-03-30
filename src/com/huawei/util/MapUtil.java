@@ -117,8 +117,8 @@ public class MapUtil {
         FileUtil.readInputs(carPath, roadPath, crossPath);
         GlobalSolver.invokeSolver();
         MapSimulator.term = DelayTerm;
-//        MapSimulator.runMapWithCarFlow();
-    	MapSimulator.runMapWithCarFlowWithView();
+        MapSimulator.runMapWithCarFlow();
+//    	MapSimulator.runMapWithCarFlowWithView();
     	FileUtil.outputAnswer(answerPath);
     	Date end_time = new Date();
         long timeDiff = end_time.getTime() - start_time.getTime();

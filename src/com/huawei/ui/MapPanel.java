@@ -67,8 +67,8 @@ public class MapPanel extends JPanel{
 				int nextCrossId = road.getAnOtherCross(crossId);
 				if(!crossLocationMap.containsKey(nextCrossId)) {
 					Cross nextCross = MapUtil.crosses.get(nextCrossId);
-					nextCross.setRotationStatus(cross.getRotationStatus()
-							+ rotationMatrix[i][nextCross.getRotation(road.getRoadId())]);
+					nextCross.setRotationStatus((cross.getRotationStatus()
+							+ rotationMatrix[i][nextCross.getRotation(road.getRoadId())])%4);
 					crossLocationMap.put(nextCrossId, getNextLocation(
 							crossLocationMap.get(crossId),
 							cross.getRotationStatus()+i));
