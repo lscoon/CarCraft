@@ -12,6 +12,8 @@ import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
 
+import com.huawei.service.Judge;
+
 public class MapFrame extends JFrame{
 
 	private static final Logger logger = Logger.getLogger(MapFrame.class);
@@ -23,12 +25,12 @@ public class MapFrame extends JFrame{
 	public ControlPanel pControl = null;
 	private JPanel pRoad = null;
 	
-	public MapFrame() {
+	public MapFrame(Judge judge) {
 		pMap = new MapPanel();
 		add(pMap, BorderLayout.EAST);
 		setMapPanelListener();
 		
-		pControl = new ControlPanel(pMap);
+		pControl = new ControlPanel(judge,pMap);
 		add(pControl, BorderLayout.CENTER);
 		
 		pRoad = new JPanel(new GridLayout(1,2));

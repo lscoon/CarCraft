@@ -71,24 +71,6 @@ public class Road {
 		else return origin.getCrossId();
 	}
 	
-	public int updateRunnableCars() {
-		int count = 0;
-		count = forwardRoad.updateRunnableCars();
-		if(isBiDirect)
-			count += backwardRoad.updateRunnableCars();
-		//logger.info("step1: road " + roadId + ", " + count + " cars updated");
-		return count;
-	}
-	
-	public int updateWaitedCars(Cross cross) {
-		if(cross.getCrossId() == destination.getCrossId())
-			return forwardRoad.updateWaitedCars(cross, getNeighbourDirections(cross));
-		else if(isBiDirect)
-			return backwardRoad.updateWaitedCars(cross,getNeighbourDirections(cross));
-		logger.error("step2: update invalid road cars " + roadId);
-		return -1;
-	}
-	
 	public void updateRoadDirections(Cross cross) {
 		if(cross.getCrossId() == destination.getCrossId())
 			forwardRoad.updateRoadDirection();
@@ -107,7 +89,7 @@ public class Road {
 		return Direction.direct;
 	}
 	
-	private Direction[] getNeighbourDirections(Cross cross) {
+	public Direction[] getNeighbourDirections(Cross cross) {
 		Direction[] directions = new Direction[3];
 		int index = cross.getRoads().indexOf(this);
 		for(int i=1; i<4; i++) {
@@ -122,37 +104,6 @@ public class Road {
 		}
 		return directions;
 	}
-	
-//	private Direction computeDirection(Road roadBefore) {
-//		if(roadBefore == null)
-//			return Direction.unknown;
-//		Cross cross = null;
-//		if(origin.getRoads().contains(roadBefore))
-//			cross = origin;
-//		else cross = destination;
-//		switch((cross.getRoads().indexOf(roadBefore)-
-//				cross.getRoads().indexOf(this)+4)%4) {
-//			case 1: return Direction.right;
-//			case 2: return Direction.direct;
-//			case 3: return Direction.left;
-//			default: logger.error("something error while computing directions");
-//		}
-//		return Direction.unknown;
-//	}
-	
-//	private int compareDirection(Direction direct1, Direction direct2) {
-//		if(direct1 == Direction.unknown)
-//			return 1;
-//		else if (direct1 == Direction.direct) {
-//			if(direct2 == Direction.unknown)
-//				return -1;
-//		}
-//		else if (direct1 == Direction.left) {
-//			if(direct2 == Direction.right)
-//				return 1;
-//		}
-//		return -1;
-//	}
 	
 	public boolean getForwardOrBackward(Road roadBefore) {
 		for(Road r: origin.getRoads())
@@ -182,28 +133,6 @@ public class Road {
 		else return false;
 	}
 	
-//	public int computePriority(CarFlow carFlow1, CarFlow carFlow2) {
-//		List<Road> roadList1= carFlow1.getRoadList();
-//		List<Road> roadList2= carFlow2.getRoadList();
-//		if(!roadList2.contains(this)) //|| (roadList2.indexOf(this)==(roadList2.size()-1)))
-//			return 0;
-//		int index1 = roadList1.indexOf(this);
-//		int index2 = roadList2.indexOf(this);
-//		Road roadBefore1 = null;
-//		Road roadBefore2 = null;
-//		if(index1 != 0)
-//			roadBefore1 = roadList1.get(index1-1);
-//		if(index2 != 0)
-//			roadBefore2 = roadList2.get(index2-1);
-//		if(!isSameDirection(carFlow1, carFlow2, roadBefore1, roadBefore2))
-//			return 0;
-//		Direction direct1 = computeDirection(roadBefore1);
-//		Direction direct2 = computeDirection(roadBefore2);
-//		if(direct1==direct2)
-//			return 0;
-//		return compareDirection(direct1, direct2);
-//	}
-	
 	public boolean isOverlay(CarFlow carFlow1, CarFlow carFlow2) {
 		List<Road> roadList1= carFlow1.getRoadList();
 		List<Road> roadList2= carFlow2.getRoadList();
@@ -228,7 +157,7 @@ public class Road {
 	// 0, 1... in road lan num
 	// -1, waited, means road has no enough space or ahead car is not updated
 	// -2, error, invalid
-	protected int getInRoadLaneNum(Cross cross, int nextDistance) {
+	public int getInRoadLaneNum(Cross cross, int nextDistance) {
 		if(cross.getCrossId() == origin.getCrossId())
 			return forwardRoad.getInRoadLaneNum(nextDistance);
 		else if(isBiDirect)
@@ -236,16 +165,6 @@ public class Road {
 		else 
 			logger.error("step2: get invalid road lane nums " + roadId);
 		return -2;
-	}
-	
-	// num means car in road lane num
-	protected void updateRoadWhilePassCross(Cross cross, Car car, int num) {
-		if(cross.getCrossId() == origin.getCrossId())
-			forwardRoad.updateRoadWhilePassCross(car, num);
-		else if(isBiDirect)
-			backwardRoad.updateRoadWhilePassCross(car, num);
-		else
-			logger.error("step2: invalid car " + car.getCarId() + " in " + roadId);
 	}
 	
 	public int getBlankNum(int crossId, int speed) {
@@ -275,6 +194,14 @@ public class Road {
 		return isBiDirect;
 	}
 	
+	public OneWayRoad getForwardRoad() {
+		return forwardRoad;
+	}
+
+	public OneWayRoad getBackwardRoad() {
+		return backwardRoad;
+	}
+
 	public int getLength() {
 		return forwardRoad.getLength();
 	}

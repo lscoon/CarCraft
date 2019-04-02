@@ -12,8 +12,9 @@ import com.huawei.entity.Car;
 import com.huawei.entity.CarFlow;
 import com.huawei.entity.Cross;
 import com.huawei.entity.Road;
-import com.huawei.service.GlobalSolver;
-import com.huawei.service.MapSimulator;
+import com.huawei.service.SolverWithFlow;
+import com.huawei.service.Judge;
+import com.huawei.service.JudgeWithFlow;
 import com.huawei.ui.MapFrame;
 
 public class MapUtil {
@@ -34,9 +35,9 @@ public class MapUtil {
 	public static int DelayTerm = 0;
 	public static double LoadParameter = 0.6;
 	public static int RoadMaxLoad = 250;
-	public static int RoadListMaxIncrease = 1;
+	public static int RoadListMaxIncrease = 4;
 	// when fail this nums, will not try judge overlay
-	public static int MaxFailCount = 100;
+	public static int MaxFailCount = 20;
 	// when finish this nums carflows, will try to add carflows
 	public static int MaxCarFlowFinishCount = 1;
 	
@@ -63,38 +64,6 @@ public class MapUtil {
 		System.out.println(cars.size() + " cars");
 	}
 	
-	public static void checkParameters() {
-//		logger.info("CarFlowMaxCarCount " + CarFlowMaxCarCount);
-		if(ExpectedFlowSize > RoadMaxLoad) {
-			System.out.println("maybe error in road max load");
-		}
-		
-		int size = carFlows.size();
-		for(int i=0; i<size; i++) {
-			CarFlow carflow = carFlows.get(i);
-			while(carflow.getOutRoadCars().size() > ExpectedFlowSize) {
-				List<Road> newRoadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), 
-						carflow.getDestination(), MapUtil.CarMaxSpeed, carflow.getRoadList());
-				CarFlow tempCarFlow = new CarFlow(newRoadList, carflow, ExpectedFlowSize);
-				tempCarFlow.refreshOutRoadCarCarFlows();
-				
-				carFlows.add(tempCarFlow);
-				carflow.split(ExpectedFlowSize);
-			}
-		}
-		
-//		for(CarFlow carFlow :carFlows) {
-//			if(carFlow.getOutRoadCars().size() < 80)
-//				continue;
-//			for(Car car : carFlow.getOutRoadCars()) {
-//				
-//				if(car.getMaxSpeed() < (CarMaxSpeed/2)+1) {
-//					car.setRealStartTime(Math.max(10, car.getRealStartTime()));
-//				}
-//			}
-//		}
-	}
-	
 	private static void clear() {
 		CarIdMaxLength = 10;
 		CarMinSpeed = 10;
@@ -104,9 +73,9 @@ public class MapUtil {
 		cars.clear();
 		carFlows.clear();
 		crossSequence.clear();
+		FloydUtil.pathMap = null;
+		FloydUtil.distMap = null;
 		DijkstraUtil.dist = null;
-		MapSimulator.finishCars.clear();
-		MapSimulator.term = DelayTerm;
 	}
 	
 	private static void runFile(String arg) {
@@ -117,18 +86,20 @@ public class MapUtil {
         String crossPath = args[2];
         String answerPath = args[3];
         FileUtil.readInputs(carPath, roadPath, crossPath);
-        GlobalSolver.invokeSolver();
-        MapSimulator.term = DelayTerm;
-        MapSimulator.runMapWithCarFlow();
-//    	MapSimulator.runMapWithCarFlowWithView();
-    	FileUtil.outputAnswer(answerPath);
+        
+        FloydUtil.initPathAndDistMatrixMap();
+        SolverWithFlow.initCarClusters();
+        JudgeWithFlow judgeWithFlow = new JudgeWithFlow(DelayTerm);
+        judgeWithFlow.runWithoutView();
+        
+//    	FileUtil.outputAnswer(answerPath);
     	Date end_time = new Date();
         long timeDiff = end_time.getTime() - start_time.getTime();
         long count = 0;
         for(Car car : cars.values()) {
         	count += car.getRealEndTime()-car.getStartTime();
         }
-        logger.info(arg + ":   " + (MapSimulator.term-MapSimulator.realStartTerm) + ",   " + count + ",   "+ timeDiff);
+        logger.info(arg + ":   " + (judgeWithFlow.getTerm()-judgeWithFlow.getRealStartTerm()) + ",   " + count + ",   "+ timeDiff);
 	}
 	
 	private static void testAnswer(String arg) {
@@ -139,14 +110,14 @@ public class MapUtil {
         String answerPath = args[3];
 		FileUtil.readInputs(carPath, roadPath, crossPath);
 		FileUtil.inputAnswer(answerPath);
-        MapSimulator.term = DelayTerm;
+		Judge judge = new Judge(DelayTerm);
 //        Date test_start_time = new Date();
-        MapSimulator.runMapWithOutView();
+		judge.runWithoutView();
 //        MapSimulator.runMapWithView();
 //        Date test_end_time = new Date();
 //        long timeDiff = test_end_time.getTime() - test_start_time.getTime();
 //        logger.info("Take time " + timeDiff);
-        logger.info("Dispatcher time: " + (MapSimulator.term-MapSimulator.realStartTerm));
+        logger.info("Dispatcher time: " + (judge.getTerm()-judge.getRealStartTerm()));
         long count = 0;
         for(Car car : cars.values()) {
         	count += car.getRealEndTime()-car.getStartTime();
@@ -156,17 +127,14 @@ public class MapUtil {
 		
 		
 	public static void main(String[] args) {
-//		for(LoadParameter=0.1;LoadParameter<=2; LoadParameter += 0.1) {
-		
-			logger.info(NowStartOffCarsAdd+","+LoadParameter+","+RoadMaxLoad+","+RoadListMaxIncrease+","+MaxFailCount+","+MaxCarFlowFinishCount);
-			clear();
-			runFile("inputs/1-map-exam-1/");
-			clear();
-			runFile("inputs/1-map-exam-2/");
-//		}
+		logger.info(NowStartOffCarsAdd+","+LoadParameter+","+RoadMaxLoad+","+RoadListMaxIncrease+","+MaxFailCount+","+MaxCarFlowFinishCount);
 //		clear();
-//		testAnswer("inputs/1-map-exam-1/");
+//		runFile("maps/1-map-exam-1/");
 //		clear();
-//		testAnswer("inputs/1-map-exam-2/");
+//		runFile("maps/1-map-exam-2/");
+//		clear();
+//		testAnswer("maps/1-map-exam-1/");
+//		clear();
+//		testAnswer("maps/1-map-exam-2/");
     }
 }

@@ -5,9 +5,10 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import com.huawei.service.GlobalSolver;
-import com.huawei.service.MapSimulator;
+import com.huawei.service.SolverWithFlow;
+import com.huawei.service.JudgeWithFlow;
 import com.huawei.util.FileUtil;
+import com.huawei.util.FloydUtil;
 import com.huawei.util.MapUtil;
 
 public class Main {
@@ -37,14 +38,12 @@ public class Main {
         logger.info("start read input files");
         FileUtil.readInputs(carPath, roadPath, crossPath);
         
-    	GlobalSolver.invokeSolver();
-    	MapSimulator.term = MapUtil.DelayTerm;
-    	MapSimulator.runMapWithCarFlow();
-//    	MapSimulator.runMapWithCarFlowWithView();
-//    	MapSimulator.runMapWithView();
-//    	MapSimulator.runMapWithOutView();
+        FloydUtil.initPathAndDistMatrixMap();
+        SolverWithFlow.initCarClusters();
+        JudgeWithFlow judgeWithFlow = new JudgeWithFlow(MapUtil.DelayTerm);
+        judgeWithFlow.runWithoutView();
     	
-    	logger.info("End in term " + MapSimulator.term);
+    	logger.info("End in term " + judgeWithFlow.getTerm());
         // TODO: write answer.txt
         logger.info("Start write output file");
         FileUtil.outputAnswer(answerPath);

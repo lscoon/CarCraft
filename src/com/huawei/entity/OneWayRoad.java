@@ -3,13 +3,8 @@ package com.huawei.entity;
 import org.apache.log4j.Logger;
 
 import com.huawei.entity.Car.Direction;
-import com.huawei.service.MapSimulator;
 import com.huawei.util.MapUtil;
 
-/**
- * @author sc
- *
- */
 public class OneWayRoad {
 	
 	private static final Logger logger = Logger.getLogger(OneWayRoad.class);
@@ -94,124 +89,8 @@ public class OneWayRoad {
 			return countNum(input/10) + 1;
 	}
 	
-	protected int updateRunnableCars() {
-		int count =0;
-		for(int i=0; i<lanesNum; i++)
-			count += updateLaneRunnableCars(i);
-		return count;
-	}
-	
-	// only consider and update cars that will not pass the cross
-	private int updateLaneRunnableCars(int i) {
-		int count = 0;
-		if(carNum==0)
-			 return count;
-		
-		for(int j=len-1;j>=0;j--) {
-			Car car = status[i][j];
-			if(car == null || !car.isWaited())
-				continue;
-			int s1 = len-1-j;
-			car.computeNowAndNextDistance(s1);
-			int k=j+1;
-			for(; k<=j+car.getNowDistance(); k++)
-				if(status[i][k]!=null) {
-					Car aheadCar = status[i][k];
-					
-					// aheadCar is updated will update nowCar, otherwise not consider
-					if(!aheadCar.isWaited()) {
-						// forward k-j-1 step
-						car.stepForward();
-						if(k!=j+1) {
-							status[i][k-1] = status[i][j];
-							status[i][j]=null;
-						}
-						count++;
-					}
-					break;
-				}
-			
-			// no ahead car
-			if(k==j+car.getNowDistance()+1) {
-//				if(car.getNextDistance()==-1) {
-//					car.arrive();
-//					carNum--;
-//					status[i][j]=null;
-//					count++;
-//				}
-//				else 
-//				next distance = -1/-2 will not consider
-				if(car.getNextDistance()==0) {
-					car.stepForward();
-					if(k!=j+1) {
-						status[i][k-1] = status[i][j];
-						status[i][j]=null;
-					}
-					count++;
-				}
-			}
-		}
-		return count;
-	}
-	
-	protected int updateWaitedCars(Cross cross, Direction[] directions) {
-		int count = 0;
-		while(firstCarDirection!=Direction.unknown) {
-//			if(MapSimulator.term==14 && road.getRoadId()==5066)
-//				System.out.println("11");
-			Car car = status[firstCarLocation[0]][firstCarLocation[1]];
-			boolean jammedTag = false;
-			switch(firstCarDirection) {
-				case direct: break;
-				case right: 
-					if(directions[0]==Direction.direct || directions[1]==Direction.left)
-						jammedTag = true;
-					break;
-				case left:
-					if(directions[2]==Direction.direct)
-						jammedTag = true;
-					break;
-				default: break;
-			}
-			// jammed means car could not pass the cross because of other roads' directs
-			if(jammedTag)
-				return count;
-			int flag = car.updateCarWhilePassCross(cross);
-			// >=0 could step in
-			// -1 waited ahead car
-			// -2 no enough space or no enough speed
-			// -3 arrive
-			if(flag == -1)
-				return count;
-			else if(flag == -2) {
-				if(firstCarLocation[1] != len-1) {
-					status[firstCarLocation[0]][len-1] = status[firstCarLocation[0]][firstCarLocation[1]];
-					status[firstCarLocation[0]][firstCarLocation[1]] = null;
-				}
-				count++;
-				count += updateLaneRunnableCars(firstCarLocation[0]);
-				updateRoadDirection();
-			}
-			else if(flag == -3) {
-				carNum--;
-				status[firstCarLocation[0]][firstCarLocation[1]] = null;
-				count++;
-				count += updateLaneRunnableCars(firstCarLocation[0]);
-				updateRoadDirection();
-			}
-			else{
-				status[firstCarLocation[0]][firstCarLocation[1]] = null;
-				carNum--;
-				count++;
-				count += updateLaneRunnableCars(firstCarLocation[0]);
-				updateRoadDirection();
-			}
-		}
-		return count;
-	}
-	
 	// pass cross order, means z
-	protected void updateRoadDirection() {
+	public void updateRoadDirection() {
 		if(carNum==0) {
 			firstCarLocation[0] = 0;
 			firstCarLocation[1] = len-1;
@@ -259,19 +138,6 @@ public class OneWayRoad {
 		return -2;
 	}
 	
-	protected void updateRoadWhilePassCross(Car car, int lanenum) {
-		for(int j=0; j<car.getNextDistance(); j++)
-			if(status[lanenum][j]!=null) {
-				if(j==0 || status[lanenum][j].isWaited())
-					logger.error("invalid car "+car.getCarId()+" in road ");
-				status[lanenum][j-1] = car;
-				carNum++;
-				return;
-			}
-		status[lanenum][car.getNextDistance()-1] = car;
-		carNum++;
-	}
-	
 	protected int getBlankNum(int speed) {
 		int count = 0;
 		for(int i=0; i<lanesNum; i++) {
@@ -293,7 +159,7 @@ public class OneWayRoad {
 		return false;
 	}
 	
-	protected Direction getFirstCarDirection() {
+	public Direction getFirstCarDirection() {
 		return firstCarDirection;
 	}
 
@@ -301,11 +167,11 @@ public class OneWayRoad {
 		return (int) carNum;
 	}
 	
-	protected int getLanesNum() {
+	public int getLanesNum() {
 		return lanesNum;
 	}
 	
-	protected int getLength() {
+	public int getLength() {
 		return len;
 	}
 
@@ -316,4 +182,65 @@ public class OneWayRoad {
 	public void changeLoad(int change) {
 		this.load += change;
 	}
+
+	public int getLen() {
+		return len;
+	}
+
+	public void setLen(int len) {
+		this.len = len;
+	}
+
+	public Road getRoad() {
+		return road;
+	}
+
+	public void setRoad(Road road) {
+		this.road = road;
+	}
+
+	public Car[][] getStatus() {
+		return status;
+	}
+	
+	public Car getStatus(int i, int j) {
+		return status[i][j];
+	}
+	
+	public void setStatus(Car[][] status) {
+		this.status = status;
+	}
+	
+	public void setStatus(Car newCar, int i, int j) {
+		status[i][j] = newCar; 
+	}
+
+	public int[] getFirstCarLocation() {
+		return firstCarLocation;
+	}
+
+	public void setFirstCarLocation(int[] firstCarLocation) {
+		this.firstCarLocation = firstCarLocation;
+	}
+
+	public Car getFirstCar() {
+		return status[firstCarLocation[0]][firstCarLocation[1]];
+	}
+	
+	public void setLanesNum(int lanesNum) {
+		this.lanesNum = lanesNum;
+	}
+
+	public void setCarNum(int carNum) {
+		this.carNum = carNum;
+	}
+
+	public void setFirstCarDirection(Direction firstCarDirection) {
+		this.firstCarDirection = firstCarDirection;
+	}
+
+	public void setLoad(int load) {
+		this.load = load;
+	}
+	
 }

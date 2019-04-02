@@ -2,11 +2,10 @@ package com.huawei.entity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import org.apache.log4j.Logger;
 
-import com.huawei.service.MapSimulator;
+import com.huawei.service.JudgeWithFlow;
 import com.huawei.util.MapUtil;
 
 public class CarFlow {
@@ -17,59 +16,68 @@ public class CarFlow {
 	private int destination;
 	private List<Road> roadList;
 
-	private int minTerm = 0;
+	private int minTerm = MapUtil.IntMax;
 	private int maxSpeed = 0;
 	private boolean isRunning = false;
 	private boolean isFinished = false;
-
-	private int totalCarCount = 0;
+	
 //	 should be sorted by speed from max to min
-	private ArrayList<Car> outRoadCars = new ArrayList<>();
-	private ArrayList<Car> runCars = new ArrayList<>();
+	private int totalCarCount = 0;
+	private ArrayList<Car> outRoadCars;
+	private ArrayList<Car> runCars;
 
 	public CarFlow() {
+		origin = 0;
+		destination = 0;
 		roadList = null;
+		minTerm = MapUtil.IntMax;
+		maxSpeed = 0;
+		isRunning = false;
+		isFinished = false;
+		totalCarCount = 0;
+		outRoadCars = new ArrayList<>();
+		runCars = new ArrayList<>();
 	}
 	
-	public CarFlow(List<Road> newRoadList, CarFlow lastCarFlow) {
-		origin = lastCarFlow.getOrigin();
-		destination = lastCarFlow.getDestination();
-		roadList = newRoadList;
-		totalCarCount = outRoadCars.size();
-		outRoadCars = lastCarFlow.getOutRoadCars();
+	public CarFlow(Car car) {
+		origin = car.getOrigin();
+		destination = car.getDestination();
+		roadList = null;
+		minTerm = MapUtil.IntMax;
+		maxSpeed = 0;
+		isRunning = false;
+		isFinished = false;
+		totalCarCount = 0;
+		outRoadCars = new ArrayList<>();
+		runCars = new ArrayList<>();
+		addCar(car);
 	}
 	
 	public CarFlow(List<Road> newRoadList, CarFlow lastCarFlow, int num) {
 		origin = lastCarFlow.getOrigin();
 		destination = lastCarFlow.getDestination();
 		roadList = newRoadList;
-		
-		minTerm = MapSimulator.term;
+		minTerm = MapUtil.IntMax;
 		maxSpeed = 0;
+		isRunning = false;
+		isFinished = false;
+		totalCarCount = 0;
+		outRoadCars = new ArrayList<>();
+		runCars = new ArrayList<>();
 		
 		for(int i=lastCarFlow.outRoadCars.size()-num; i<lastCarFlow.outRoadCars.size(); i++) {
 			Car car = lastCarFlow.getOutRoadCars().get(i);
-			outRoadCars.add(car);
-			if(car.getMaxSpeed()>maxSpeed)
-				maxSpeed = car.getMaxSpeed();
-			if(car.getRealStartTime()<minTerm)
-				minTerm = car.getRealStartTime();
-		}
-		totalCarCount = outRoadCars.size();
-	}
-	
-	public void refreshOutRoadCarCarFlows() {
-		for(Car car : outRoadCars) {
-			car.setCarFlow(this);
+			addCar(car);
 		}
 	}
 	
-	public void split(int num) {
-//		updateLoad(-num);
+	public CarFlow split(List<Road> newRoadList, int num) {
+		CarFlow newCarFlow = new CarFlow(newRoadList, this, num);
 		while(num > 0) {
 			outRoadCars.remove(outRoadCars.get(outRoadCars.size()-1));
 			num--;
 		}
+		return newCarFlow;
 	}
 	
 	public void startoff() {
@@ -82,18 +90,13 @@ public class CarFlow {
 			car.setNextRoad(list.get(0));
 		}
 	}
-
-	public void newStartoff(List<Road> newRoadList) {
-		roadList = newRoadList;
-		startoff();
-	}
 	
 	public void updateLoad(int change) {
 		roadList.get(0).changeLoad(origin, change);
 		for(int i=1; i<roadList.size(); i++)
 			roadList.get(i).changeLoad(roadList.get(i-1), change);
 	}
-
+	
 	public boolean isLoadFree() {
 		if(outRoadCars.size() + roadList.get(0).getLoad(origin) 
 				> MapUtil.RoadMaxLoad * roadList.get(0).getLanesNum())
@@ -105,7 +108,7 @@ public class CarFlow {
 		return true;
 	}
 	
-	public ArrayList<Car> getNowStartOffCars() {
+	public ArrayList<Car> getNowStartOffCars(JudgeWithFlow judgeWithFlow) {
 		ArrayList<Car> startOffCarList = new ArrayList<>();
 		if(outRoadCars.size()==0)
 			return startOffCarList;
@@ -118,7 +121,7 @@ public class CarFlow {
 		for(int i=0; i<outRoadCars.size(); i++) {
 			Car car = outRoadCars.get(i);
 			if(car != null) {
-				if (car.getRealStartTime() <= MapSimulator.term) {
+				if (car.getRealStartTime() <= judgeWithFlow.getTerm()) {
 					startOffCarList.add(car);
 					outRoadCars.set(i, null);
 					blankNum--;
@@ -138,7 +141,7 @@ public class CarFlow {
 		for(Car car:startOffCarList) {
 			if(car.isRunning())
 				logger.error("start off running cars");;
-			car.setRealStartTime(MapSimulator.term);
+			car.setRealStartTime(judgeWithFlow.getTerm());
 		}
 		runCars.addAll(startOffCarList);
 		return startOffCarList;
@@ -152,7 +155,6 @@ public class CarFlow {
 	 * @return: void
 	 */
 	public void putback(Car car) {
-//		car.setRealStartTime(car.getRealStartTime()+1);
 		for(int i=0; i<outRoadCars.size(); i++)
 			if(outRoadCars.get(i)==null) {
 				outRoadCars.set(i, car);
@@ -189,11 +191,16 @@ public class CarFlow {
 
 	public void addCar(Car car) {
 		outRoadCars.add(car);
-		totalCarCount = outRoadCars.size();
+		totalCarCount++;
 		if(totalCarCount > MapUtil.CarFlowMaxCarCount)
 			MapUtil.CarFlowMaxCarCount = totalCarCount;
+		if(maxSpeed < car.getMaxSpeed())
+			maxSpeed = car.getMaxSpeed();
+		if(minTerm > car.getStartTime())
+			minTerm = car.getStartTime();
+		car.setCarFlow(this);
 	}
-
+	
 	public int getDestination() {
 		return destination;
 	}
@@ -250,12 +257,12 @@ public class CarFlow {
 		return outRoadCars;
 	}
 
-	public void setOutRoadCars(ArrayList<Car> outRoadCars) {
-		this.outRoadCars = outRoadCars;
-		totalCarCount = outRoadCars.size();
-		if(totalCarCount > MapUtil.CarFlowMaxCarCount)
-			MapUtil.CarFlowMaxCarCount = totalCarCount;
-	}
+//	public void setOutRoadCars(ArrayList<Car> outRoadCars) {
+//		this.outRoadCars = outRoadCars;
+//		totalCarCount = outRoadCars.size();
+//		if(totalCarCount > MapUtil.CarFlowMaxCarCount)
+//			MapUtil.CarFlowMaxCarCount = totalCarCount;
+//	}
 
 	public ArrayList<Car> getRunCars() {
 		return runCars;

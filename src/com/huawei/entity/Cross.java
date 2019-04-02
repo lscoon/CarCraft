@@ -80,30 +80,7 @@ public class Cross{
 		return -1;
 	}
 	
-	public int updateCross() {
-		initFirstCarDirection();
-		int count=0;
-//		int num=0;
-//		int sum=0;
-//		do {
-//			count = 0;
-//			num++;
-			for(int i=0; i<4; i++) {
-				if(sequenceRoadIds[i]==-1)
-					break;
-				Road road = roads.get(sequenceRoadIds[i]);
-				if(road.getOrigin().getCrossId()==crossId && !road.isBiDirect())
-					continue;
-				count += road.updateWaitedCars(this);
-			}
-			return count;
-//			sum += count;
-			//logger.info("step2: cross " + crossId + ", " + count + " cars passed in iterator " + num);
-//		} while(count!=0);
-//		return sum;
-	}
-	
-	private void initFirstCarDirection() {
+	public void initFirstCarDirection() {
 		for(int i=0; i<4; i++)
 			if(roads.get(i)!=null) {
 				Road road = roads.get(i);
@@ -141,5 +118,26 @@ public class Cross{
 	public void setRotationStatus(int rotation) {
 		this.rotationStatus = rotation;
 	}
+
+	public int[] getSequenceRoadIds() {
+		return sequenceRoadIds;
+	}
+
+	public void setSequenceRoadIds(int[] sequenceRoadIds) {
+		this.sequenceRoadIds = sequenceRoadIds;
+	}
+
+	public void setCrossId(int crossId) {
+		this.crossId = crossId;
+	}
+
+	public void setRoadIds(int[] roadIds) {
+		this.roadIds = roadIds;
+	}
+
+	public void setRoads(List<Road> roads) {
+		this.roads = roads;
+	}
+	
 	
 }

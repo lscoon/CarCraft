@@ -14,8 +14,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 
-import com.huawei.service.MapSimulator;
-import com.huawei.service.MapUpdate;
+import com.huawei.service.Judge;
 import com.huawei.util.MapUtil;
 
 public class ControlPanel extends JPanel{
@@ -53,7 +52,7 @@ public class ControlPanel extends JPanel{
 	protected JScrollPane roadView0 = null;
 	protected JScrollPane roadView1 = null;
 	
-	public ControlPanel(MapPanel pMap) {
+	public ControlPanel(Judge judge, MapPanel pMap) {
 		super(new BorderLayout());
 
 		add(pTop, BorderLayout.NORTH);
@@ -73,25 +72,24 @@ public class ControlPanel extends JPanel{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(MapSimulator.finishCars.size()!=MapUtil.cars.size()) {
+				if(judge.getFinishCars().size()!=MapUtil.cars.size()) {
 					Thread t = new Thread(new Runnable(){  
 			            public void run(){
 			            	btMapRefresh.setEnabled(false);
-//			            	MapUpdate.updateMap();
-			            	MapSimulator.updateMapWithCarFlow();
-			            	MapSimulator.term++;
+			            	judge.runInOneTerm();
+			            	judge.setTerm(judge.getTerm()+1);
 			            	
 			            	carInfo.setText(MapUtil.cars.get(carBox.getSelectedItem()).info());
 			            	roadText0.setText(MapUtil.roads.get(roadBox.getSelectedItem()).showStatus());
 			            	roadText1.setText(MapUtil.roads.get(roadBoxTwo.getSelectedItem()).showStatus());
-							btMapRefresh.setText(Integer.toString(MapSimulator.term-1));
+							btMapRefresh.setText(Integer.toString(judge.getTerm()-1));
 							pMap.repaint();
 							btMapRefresh.setEnabled(true);
 			            }
 					});
 			        t.start();  
 				}
-				else btMapRefresh.setText("End " + (MapSimulator.term-1));
+				else btMapRefresh.setText("End " + (judge.getTerm()-1));
 			}
 			
 		});

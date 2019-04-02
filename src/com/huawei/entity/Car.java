@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.huawei.service.MapSimulator;
-import com.huawei.service.MapUpdate;
 import com.huawei.util.MapUtil;
 
 public class Car {
@@ -74,79 +72,28 @@ public class Car {
 		return info;
 	}
 	
-	public boolean startOff() {
-		nextDistance = Math.min(maxSpeed, nextRoad.getLimitSpeed());
-		
-		if(updateCarWhilePassCross(MapUtil.crosses.get(origin)) >= 0) {
-			//logger.info("car " + carId + " start off in Time " + MapSimulator.term);
-			isRunning = true;
-			realStartTime = MapSimulator.term;
-			MapSimulator.outRoadCars.remove(this);
-			MapSimulator.nowRunCars.add(this);
-			return true;
+	public void computeDirection() {
+		if(nextRoad == null) {
+			direction =  Direction.direct;
+			return;
 		}
-		realStartTime++;
-		return false;
-	}
-	
-	protected void arrive() {
-		if(roadList.size()==1)
-			nowRoad.changeLoad(origin, -1);
-		else nowRoad.changeLoad(roadList.get(roadList.indexOf(nowRoad)-1), -1);
-		realEndTime = MapSimulator.term;
-		nowRoad = null;
-		nextRoad = null;
-		isRunning = false;
-		isWaited = false;
-		if(carFlow!=null)
-			carFlow.getRunCars().remove(this);
-		MapSimulator.nowRunCars.remove(this);
-		MapSimulator.finishCars.add(this);
-		MapUpdate.nowWaitedCars.remove(this);
-		MapUpdate.stepFinishCount++;
-	}
-	
-	protected void stepForward() {
-		isWaited = false;
-		MapUpdate.nowWaitedCars.remove(this);
-	}
-	
-	private void stepPassCross() {
-		if(nowRoad != null) {
-			if(roadList.indexOf(nowRoad)==0)
-				nowRoad.changeLoad(origin, -1);
-			else nowRoad.changeLoad(roadList.get(roadList.indexOf(nowRoad)-1), -1);
-		}
-		nowRoad = nextRoad;
-		int index = roadList.indexOf(nowRoad);
-		if(index == roadList.size()-1)
-			nextRoad = null;
-		else nextRoad = roadList.get(index+1);
-		direction = computeDirection();
-		isWaited = false;
-		MapUpdate.nowWaitedCars.remove(this);
-	}
-	
-	private Direction computeDirection() {
-		if(nextRoad == null)
-			return Direction.direct;
 		Cross cross = null;
 		if(nowRoad.getOrigin().getRoads().contains(nextRoad))
 			cross = nowRoad.getOrigin();
 		else cross = nowRoad.getDestination();
 		switch((cross.getRoads().indexOf(nowRoad)-
 				cross.getRoads().indexOf(nextRoad)+4)%4) {
-			case 1: return Direction.right;
-			case 2: return Direction.direct;
-			case 3: return Direction.left;
+			case 1: direction = Direction.right;return;
+			case 2: direction = Direction.direct;return;
+			case 3: direction = Direction.left;return;
 			default: logger.error("something error while computing directions");
 		}
-		return Direction.unknown;
+		direction =  Direction.unknown;
 	}
 	
 	// -1 means destination
 	// -2 means could not arrive because of speed limit speed
-	protected void computeNowAndNextDistance(int s1) {
+	public void computeNowAndNextDistance(int s1) {
 		int nowSpeed = Math.min(maxSpeed, nowRoad.getLimitSpeed());
 		if(nowSpeed <= s1) {
 			nowDistance = nowSpeed;
@@ -161,37 +108,6 @@ public class Car {
 			if(s1 >= nextSpeed)
 				nextDistance = -2;
 			else nextDistance = nextSpeed-s1;
-		}
-	}
-	
-	
-	// >=0 could step in
-	// -1 waited ahead car
-	// -2 no enough space
-	// -3 arrive
-	// from nowRoad to nextRoad
-	protected int updateCarWhilePassCross(Cross cross) {
-		if(nextRoad==null) {
-//			logger.error("next road " + nextRoad.getRoadId() + " not exists");
-			arrive();
-			return -3;
-		}
-		else if(nextDistance == -2) {
-			stepForward();
-			return -2;
-		}
-		else {
-			int laneNum = nextRoad.getInRoadLaneNum(cross, nextDistance);
-			
-			// could pass the cross
-			if(laneNum >= 0){
-				nextRoad.updateRoadWhilePassCross(cross, this, laneNum);
-				stepPassCross();
-			}
-			// will not pass the cross because no enough space
-			else if(laneNum == -2)
-				stepForward();
-			return laneNum;
 		}
 	}
 	
@@ -292,16 +208,10 @@ public class Car {
 		this.isRunning = isRunning;
 	}
 
-	/**
-	 * @return the carFlow
-	 */
 	public CarFlow getCarFlow() {
 		return carFlow;
 	}
 
-	/**
-	 * @param carFlow the carFlow to set
-	 */
 	public void setCarFlow(CarFlow carFlow) {
 		this.carFlow = carFlow;
 	}
