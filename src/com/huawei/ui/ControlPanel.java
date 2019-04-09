@@ -5,6 +5,9 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -29,7 +32,7 @@ public class ControlPanel extends JPanel{
 	private static final int RoadViewY = 160;
 	
 	private static final String CarInfo = "car \ncarId: \norigin: \ndestin: \nmaxSpd: \n"
-			+ "stTime: \nrealStT: \nnowRoad: \nnextRoad:";
+			+ "stTime: \nrealStT: \nisPreset: \nisPri: \nnowRoad: \nnextRoad:";
 	private static final String CrossInfo = "cross \ncrossId: \nroad0Id: \n"
 			+ "road1Id: \nroad2Id: \nroad3Id: ";
 	private static final String RoadInfo = "road \nroadId: \nlimitSpeed: \n"
@@ -77,7 +80,6 @@ public class ControlPanel extends JPanel{
 			            public void run(){
 			            	btMapRefresh.setEnabled(false);
 			            	judge.runInOneTerm();
-			            	judge.setTerm(judge.getTerm()+1);
 			            	
 			            	carInfo.setText(MapUtil.cars.get(carBox.getSelectedItem()).info());
 			            	roadText0.setText(MapUtil.roads.get(roadBox.getSelectedItem()).showStatus());
@@ -182,9 +184,14 @@ public class ControlPanel extends JPanel{
 		roadView1.setPreferredSize(new Dimension(RoadViewX, RoadViewY));
 		roadText1.setEditable(false);
 		
+		List<Integer> roadList = new LinkedList<>();
 		for(int i : MapUtil.roads.keySet()) {
-			roadBox.addItem(i);
-			roadBoxTwo.addItem(i);
+			roadList.add(i);
+		}
+		Collections.sort(roadList);
+		for(int item: roadList) {
+			roadBox.addItem(item);
+			roadBoxTwo.addItem(item);
 		}
 		
 		roadBox.addActionListener(

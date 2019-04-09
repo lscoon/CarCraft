@@ -14,7 +14,7 @@ public class FloydUtil {
 	public static void initPathAndDistMatrixMap() {
 		pathMap = new LinkedHashMap<>();
 		distMap = new LinkedHashMap<>();
-		for(int i=MapUtil.CarMinSpeed; i<=MapUtil.CarMaxSpeed; i++)
+		for(int i=MapUtil.AllCarMinSpeed; i<=MapUtil.AllCarMaxSpeed; i++)
 			floyd(i);
 	}
 	

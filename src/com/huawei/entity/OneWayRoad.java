@@ -97,6 +97,23 @@ public class OneWayRoad {
 			firstCarDirection = Direction.unknown;
 			return;
 		}
+		
+		for(int j=len-1; j>=0; j--)
+			for(int i=0; i<lanesNum; i++) {
+				if(status[i][j]!=null && status[i][j].isWaited() && status[i][j].isPriority()) {
+					int k=j+1;
+					for(; k<len; k++)
+						if(status[i][k]!=null && status[i][k].isWaited())
+							break;
+					if(k==len) {
+						firstCarDirection = status[i][j].getDirection();
+						firstCarLocation[0] = i;
+						firstCarLocation[1] = j;
+						return;
+					}
+				}
+			}
+		
 		for(int j=len-1; j>=0; j--)
 			for(int i=0; i<lanesNum; i++) {
 				if(status[i][j]!=null && status[i][j].isWaited()) {

@@ -23,26 +23,30 @@ public class FileUtil {
 	private static String carFile = "";
 	private static String roadFile = "";
 	private static String crossFile = "";
+	private static String presetAnswerFile = "";
 	private static String answerFile = "";
 
 	public static String[] initFiles(String filePath) {
-		String[] temp = new String[4];
+		String[] temp = new String[5];
 		temp[0] = filePath + "car.txt";
 		temp[1] = filePath + "road.txt";
 		temp[2] = filePath + "cross.txt";
-		temp[3] = filePath + "answer.txt";
+		temp[3] = filePath + "presetAnswer.txt";
+		temp[4] = filePath + "answer.txt";
 		return temp;
 	}
 
-	public static void readInputs(String carPath, String roadPath, String crossPath) {
+	public static void readInputs(String carPath, String roadPath, String crossPath, String presetAnswerPath) {
 		crossFile = crossPath;
 		roadFile = roadPath;
 		carFile = carPath;
+		presetAnswerFile = presetAnswerPath;
 		inputCross();
 		inputRoad();
 		bindRoadToCross();
 
 		inputCar();
+		inputPresetAnswer();
 	}
 
 	private static void inputCross() {
@@ -167,6 +171,47 @@ public class FileUtil {
 		}
 	}
 
+	private static void inputPresetAnswer() {
+		FileReader reader = null;
+		BufferedReader br = null;
+		try {
+			String line = null;
+			reader = new FileReader(presetAnswerFile);
+			br = new BufferedReader(reader);
+			while ((line = br.readLine()) != null) {
+				if (line.length() == 0 || line.startsWith("#"))
+					continue;
+				line = line.substring(1, line.length() - 1);
+				String[] presetStrings = line.split(",");
+				int carId = Integer.valueOf(presetStrings[0].trim()).intValue();
+				Car car = MapUtil.cars.get(carId);
+				if(car.isPreset())
+					car.preset(presetStrings);
+				else logger.error("this car should not be preseted");
+			}
+			reader.close();
+			br.close();
+		} catch (IOException e) {
+			logger.error("preset input stream problem");
+			e.printStackTrace();
+		} finally {
+			if (null != reader) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			if (null != br) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	public static void inputAnswer(String answerPath) {
 		answerFile = answerPath;
 		FileReader reader = null;
@@ -186,6 +231,7 @@ public class FileUtil {
 				for (int i = 2; i < answerStrings.length; i++)
 					runRoadList.add(MapUtil.roads.get(Integer.valueOf(answerStrings[i].trim()).intValue()));
 				Car car = MapUtil.cars.get(carId);
+				car.setStartTime(realStTime);
 				car.setRealStartTime(realStTime);
 				car.setRoadList(runRoadList);
 			}

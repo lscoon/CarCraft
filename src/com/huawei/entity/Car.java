@@ -1,5 +1,6 @@
 package com.huawei.entity;
 
+import java.lang.Thread.State;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,13 +12,15 @@ public class Car {
 	
 	private static final Logger logger = Logger.getLogger(Car.class);
 	// left right direct no
-	public static enum Direction {right,left,direct,unknown};
+	public static enum Direction {right,left,direct,unknown,priRight,priLeft,priDirect};
 	
 	private int carId;
 	private int origin;
 	private int destination;
 	private int maxSpeed;
 	private int startTime;
+	private boolean isPriority = false;
+	private boolean isPreset = false;
 	
 	private int realStartTime = 0;
 	private int realEndTime = 0;
@@ -34,7 +37,7 @@ public class Car {
 	private boolean isWaited = false;
 	
 	public Car (String[] strs) {
-		if (strs.length != 5) {
+		if (strs.length != 7) {
 			logger.error("car create format error: " + strs);
 			return;
 		}
@@ -43,16 +46,51 @@ public class Car {
 		destination = Integer.valueOf(strs[2].trim()).intValue();
 		maxSpeed = Integer.valueOf(strs[3].trim()).intValue();
 		startTime = Integer.valueOf(strs[4].trim()).intValue();
+		if(Integer.valueOf(strs[5].trim()).intValue()==1)
+			isPriority = true;
+		else isPriority = false;
+		if(Integer.valueOf(strs[6].trim()).intValue()==1)
+			isPreset = true;
+		else isPreset = false;
+			
 		realStartTime = startTime;
 		
 		if(carId/MapUtil.CarIdMaxLength > 0)
 			MapUtil.CarIdMaxLength = MapUtil.CarIdMaxLength*10;
-		if(maxSpeed>MapUtil.CarMaxSpeed)
-			MapUtil.CarMaxSpeed = maxSpeed;
-		if(maxSpeed<MapUtil.CarMinSpeed)
-			MapUtil.CarMinSpeed = maxSpeed;
+		
+		MapUtil.AllCarNum++;
+		if(maxSpeed > MapUtil.AllCarMaxSpeed)
+			MapUtil.AllCarMaxSpeed = maxSpeed;
+		if(maxSpeed < MapUtil.AllCarMinSpeed)
+			MapUtil.AllCarMinSpeed = maxSpeed;
+		if(startTime < MapUtil.AllCarEarliestStartTime)
+			MapUtil.AllCarEarliestStartTime = startTime;
+		if(startTime > MapUtil.AllCarLatestStartTime)
+			MapUtil.AllCarLatestStartTime = startTime;
+		
+		if(isPriority) {
+			MapUtil.PriorityCarNum++;
+			if(maxSpeed > MapUtil.PriorityCarMaxSpeed)
+				MapUtil.PriorityCarMaxSpeed = maxSpeed;
+			if(maxSpeed < MapUtil.PriorityCarMinSpeed)
+				MapUtil.PriorityCarMinSpeed = maxSpeed;
+			if(startTime < MapUtil.PriorityCarEarliestStartTime)
+				MapUtil.PriorityCarEarliestStartTime = startTime;
+			if(startTime > MapUtil.PriorityCarLatestStartTime)
+				MapUtil.PriorityCarLatestStartTime = startTime;
+		}
 	}
 
+	public void preset(String[] strs) {
+		startTime = Integer.valueOf(strs[1].trim()).intValue();
+		realStartTime = startTime;
+		for(int i=2; i<strs.length; i++) {
+			Road road = MapUtil.roads.get(Integer.valueOf(strs[i].trim()).intValue());
+			roadList.add(road);
+		}
+		nextRoad = roadList.get(0);
+	}
+	
 	public String info() {
 		String info = "\n";
 		info = info.concat(carId + "\n");
@@ -61,6 +99,8 @@ public class Car {
 		info = info.concat(maxSpeed + "\n");
 		info = info.concat(startTime + "\n");
 		info = info.concat(realStartTime + "\n");
+		info = info.concat(isPreset + "\n");
+		info = info.concat(isPriority + "\n");
 		if(nowRoad!=null)
 			info = info.concat(nowRoad.getRoadId() + "\n");
 		else info = info.concat("n\n");
@@ -83,9 +123,21 @@ public class Car {
 		else cross = nowRoad.getDestination();
 		switch((cross.getRoads().indexOf(nowRoad)-
 				cross.getRoads().indexOf(nextRoad)+4)%4) {
-			case 1: direction = Direction.right;return;
-			case 2: direction = Direction.direct;return;
-			case 3: direction = Direction.left;return;
+			case 1: 
+				if(isPriority)
+					direction = Direction.priRight;
+				else direction = Direction.right;
+				return;
+			case 2: 
+				if(isPriority)
+					direction = Direction.priDirect;
+				else direction = Direction.direct;
+				return;
+			case 3: 
+				if(isPriority)
+					direction = Direction.priLeft;
+				else direction = Direction.left;
+				return;
 			default: logger.error("something error while computing directions");
 		}
 		direction =  Direction.unknown;
@@ -125,6 +177,10 @@ public class Car {
 
 	public int getMaxSpeed() {
 		return maxSpeed;
+	}
+	
+	public void setStartTime(int startTime) {
+		this.startTime = startTime;
 	}
 	
 	public int getStartTime() {
@@ -214,6 +270,14 @@ public class Car {
 
 	public void setCarFlow(CarFlow carFlow) {
 		this.carFlow = carFlow;
+	}
+
+	public boolean isPriority() {
+		return isPriority;
+	}
+
+	public boolean isPreset() {
+		return isPreset;
 	}
 	
 }

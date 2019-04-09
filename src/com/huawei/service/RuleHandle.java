@@ -1,8 +1,11 @@
 package com.huawei.service;
 
+import java.util.ArrayList;
+
 import org.apache.log4j.Logger;
 
 import com.huawei.entity.Car;
+import com.huawei.entity.CarFlow;
 import com.huawei.entity.Cross;
 import com.huawei.entity.OneWayRoad;
 import com.huawei.entity.Road;
@@ -100,15 +103,33 @@ public class RuleHandle {
 			Car car = oneWayRoad.getFirstCar();
 			boolean jammedTag = false;
 			switch(oneWayRoad.getFirstCarDirection()) {
-				case direct: break;
-				case right: 
-					if(directions[0]==Direction.direct || directions[1]==Direction.left)
+				case priDirect: break;
+				case priLeft:
+					if(directions[2]==Direction.priDirect)
+						jammedTag = true;
+					break;
+				case priRight: 
+					if(directions[0]==Direction.priDirect || directions[1]==Direction.priLeft)
+						jammedTag = true;
+					break;
+				case direct: 
+					if(directions[0]==Direction.priLeft || directions[2]==Direction.priRight)
 						jammedTag = true;
 					break;
 				case left:
-					if(directions[2]==Direction.direct)
+					if(directions[1]==Direction.priRight || 
+						directions[2]==Direction.priDirect ||
+						directions[2]==Direction.direct)
 						jammedTag = true;
 					break;
+				case right: 
+					if(directions[0]==Direction.priDirect ||
+						directions[1]==Direction.priLeft ||
+						directions[0]==Direction.direct || 
+						directions[1]==Direction.left)
+						jammedTag = true;
+					break;
+				
 				default: break;
 			}
 			// jammed means car could not pass the cross because of other roads' directs
@@ -125,6 +146,7 @@ public class RuleHandle {
 				}
 				count++;
 				count += driveCarJustOnLaneToEndState(judge, oneWayRoad, firstCarLocation[0]);
+				drivePriCarInGarage(judge,oneWayRoad.getRoad());
 				oneWayRoad.updateRoadDirection();
 			}
 			else{
@@ -132,6 +154,7 @@ public class RuleHandle {
 				oneWayRoad.setCarNum(oneWayRoad.getCarNum()-1);
 				count++;
 				count += driveCarJustOnLaneToEndState(judge, oneWayRoad, firstCarLocation[0]);
+				drivePriCarInGarage(judge,oneWayRoad.getRoad());
 				oneWayRoad.updateRoadDirection();
 			}
 		}
@@ -152,6 +175,8 @@ public class RuleHandle {
 			return -2;
 		}
 		else {
+			if(car.getNextRoad().getRoadId()==5264)
+				logger.debug("111");
 			int laneNum = car.getNextRoad().getInRoadLaneNum(cross, car.getNextDistance());
 			
 			// could pass the cross
@@ -232,9 +257,13 @@ public class RuleHandle {
 	private static boolean startoffCar(Judge judge, Car car) {
 		car.setNextDistance(Math.min(car.getMaxSpeed(), car.getNextRoad().getLimitSpeed()));
 		if(updateCar(judge, car, MapUtil.crosses.get(car.getOrigin())) >=0 ) {
+			if(judge instanceof JudgeWithFlow && car.isPreset())
+				startoffPresetCar((JudgeWithFlow)judge, car);
 			car.setRunning(true);
 			car.setRealStartTime(judge.getTerm());
-			judge.getOutRoadCars().remove(car);
+			if(car.isPriority())
+				judge.getPriOutRoadCars().remove(car);
+			else judge.getOutRoadCars().remove(car);
 			judge.getNowRunCars().add(car);
 			return true;
 		}
@@ -242,11 +271,59 @@ public class RuleHandle {
 		return false;
 	}
 	
+	private static void startoffPresetCar(JudgeWithFlow judge, Car car) {
+//		if(car.getCarId()==94604)
+//			logger.debug("11");
+		
+		CarFlow presetCarFlow = new CarFlow(car);
+		presetCarFlow.setRunning(true);
+		presetCarFlow.setPreset(true);
+		ArrayList<Road> list = new ArrayList<>();
+		list.addAll(car.getRoadList());
+		presetCarFlow.setRoadList(list);
+		presetCarFlow.updateLoad(1);
+		presetCarFlow.getOutRoadCars().remove(car);
+		presetCarFlow.getRunCars().add(car);
+		judge.addnowRunCarFlows(presetCarFlow);
+	}
+	
 	public static int driveCarInGarage(Judge judge){
 		int count = 0;
 		for (int i = 0; i < judge.getOutRoadCars().size(); i++) {
 			Car car = judge.getOutRoadCars().get(i);
-			if (car.getRealStartTime() <= judge.getTerm()) {
+			if (car.getStartTime() <= judge.getTerm()) {
+				if (startoffCar(judge, car)) {
+					count++;
+					i--;
+				}
+			}
+			else break;
+		}
+		return count;
+	}
+	
+	public static int drivePriCarInGarage(Judge judge) {
+		int count = 0;
+		for (int i = 0; i < judge.getPriOutRoadCars().size(); i++) {
+			Car car = judge.getPriOutRoadCars().get(i);
+			if (car.getStartTime() <= judge.getTerm()) {
+				if (startoffCar(judge, car)) {
+					count++;
+					i--;
+				}
+			}
+			else break;
+		}
+		return count;
+	}
+	
+	public static int drivePriCarInGarage(Judge judge, Road road) {
+		int count = 0;
+		for (int i = 0; i < judge.getPriOutRoadCars().size(); i++) {
+			Car car = judge.getPriOutRoadCars().get(i);
+			if(car.getRoadList().get(0).getRoadId() != road.getRoadId())
+				continue;
+			if (car.getStartTime() <= judge.getTerm()) {
 				if (startoffCar(judge, car)) {
 					count++;
 					i--;

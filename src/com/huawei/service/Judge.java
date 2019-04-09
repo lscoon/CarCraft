@@ -1,9 +1,7 @@
 package com.huawei.service;
 
-import java.sql.Time;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -26,6 +24,7 @@ public class Judge {
 	protected int term = 0;
 	protected int realStartTerm = -1;
 	
+	protected List<Car> priOutRoadCars = new LinkedList<>();
 	protected List<Car> outRoadCars = new LinkedList<>();
 	protected Set<Car> nowRunCars = new HashSet<>();
 	protected Set<Car> finishCars = new HashSet<>();
@@ -50,10 +49,21 @@ public class Judge {
 		finishCars.clear();
 		nowWaitedCars.clear();
 		
-		for (Car i : MapUtil.cars.values())
-			outRoadCars.add(i);
+		for (Car car : MapUtil.cars.values())
+			if(car.isPriority())
+				priOutRoadCars.add(car);
+			else outRoadCars.add(car);
 		
 		Collections.sort(outRoadCars, new Comparator<Car>() {
+			@Override
+			public int compare(Car o1, Car o2) {
+				if(o2.getRealStartTime() == o1.getRealStartTime())
+					return o1.getCarId() - o2.getCarId();
+				return o1.getRealStartTime() - o2.getRealStartTime();
+			}
+		});
+		
+		Collections.sort(priOutRoadCars, new Comparator<Car>() {
 			@Override
 			public int compare(Car o1, Car o2) {
 				if(o2.getRealStartTime() == o1.getRealStartTime())
@@ -74,14 +84,13 @@ public class Judge {
 		init();
 		while (finishCars.size() != MapUtil.cars.size()) {
 			runInOneTerm();
-			term++;
 		}
 		logger.info("end run judge in " + term);
 	}
 	
 	public void runInOneTerm() {
 //		logger.info("start in " + term);
-		if(term % 1000 == 0)
+		if(term % 10 == 0)
 			logger.info("Judge reach " + term);
 		nowWaitedCars.addAll(nowRunCars);
 		for (Car car : nowWaitedCars) {
@@ -98,6 +107,8 @@ public class Judge {
 //		logger.info("end step one: update " + stepOneCount + " cars");
 //		logger.info("leave " + nowWaitedCars.size() + " cars waited");
 		
+		RuleHandle.drivePriCarInGarage(this);
+		
 //		logger.info("start step two");
 		int stepTwoCount = 0;
 		int stepTwoTimes = 0;
@@ -106,11 +117,11 @@ public class Judge {
 			int count = 0;
 			for (int i = 0; i < MapUtil.crossSequence.size(); i++) {
 				Cross cross = MapUtil.crosses.get(MapUtil.crossSequence.get(i));
-				count += RuleHandle.updateCross(this,cross);
+				count += RuleHandle.updateCross(this,cross);	
 			}
+//			logger.info("count:" + count);
 			if(count==0) {
 				findDeadLock();
-				System.exit(term);
 			}
 			stepTwoCount += count;
 			stepTwoTimes++;
@@ -119,12 +130,15 @@ public class Judge {
 //				+ stepTwoTimes + " iterators");
 		
 //		logger.info("start step three");
-		int stepThreeCount = RuleHandle.driveCarInGarage(this);
+		int stepThreeCount = RuleHandle.drivePriCarInGarage(this);
+		stepThreeCount += RuleHandle.driveCarInGarage(this);
 //		logger.info("end step three: start off " + stepThreeCount + " cars");
 		
 		if(nowRunCars.size()!=0)
 			if(realStartTerm == -1)
 				realStartTerm = term;
+		
+		term++;
 	}
 	
 	private void findDeadLock() {
@@ -143,12 +157,21 @@ public class Judge {
 			for(Car car : tempCarSet)
 				temp = temp.concat(car.getCarId()+"\n");
 			MapUtil.mapView.pControl.info.setText(temp);
+			while(true) {}
 		}
-		logger.info("dead lock happen in " + term);
+		else {
+			logger.info("dead lock happen in " + term);
+			System.exit(term);
+		}
+		
 	}
 
 	public List<Car> getOutRoadCars() {
 		return outRoadCars;
+	}
+	
+	public List<Car> getPriOutRoadCars(){
+		return priOutRoadCars;
 	}
 	
 	public Set<Car> getNowWaitedCars() {

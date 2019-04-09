@@ -29,9 +29,24 @@ public class SolverWithFlow {
 	 *               invoked after initCarRoadList();
 	 * @return: save results in variable carFlows
 	 */
+	
+	private static boolean compareRoadList(List<Road> list1, List<Road> list2) {
+		int len1 = list1.size();
+		int len2 = list2.size();
+		if(len1!=len2)
+			return false;
+		for(int i=0; i<len1; i++)
+			if(list1.get(i).getRoadId()!=list2.get(i).getRoadId())
+				return false;
+		return true;
+	}
+	
 	public static void initCarClusters() {
 
 		for (Car car : MapUtil.cars.values()) {
+			if(car.isPreset()) {
+				continue;
+			}
 			for (CarFlow carflow : MapUtil.carFlows) {
 				if (carflow.getOrigin() == car.getOrigin() && carflow.getDestination() == car.getDestination()) {
 					carflow.addCar(car);
@@ -44,7 +59,6 @@ public class SolverWithFlow {
 				MapUtil.carFlows.add(carFlow);
 			}
 		}
-
 		initCarFlowRoadList(0);
 		splitCarFlows();
 		
@@ -53,9 +67,12 @@ public class SolverWithFlow {
 			@Override
 			public int compare(CarFlow o1, CarFlow o2) {
 				// TODO Auto-generated method stub
-				if(o2.getRoadList().size() == o1.getRoadList().size())
-					return o2.getCarFlowSize() - o1.getCarFlowSize();
-				return o2.getRoadList().size() - o1.getRoadList().size();
+//				if(o2.getRoadList().size() == o1.getRoadList().size())
+//					return o2.getCarFlowSize() - o1.getCarFlowSize();
+//				return o2.getRoadList().size() - o1.getRoadList().size();
+				if(o2.getCarFlowSize() == o1.getCarFlowSize())
+					return o2.getRoadList().size() - o1.getRoadList().size();
+				return o2.getCarFlowSize() - o1.getCarFlowSize();
 				
 			}
 		});
@@ -86,7 +103,7 @@ public class SolverWithFlow {
 			CarFlow carflow = MapUtil.carFlows.get(i);
 			while(carflow.getOutRoadCars().size() > MapUtil.ExpectedFlowSize) {
 				List<Road> newRoadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), 
-						carflow.getDestination(), MapUtil.CarMaxSpeed, carflow.getRoadList());
+						carflow.getDestination(), MapUtil.AllCarMaxSpeed, carflow.getRoadList());
 				CarFlow newCarFlow = carflow.split(newRoadList, MapUtil.ExpectedFlowSize);
 				MapUtil.carFlows.add(newCarFlow);
 			}
@@ -99,7 +116,7 @@ public class SolverWithFlow {
 		for (CarFlow carflow : MapUtil.carFlows) {
 			int originSeq = MapUtil.crossSequence.indexOf(carflow.getOrigin());
 			int destinationSeq = MapUtil.crossSequence.indexOf(carflow.getDestination());
-			int speed = MapUtil.CarMaxSpeed;
+			int speed = MapUtil.AllCarMaxSpeed;
 			if(globalOrLocalTag == 1)
 				speed = carflow.getMaxSpeed();
 			Road[][] pathMatrix = FloydUtil.pathMap.get((Integer) speed);

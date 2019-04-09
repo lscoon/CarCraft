@@ -1,6 +1,7 @@
 package com.huawei.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -18,8 +19,8 @@ public class MapFrame extends JFrame{
 
 	private static final Logger logger = Logger.getLogger(MapFrame.class);
 	
-	private static final int ViewX = 800;
-	private static final int ViewY = 660;
+	private static final int ViewX = 1200;
+	private static final int ViewY = 1000;
 	
 	private MapPanel pMap = null;
 	public ControlPanel pControl = null;

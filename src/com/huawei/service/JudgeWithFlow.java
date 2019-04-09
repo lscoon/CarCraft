@@ -20,6 +20,7 @@ public class JudgeWithFlow extends Judge {
 
 	private static int splitFlowTag = -1;
 	private static int carFlowFinishCount = 0;
+	private static List<Car> preSetCars = new ArrayList<>();
 	
 	private static ArrayList<CarFlow> outRoadCarFlows = new ArrayList<>();
 	private static List<CarFlow> nowRunCarFlows = new ArrayList<>();
@@ -40,9 +41,20 @@ public class JudgeWithFlow extends Judge {
 		
 		checkParameters();
 		
+		for(Car car : MapUtil.cars.values())
+			if(car.isPreset())
+				preSetCars.add(car);
+		Collections.sort(preSetCars, new Comparator<Car>() {
+			@Override
+			public int compare(Car o1, Car o2) {
+				if(o2.getRealStartTime() == o1.getRealStartTime())
+					return o1.getCarId() - o2.getCarId();
+				return o1.getRealStartTime() - o2.getRealStartTime();
+			}
+		});
+		
 		for(CarFlow carFlow : MapUtil.carFlows)
 			outRoadCarFlows.add(carFlow);
-		driveCarFlows();
 	}
 	
 	private void checkParameters() {
@@ -64,20 +76,44 @@ public class JudgeWithFlow extends Judge {
 		init();
 		while (finishCars.size() != MapUtil.cars.size()) {
 			runInOneTerm();
-			term++;
 		}
 		logger.info("end run judge with flow in " + term);
 	}
 	
 	@Override
 	public void runInOneTerm() {
+		logger.info("nowRunCarFlowsSize:" + nowRunCarFlows.size() + ",outRoadCarFlowsSize:" + outRoadCarFlows.size());
 		int count = 0;
 		for(CarFlow carFlow : nowRunCarFlows) {
 			ArrayList<Car> list = carFlow.getNowStartOffCars(this);
-			outRoadCars.addAll(list);
+			for(Car car : list)
+				if(car.isPriority())
+					priOutRoadCars.add(car);
+				else outRoadCars.add(car);
 			count += list.size();
 		}
+		
+		for(int i=0; i<preSetCars.size(); i++) {
+			Car car = preSetCars.get(i);
+			if(car.getStartTime() <= term) {
+				if(car.isPriority())
+					priOutRoadCars.add(car);
+				else outRoadCars.add(car);
+				preSetCars.remove(car);
+				i--;
+			}
+			else break;
+		}
 //		logger.info("add " + count + " cars to outRoadCars");
+		
+		Collections.sort(priOutRoadCars, new Comparator<Car>() {
+			@Override
+			public int compare(Car o1, Car o2) {
+				if(o2.getRealStartTime() == o1.getRealStartTime())
+					return o1.getCarId() - o2.getCarId();
+				return o1.getRealStartTime() - o2.getRealStartTime();
+			}
+		});
 		
 		Collections.sort(outRoadCars, new Comparator<Car>() {
 			@Override
@@ -91,15 +127,28 @@ public class JudgeWithFlow extends Judge {
 		super.runInOneTerm();
 		
 //		logger.info("put back " + outRoadCars.size() + " cars");
-		for(Car car : outRoadCars)
-			car.getCarFlow().putback(car);
-		outRoadCars.clear();
+		for(int i=0; i<outRoadCars.size(); i++) {
+			Car car = outRoadCars.get(i);
+			if(!car.isPreset()) {
+				car.getCarFlow().putback(car);
+				outRoadCars.remove(car);
+				i--;
+			}
+		}
+
+		for(int i=0; i<priOutRoadCars.size(); i++) {
+			Car car = priOutRoadCars.get(i);
+			if(!car.isPreset()) {
+				car.getCarFlow().putback(car);
+				priOutRoadCars.remove(car);
+				i--;
+			}
+		}
 		
 		handleFlowDuringRun();
 	}
 	
 	private void handleFlowDuringRun() {
-		term++;
 		if(checkFinishFlow() > 0) {
 			if(splitFlowTag >= MapUtil.SplitFlowThreshhold) {
 //				splitFlow();
@@ -121,7 +170,6 @@ public class JudgeWithFlow extends Judge {
 				splitFlowTag = 0;
 //				splitFlow();
 			}
-		term--;
 	}
 	
 	private int checkFinishFlow() {
@@ -131,7 +179,8 @@ public class JudgeWithFlow extends Judge {
 			if(carflow.checkIfFinished()) {
 				nowRunCarFlows.remove(i);
 				i--;
-				count++;
+//				if(!carflow.isPreset())
+					count++;
 				carFlowFinishCount++;
 				if(splitFlowTag != -1)
 					splitFlowTag++;
@@ -139,8 +188,6 @@ public class JudgeWithFlow extends Judge {
 		}
 		return count;
 	}
-	
-	
 	
 	private void driveCarFlows() {
 		int count = 0;
@@ -156,13 +203,12 @@ public class JudgeWithFlow extends Judge {
 						i--;
 						count++;
 					}
-					else{
-						failCount++;
-					}
+					else failCount++;
+
 				}
-				else {
+				else{
 					List<Road> newRoadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), 
-							carflow.getDestination(), MapUtil.CarMaxSpeed, null);
+							carflow.getDestination(), MapUtil.AllCarMaxSpeed, null);
 					if(newRoadList!=null && newRoadList.size() - carflow.getRoadList().size() <= MapUtil.RoadListMaxIncrease) {
 						List<Road> oldRoadList = carflow.getRoadList();
 						carflow.setRoadList(newRoadList);
@@ -187,8 +233,11 @@ public class JudgeWithFlow extends Judge {
 					break;
 			}
 		}
-		
 //		logger.info("add " + count + " car flows");
+	}
+	
+	public void addnowRunCarFlows(CarFlow carFlow) {
+		nowRunCarFlows.add(carFlow);
 	}
 	
 //	private static void splitFlow() {

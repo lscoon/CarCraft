@@ -25,19 +25,19 @@ public class MapPanel extends JPanel{
 	private static final Logger logger = Logger.getLogger(MapPanel.class);
 	
 	private static final Font crossFont = new Font("SansSerif", Font.BOLD, 12);
-	private static final Font roadFont = new Font("SansSerif", Font.BOLD, 8);
+	private static final Font roadFont = new Font("SansSerif", Font.BOLD, 10);
 	
-	private static final int MapX = 500;
-	private static final int MapY = 500;
+	private static final int MapX = 900;
+	private static final int MapY = 700;
 	
-	private int Distance = 40;
-	private int TranslateX = 50;
-	private int TranslateY = 450;
+	private int Distance = 60;
+	private int TranslateX = 0;
+	private int TranslateY = 800;
 	
 	// key matrix, don't ask me why
 	// x means beginCross roads count, y means endCross roads count
 	private static final int[][] rotationMatrix = {
-			{2,1,0,3},{3,2,1,0},{0,1,2,3},{3,0,1,2}};
+			{2,1,0,3},{3,2,1,0},{0,3,2,1},{1,0,3,2}};
 	
 	private Map<Integer,int[]> crossLocationMap = new HashMap<>();
 	private Set<Integer> paintedRoads = new HashSet<>();
@@ -64,28 +64,21 @@ public class MapPanel extends JPanel{
 				Road road = cross.getRoads().get(i);
 				if(road == null)
 					continue;
-				if(cross.getCrossId()==1803)
-					logger.info("111");
 				int nextCrossId = road.getAnOtherCross(crossId);
 				if(!crossLocationMap.containsKey(nextCrossId)) {
 					
 					Cross nextCross = MapUtil.crosses.get(nextCrossId);
-					nextCross.setRotationStatus((cross.getRotationStatus()
-							+ rotationMatrix[i][nextCross.getRotation(road.getRoadId())])%4);
-//					int temp = 0;
-//					if(i==0 || i==3)
-//						temp=rotationMatrix[(i+2)%4][nextCross.getRotation(road.getRoadId())];
-//					else temp=rotationMatrix[i%4][nextCross.getRotation(road.getRoadId())];
+					nextCross.setRotationStatus(rotationMatrix[(cross.getRotationStatus()+i)%4]
+							[nextCross.getRotation(road.getRoadId())]);
 					crossLocationMap.put(nextCrossId, getNextLocation(
 							crossLocationMap.get(crossId),
-							nextCross.getRotationStatus()+i));
-//							temp));
+							cross.getRotationStatus()+i));
 							
 					queue.add(nextCrossId);
 				}
 			}
 		}
-		logger.info("init bfs");
+//		logger.info("init bfs");
 	};
 	
 	private int[] getNextLocation(int[] location, int rotation) {
@@ -131,10 +124,10 @@ public class MapPanel extends JPanel{
 		List<Road> roads = cross.getRoads();
 		int roSta = cross.getRotationStatus();
 		
-//		paintRoad(g, cross, roads.get((524-roSta)%4), locationX, locationY, locationX, locationY-Distance);
-//		paintRoad(g, cross, roads.get((525-roSta)%4), locationX, locationY, locationX+Distance, locationY);
-//		paintRoad(g, cross, roads.get((526-roSta)%4), locationX, locationY, locationX, locationY+Distance);
-//		paintRoad(g, cross, roads.get((527-roSta)%4), locationX, locationY, locationX-Distance, locationY);
+		paintRoad(g, cross, roads.get((524-roSta)%4), locationX, locationY, locationX, locationY-Distance);
+		paintRoad(g, cross, roads.get((525-roSta)%4), locationX, locationY, locationX+Distance, locationY);
+		paintRoad(g, cross, roads.get((526-roSta)%4), locationX, locationY, locationX, locationY+Distance);
+		paintRoad(g, cross, roads.get((527-roSta)%4), locationX, locationY, locationX-Distance, locationY);
 	}
 	
 	private void paintRoad(Graphics g, Cross cross, Road road, int x_1, int y_1, int x_2, int y_2) {
@@ -145,7 +138,7 @@ public class MapPanel extends JPanel{
 			return;
 		g.drawString(Integer.toString(roadId), (x_1+x_2-30)/2, (y_1+y_2)/2);
 		g.setColor(Color.red);
-//		g.drawString(Integer.toString(road.getCarNum()), (x_1+x_2+20)/2, (y_1+y_2)/2);
+		g.drawString(Integer.toString(road.getCarNum()), (x_1+x_2+20)/2, (y_1+y_2)/2);
 		
 		g.setColor(Color.black);
 		g.drawLine(x_1, y_1, x_2, y_2);

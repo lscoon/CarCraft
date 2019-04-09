@@ -16,9 +16,9 @@ public class Main {
 	private static final Logger logger = Logger.getLogger(Main.class);
     
 	public static void main(String[] args) {
-//		args = FileUtil.initFiles("inputs/1-map-training-1/");
+//		args = FileUtil.initFiles("maps/1-map-training-1/");
 		
-    	if (args.length != 4) {
+		if (args.length != 5) {
             logger.error("please input args: inputFilePath, resultFilePath");
             return;
         }
@@ -28,15 +28,16 @@ public class Main {
     	SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //    	String s_start_time = df.format(start_time);
 
-        String carPath = args[0];
+    	String carPath = args[0];
         String roadPath = args[1];
         String crossPath = args[2];
-        String answerPath = args[3];
-        logger.info("carPath = " + carPath + " roadPath = " + roadPath + " crossPath = " + crossPath + " and answerPath = " + answerPath);
-
+        String presetAnswerPath = args[3];
+        String answerPath = args[4];
+        logger.info("carPath = " + carPath + " roadPath = " + roadPath + " crossPath = " + crossPath + " presetAnswerPath = " + presetAnswerPath + " and answerPath = " + answerPath);
+        
         // TODO:read input files
         logger.info("start read input files");
-        FileUtil.readInputs(carPath, roadPath, crossPath);
+        FileUtil.readInputs(carPath, roadPath, crossPath, presetAnswerPath);
         
         FloydUtil.initPathAndDistMatrixMap();
         SolverWithFlow.initCarClusters();

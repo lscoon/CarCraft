@@ -15,7 +15,8 @@ public class CarFlow {
 	private int origin;
 	private int destination;
 	private List<Road> roadList;
-
+	private boolean isPreset;
+	
 	private int minTerm = MapUtil.IntMax;
 	private int maxSpeed = 0;
 	private boolean isRunning = false;
@@ -30,6 +31,7 @@ public class CarFlow {
 		origin = 0;
 		destination = 0;
 		roadList = null;
+		isPreset = false;
 		minTerm = MapUtil.IntMax;
 		maxSpeed = 0;
 		isRunning = false;
@@ -43,6 +45,7 @@ public class CarFlow {
 		origin = car.getOrigin();
 		destination = car.getDestination();
 		roadList = null;
+		isPreset = false;
 		minTerm = MapUtil.IntMax;
 		maxSpeed = 0;
 		isRunning = false;
@@ -57,6 +60,7 @@ public class CarFlow {
 		origin = lastCarFlow.getOrigin();
 		destination = lastCarFlow.getDestination();
 		roadList = newRoadList;
+		isPreset = false;
 		minTerm = MapUtil.IntMax;
 		maxSpeed = 0;
 		isRunning = false;
@@ -278,5 +282,13 @@ public class CarFlow {
 
 	public void setFinished(boolean isFinished) {
 		this.isFinished = isFinished;
+	}
+
+	public boolean isPreset() {
+		return isPreset;
+	}
+
+	public void setPreset(boolean isPreset) {
+		this.isPreset = isPreset;
 	}
 }
