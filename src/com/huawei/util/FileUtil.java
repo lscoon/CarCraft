@@ -269,6 +269,8 @@ public class FileUtil {
 			Iterator<Map.Entry<Integer, Car>> iterator = MapUtil.cars.entrySet().iterator();
 			while (iterator.hasNext()) {
 				Map.Entry<Integer, Car> entry = iterator.next();
+				if(entry.getValue().isPreset())
+					continue;
 				String content = "(" + entry.getKey();
 				content = content.concat(", " + entry.getValue().getRealStartTime());
 				for (Road road : entry.getValue().getRoadList()) {

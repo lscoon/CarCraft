@@ -90,7 +90,7 @@ public class Judge {
 	
 	public void runInOneTerm() {
 //		logger.info("start in " + term);
-		if(term % 10 == 0)
+		if(term % 500 == 0)
 			logger.info("Judge reach " + term);
 		nowWaitedCars.addAll(nowRunCars);
 		for (Car car : nowWaitedCars) {

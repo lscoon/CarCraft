@@ -47,9 +47,11 @@ public class MapUtil {
 	
 	public static int CarFlowMaxCarCount = 0;
 	
+	public static double PresetParameter = 1;
+	
 	public static int NowStartOffCarsAdd = 1;
 	public static int DelayTerm = 0;
-	public static double LoadParameter = 0.8;
+	public static double LoadParameter = 1;
 	public static int RoadMaxLoad = 250;
 	public static int RoadListMaxIncrease = 2;
 	// when fail this nums, will not try judge overlay
@@ -58,7 +60,7 @@ public class MapUtil {
 	// when finish this nums carflows, will try to add carflows
 	public static int MaxCarFlowFinishCount = 5;
 	
-	public static int ExpectedFlowSize = 230;
+	public static int ExpectedFlowSize = 200;
 	public static int SplitBeginOutRoadCarFlowNum = 20;
 	public static int SplitFlowThreshhold = 10;
 	public static int SelectedFlowNum = 3;
@@ -142,8 +144,8 @@ public class MapUtil {
 		
 		int t_e = (int)(a*t_priority) + t;
 		int t_e_sum = (int)(b*t_priority_sum) + t_sum;
-		logger.info("t_pri: " + t_priority + ", t: " + t);
-		logger.info("t_pri_sum: " + t_priority_sum + ", t_sum: " + t_sum);
+//		logger.info("t_pri: " + t_priority + ", t: " + t);
+//		logger.info("t_pri_sum: " + t_priority_sum + ", t_sum: " + t_sum);
 		logger.info("t_e: " + t_e + ", t_e_sum: " + t_e_sum);
 	}
 	
@@ -174,10 +176,10 @@ public class MapUtil {
         FloydUtil.initPathAndDistMatrixMap();
         SolverWithFlow.initCarClusters();
         JudgeWithFlow judgeWithFlow = new JudgeWithFlow(DelayTerm);
-//        judgeWithFlow.runWithoutView();
-        judgeWithFlow.runWithView();
+        judgeWithFlow.runWithoutView();
+//        judgeWithFlow.runWithView();
         
-//    	FileUtil.outputAnswer(answerPath);
+    	FileUtil.outputAnswer(answerPath);
     	Date end_time = new Date();
         long timeDiff = end_time.getTime() - start_time.getTime();
         logger.info("timeDiff: "+ timeDiff);
@@ -208,11 +210,11 @@ public class MapUtil {
 //		logger.info(NowStartOffCarsAdd+","+LoadParameter+","+RoadMaxLoad+","+RoadListMaxIncrease+","+MaxFailCount+","+MaxCarFlowFinishCount);
 		clear();
 		runFile("maps/2-map-training-1/");
+		clear();
+		runFile("maps/2-map-training-2/");
 //		clear();
-//		runFile("maps/1-map-exam-2/");
+//		testAnswer("maps/2-map-training-1/");
 //		clear();
-//		testAnswer("maps/2-map-training-4/");
-//		clear();
-//		testAnswer("maps/1-map-exam-2/");
+//		testAnswer("maps/2-map-training-2/");
     }
 }

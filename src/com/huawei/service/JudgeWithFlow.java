@@ -21,6 +21,7 @@ public class JudgeWithFlow extends Judge {
 	private static int splitFlowTag = -1;
 	private static int carFlowFinishCount = 0;
 	private static List<Car> preSetCars = new ArrayList<>();
+	private static int preSetCarSize = 0;
 	
 	private static ArrayList<CarFlow> outRoadCarFlows = new ArrayList<>();
 	private static List<CarFlow> nowRunCarFlows = new ArrayList<>();
@@ -44,6 +45,7 @@ public class JudgeWithFlow extends Judge {
 		for(Car car : MapUtil.cars.values())
 			if(car.isPreset())
 				preSetCars.add(car);
+		preSetCarSize = preSetCars.size();
 		Collections.sort(preSetCars, new Comparator<Car>() {
 			@Override
 			public int compare(Car o1, Car o2) {
@@ -82,7 +84,7 @@ public class JudgeWithFlow extends Judge {
 	
 	@Override
 	public void runInOneTerm() {
-		logger.info("nowRunCarFlowsSize:" + nowRunCarFlows.size() + ",outRoadCarFlowsSize:" + outRoadCarFlows.size());
+//		logger.info("nowRunCarFlowsSize:" + nowRunCarFlows.size() + ",outRoadCarFlowsSize:" + outRoadCarFlows.size());
 		int count = 0;
 		for(CarFlow carFlow : nowRunCarFlows) {
 			ArrayList<Car> list = carFlow.getNowStartOffCars(this);
@@ -150,10 +152,12 @@ public class JudgeWithFlow extends Judge {
 	
 	private void handleFlowDuringRun() {
 		if(checkFinishFlow() > 0) {
-			if(splitFlowTag >= MapUtil.SplitFlowThreshhold) {
+			if(preSetCars.size() > preSetCarSize * (1-MapUtil.PresetParameter))
+				return;
+//			if(splitFlowTag >= MapUtil.SplitFlowThreshhold) {
 //				splitFlow();
-				splitFlowTag = 0;
-			}
+//				splitFlowTag = 0;
+//			}
 //			logger.info("finish " + count + " car flows");
 			if(carFlowFinishCount >= MapUtil.MaxCarFlowFinishCount || 
 					outRoadCarFlows.size() < MapUtil.MaxCarFlowFinishCount) {
@@ -162,14 +166,16 @@ public class JudgeWithFlow extends Judge {
 			}	
 		}
 		else if(nowRunCarFlows.size() == 0) {
+			if(preSetCars.size() > preSetCarSize * (1-MapUtil.PresetParameter))
+				return;
 //			logger.info("now no car flow");
 			driveCarFlows();
 		}
-		if(splitFlowTag == -1)
-			if(outRoadCarFlows.size() ==0) {//< MapUtil.SplitBeginOutRoadCarFlowNum) {
-				splitFlowTag = 0;
+//		if(splitFlowTag == -1)
+//			if(outRoadCarFlows.size() ==0) {//< MapUtil.SplitBeginOutRoadCarFlowNum) {
+//				splitFlowTag = 0;
 //				splitFlow();
-			}
+//			}
 	}
 	
 	private int checkFinishFlow() {
