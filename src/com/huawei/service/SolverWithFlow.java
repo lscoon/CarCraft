@@ -5,10 +5,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.atomic.DoubleAdder;
 
 import org.apache.log4j.Logger;
 
@@ -43,8 +45,16 @@ public class SolverWithFlow {
 	
 	public static void initCarClusters() {
 
+		List<CarFlow> presetFlows = new ArrayList<>();
+		
 		for (Car car : MapUtil.cars.values()) {
 			if(car.isPreset()) {
+				CarFlow carFlow = new CarFlow(car);
+				List<Road> newRoadList = new ArrayList<>();
+				for(Road road : car.getRoadList())
+					newRoadList.add(road);
+				carFlow.setRoadList(newRoadList);
+				presetFlows.add(carFlow);
 				continue;
 			}
 			for (CarFlow carflow : MapUtil.carFlows) {
@@ -61,6 +71,7 @@ public class SolverWithFlow {
 		}
 		initCarFlowRoadList(0);
 		splitCarFlows();
+		MapUtil.presetCarflow = mergeSubFlow(presetFlows);
 		
 		Collections.sort(MapUtil.carFlows, new Comparator<CarFlow>() {
 
@@ -217,6 +228,7 @@ public class SolverWithFlow {
 
 		for (int j = 0; j < mainRoad.size(); ++j) {
 			Road road = mainRoad.get(j);
+			
 
 			visitedRoads.clear();
 			for(Road r:MapUtil.roads.values()) {
@@ -308,7 +320,11 @@ public class SolverWithFlow {
 		}
 		return true;
 	}
+
+
 }
+
+
 
 class AccessPoint {
 	public List<Road> roadList = null;

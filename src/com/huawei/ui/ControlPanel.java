@@ -79,8 +79,10 @@ public class ControlPanel extends JPanel{
 					Thread t = new Thread(new Runnable(){  
 			            public void run(){
 			            	btMapRefresh.setEnabled(false);
+			            	if(judge.getTerm()==0)
+			            		for(int i=0;i<770;i++)
+			            			judge.runInOneTerm();
 			            	judge.runInOneTerm();
-			            	
 			            	carInfo.setText(MapUtil.cars.get(carBox.getSelectedItem()).info());
 			            	roadText0.setText(MapUtil.roads.get(roadBox.getSelectedItem()).showStatus());
 			            	roadText1.setText(MapUtil.roads.get(roadBoxTwo.getSelectedItem()).showStatus());

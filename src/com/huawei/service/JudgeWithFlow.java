@@ -20,8 +20,9 @@ public class JudgeWithFlow extends Judge {
 
 	private static int splitFlowTag = -1;
 	private static int carFlowFinishCount = 0;
-	private static List<Car> preSetCars = new ArrayList<>();
-	private static int preSetCarSize = 0;
+//	private static List<Car> preSetCars = new ArrayList<>();
+//	private static int preSetCarSize = 0;
+	private static boolean flag = false;
 	
 	private static ArrayList<CarFlow> outRoadCarFlows = new ArrayList<>();
 	private static List<CarFlow> nowRunCarFlows = new ArrayList<>();
@@ -42,21 +43,25 @@ public class JudgeWithFlow extends Judge {
 		
 		checkParameters();
 		
-		for(Car car : MapUtil.cars.values())
-			if(car.isPreset())
-				preSetCars.add(car);
-		preSetCarSize = preSetCars.size();
-		Collections.sort(preSetCars, new Comparator<Car>() {
-			@Override
-			public int compare(Car o1, Car o2) {
-				if(o2.getRealStartTime() == o1.getRealStartTime())
-					return o1.getCarId() - o2.getCarId();
-				return o1.getRealStartTime() - o2.getRealStartTime();
-			}
-		});
+//		for(Car car : MapUtil.cars.values())
+//			if(car.isPreset())
+//				preSetCars.add(car);
+//		preSetCarSize = preSetCars.size();
+//		Collections.sort(preSetCars, new Comparator<Car>() {
+//			@Override
+//			public int compare(Car o1, Car o2) {
+//				if(o2.getRealStartTime() == o1.getRealStartTime())
+//					return o1.getCarId() - o2.getCarId();
+//				return o1.getRealStartTime() - o2.getRealStartTime();
+//			}
+//		});
 		
 		for(CarFlow carFlow : MapUtil.carFlows)
 			outRoadCarFlows.add(carFlow);
+		for(CarFlow carFlow : MapUtil.presetCarflow) {
+			carFlow.startoff();
+			nowRunCarFlows.add(carFlow);
+		}
 	}
 	
 	private void checkParameters() {
@@ -84,7 +89,15 @@ public class JudgeWithFlow extends Judge {
 	
 	@Override
 	public void runInOneTerm() {
-//		logger.info("nowRunCarFlowsSize:" + nowRunCarFlows.size() + ",outRoadCarFlowsSize:" + outRoadCarFlows.size());
+		if(term > 770) {
+			int count =0;
+			for(CarFlow carFlow :nowRunCarFlows) {
+				if(carFlow.isPreset())
+					count++;
+			}
+			logger.info("Judge reach " + term);
+			logger.info("nowRunCarFlowsSize:" + nowRunCarFlows.size() + ",outRoadCarFlowsSize:" + outRoadCarFlows.size());
+		}
 		int count = 0;
 		for(CarFlow carFlow : nowRunCarFlows) {
 			ArrayList<Car> list = carFlow.getNowStartOffCars(this);
@@ -95,17 +108,17 @@ public class JudgeWithFlow extends Judge {
 			count += list.size();
 		}
 		
-		for(int i=0; i<preSetCars.size(); i++) {
-			Car car = preSetCars.get(i);
-			if(car.getStartTime() <= term) {
-				if(car.isPriority())
-					priOutRoadCars.add(car);
-				else outRoadCars.add(car);
-				preSetCars.remove(car);
-				i--;
-			}
-			else break;
-		}
+//		for(int i=0; i<preSetCars.size(); i++) {
+//			Car car = preSetCars.get(i);
+//			if(car.getStartTime() <= term) {
+//				if(car.isPriority())
+//					priOutRoadCars.add(car);
+//				else outRoadCars.add(car);
+//				preSetCars.remove(car);
+//				i--;
+//			}
+//			else break;
+//		}
 //		logger.info("add " + count + " cars to outRoadCars");
 		
 		Collections.sort(priOutRoadCars, new Comparator<Car>() {
@@ -152,12 +165,14 @@ public class JudgeWithFlow extends Judge {
 	
 	private void handleFlowDuringRun() {
 		if(checkFinishFlow() > 0) {
-			if(preSetCars.size() > preSetCarSize * (1-MapUtil.PresetParameter))
-				return;
+//			if(preSetCars.size() > preSetCarSize * (1-MapUtil.PresetParameter))
+//				return;
 //			if(splitFlowTag >= MapUtil.SplitFlowThreshhold) {
 //				splitFlow();
 //				splitFlowTag = 0;
 //			}
+//			if(nowRunCarFlows.size()>500)
+//				return;
 //			logger.info("finish " + count + " car flows");
 			if(carFlowFinishCount >= MapUtil.MaxCarFlowFinishCount || 
 					outRoadCarFlows.size() < MapUtil.MaxCarFlowFinishCount) {
@@ -166,8 +181,8 @@ public class JudgeWithFlow extends Judge {
 			}	
 		}
 		else if(nowRunCarFlows.size() == 0) {
-			if(preSetCars.size() > preSetCarSize * (1-MapUtil.PresetParameter))
-				return;
+//			if(preSetCars.size() > preSetCarSize * (1-MapUtil.PresetParameter))
+//				return;
 //			logger.info("now no car flow");
 			driveCarFlows();
 		}
@@ -196,6 +211,11 @@ public class JudgeWithFlow extends Judge {
 	}
 	
 	private void driveCarFlows() {
+//		if(nowRunCarFlows.size()==0)
+//			flag = true;
+//		if(!flag)
+//			return;
+			
 		int count = 0;
 		int failCount = 0;
 		for(int i=0; i<outRoadCarFlows.size(); i++) {
@@ -203,6 +223,10 @@ public class JudgeWithFlow extends Judge {
 			if(carflow.getMinTerm() <= term) {
 				if(carflow.isLoadFree()) {
 					if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
+						for(Car car :carflow.getOutRoadCars())
+							if(car.getCarId()==43693 || car.getCarId()==46284 ||car.getCarId()==92227) {
+								logger.info("11");
+							}
 						carflow.startoff();
 						outRoadCarFlows.remove(carflow);
 						nowRunCarFlows.add(carflow);
@@ -220,6 +244,10 @@ public class JudgeWithFlow extends Judge {
 						carflow.setRoadList(newRoadList);
 						if(carflow.isLoadFree()) {
 							if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
+								for(Car car :carflow.getOutRoadCars())
+									if(car.getCarId()==43693 || car.getCarId()==46284 ||car.getCarId()==92227) {
+										logger.info("11");
+									}
 								carflow.startoff();
 								outRoadCarFlows.remove(carflow);
 								nowRunCarFlows.add(carflow);
@@ -235,16 +263,19 @@ public class JudgeWithFlow extends Judge {
 					}
 				}
 				
-				if(failCount > MapUtil.MaxFailCount)
-					break;
+//				if(failCount > MapUtil.MaxFailCount)
+					//break;
 			}
+			else count++;
+			if(i - count > MapUtil.MaxFailCount)
+				break;
 		}
 //		logger.info("add " + count + " car flows");
 	}
 	
-	public void addnowRunCarFlows(CarFlow carFlow) {
-		nowRunCarFlows.add(carFlow);
-	}
+//	public void addnowRunCarFlows(CarFlow carFlow) {
+//		nowRunCarFlows.add(carFlow);
+//	}
 	
 //	private static void splitFlow() {
 //		Collections.sort(nowRunCarFlows, new Comparator<CarFlow>() {

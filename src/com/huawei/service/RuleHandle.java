@@ -257,17 +257,19 @@ public class RuleHandle {
 	private static boolean startoffCar(Judge judge, Car car) {
 		car.setNextDistance(Math.min(car.getMaxSpeed(), car.getNextRoad().getLimitSpeed()));
 		if(updateCar(judge, car, MapUtil.crosses.get(car.getOrigin())) >=0 ) {
-			if(judge instanceof JudgeWithFlow && car.isPreset())
-				startoffPresetCar((JudgeWithFlow)judge, car);
+//			if(judge instanceof JudgeWithFlow && car.isPreset())
+//				startoffPresetCar((JudgeWithFlow)judge, car);
 			car.setRunning(true);
-			car.setRealStartTime(judge.getTerm());
+			if(!car.isPreset())
+				car.setRealStartTime(judge.getTerm());
 			if(car.isPriority())
 				judge.getPriOutRoadCars().remove(car);
 			else judge.getOutRoadCars().remove(car);
 			judge.getNowRunCars().add(car);
 			return true;
 		}
-		car.setRealStartTime(car.getRealStartTime()+1);
+		if(!car.isPreset())
+			car.setRealStartTime(car.getRealStartTime()+1);
 		return false;
 	}
 	
@@ -284,7 +286,7 @@ public class RuleHandle {
 		presetCarFlow.updateLoad(1);
 		presetCarFlow.getOutRoadCars().remove(car);
 		presetCarFlow.getRunCars().add(car);
-		judge.addnowRunCarFlows(presetCarFlow);
+//		judge.addnowRunCarFlows(presetCarFlow);
 	}
 	
 	public static int driveCarInGarage(Judge judge){

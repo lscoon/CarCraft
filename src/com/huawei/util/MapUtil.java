@@ -47,18 +47,18 @@ public class MapUtil {
 	
 	public static int CarFlowMaxCarCount = 0;
 	
-	public static double PresetParameter = 1;
+//	public static double PresetParameter = 1;
 	
 	public static int NowStartOffCarsAdd = 1;
 	public static int DelayTerm = 0;
-	public static double LoadParameter = 1;
+	public static double LoadParameter = 0.8;
 	public static int RoadMaxLoad = 250;
 	public static int RoadListMaxIncrease = 2;
 	// when fail this nums, will not try judge overlay
-	public static int MaxFailCount = 50;
+	public static int MaxFailCount = 100;
 	public static int MaxPreSetFailCount = 50;
 	// when finish this nums carflows, will try to add carflows
-	public static int MaxCarFlowFinishCount = 5;
+	public static int MaxCarFlowFinishCount = 2;
 	
 	public static int ExpectedFlowSize = 200;
 	public static int SplitBeginOutRoadCarFlowNum = 20;
@@ -72,6 +72,7 @@ public class MapUtil {
 	public static Map<Integer, Car> cars = new HashMap<>();
 
 	public static ArrayList<CarFlow> carFlows = new ArrayList<CarFlow>();
+	public static List<CarFlow> presetCarflow = new ArrayList<>();
 	
 	// ordered sequence from min to max
 	public static List<Integer> crossSequence = new ArrayList<>();
@@ -176,6 +177,13 @@ public class MapUtil {
         FloydUtil.initPathAndDistMatrixMap();
         SolverWithFlow.initCarClusters();
         JudgeWithFlow judgeWithFlow = new JudgeWithFlow(DelayTerm);
+//        for(Car car : cars.values())
+//        	if(car.getCarId()==43693 || car.getCarId()==46284 ||car.getCarId()==92227) {
+//        		String string = "";
+//        		for(Road road : car.getCarFlow().getRoadList())
+//        			string = string.concat(road.getRoadId() + ",");
+//        		logger.info(car.getCarId() + ":" + string);
+//        	}
         judgeWithFlow.runWithoutView();
 //        judgeWithFlow.runWithView();
         
@@ -208,8 +216,8 @@ public class MapUtil {
 		
 	public static void main(String[] args) {
 //		logger.info(NowStartOffCarsAdd+","+LoadParameter+","+RoadMaxLoad+","+RoadListMaxIncrease+","+MaxFailCount+","+MaxCarFlowFinishCount);
-		clear();
-		runFile("maps/2-map-training-1/");
+//		clear();
+//		runFile("maps/2-map-training-1/");
 		clear();
 		runFile("maps/2-map-training-2/");
 //		clear();

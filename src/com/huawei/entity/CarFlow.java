@@ -86,12 +86,21 @@ public class CarFlow {
 	
 	public void startoff() {
 		isRunning = true;
-		updateLoad(outRoadCars.size());
-		for(Car car : outRoadCars) {
-			ArrayList<Road> list = new ArrayList<>();
-			list.addAll(roadList);
-			car.setRoadList(list);
-			car.setNextRoad(list.get(0));
+		if(isPreset) {
+			for(Car car : outRoadCars) {
+				car.getRoadList().get(0).changeLoad(car.getOrigin(), 1);
+				for(int i=1; i<car.getRoadList().size(); i++)
+					car.getRoadList().get(i).changeLoad(car.getRoadList().get(i-1), 1);
+			}
+		}
+		else {
+			updateLoad(outRoadCars.size());
+			for(Car car : outRoadCars) {
+				ArrayList<Road> list = new ArrayList<>();
+				list.addAll(roadList);
+				car.setRoadList(list);
+				car.setNextRoad(list.get(0));
+			}
 		}
 	}
 	
@@ -114,6 +123,19 @@ public class CarFlow {
 	
 	public ArrayList<Car> getNowStartOffCars(JudgeWithFlow judgeWithFlow) {
 		ArrayList<Car> startOffCarList = new ArrayList<>();
+		if(isPreset) {
+			for(int i=0; i<outRoadCars.size(); i++) {
+				Car car = outRoadCars.get(i);
+				if(car != null) {
+					if (car.getRealStartTime() <= judgeWithFlow.getTerm()) {
+						startOffCarList.add(car);
+						outRoadCars.set(i, null);
+					}
+				}
+			}
+			return startOffCarList;
+		}
+		
 		if(outRoadCars.size()==0)
 			return startOffCarList;
 		int blankNum = roadList.get(0).getBlankNum(origin, maxSpeed);
@@ -178,7 +200,7 @@ public class CarFlow {
 			}
 		}
 		
-		if(outRoadCars.size() == 0) {
+		if(!isPreset && outRoadCars.size() == 0) {
 			if(!roadList.get(0).containsCarFlow(origin, this)) {
 				origin = roadList.get(0).getAnOtherCross(origin);
 				roadList.remove(roadList.get(0));
@@ -202,6 +224,8 @@ public class CarFlow {
 			maxSpeed = car.getMaxSpeed();
 		if(minTerm > car.getStartTime())
 			minTerm = car.getStartTime();
+		if(car.isPreset())
+			isPreset = true;
 		car.setCarFlow(this);
 	}
 	
