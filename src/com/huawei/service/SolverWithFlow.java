@@ -131,6 +131,59 @@ public class SolverWithFlow {
 			carflow.setRoadList(roadList);
 		}
 	}
+	
+	public static List<CarFlow> mergeSubFlow(List<CarFlow> carFlows) {
+		List<CarFlow> result = new ArrayList<>();
+		for(int i=0;i<carFlows.size();++i) {
+			// avoid using Linkedlist to hold carFlows
+			CarFlow flow = carFlows.get(i);
+			if(flow == null) continue;
+			List<Road> roadList =  flow.getRoadList();
+			for(int j = 0;j<carFlows.size();++j) {
+				CarFlow thisFlow = carFlows.get(j);
+				if(thisFlow == null || j==i) continue;
+				List<Road> thisRoadList = thisFlow.getRoadList();
+				
+				//subRoad list judge
+				if(roadList.containsAll(thisRoadList)) {
+					// the same direction judgement
+					if(thisRoadList.size() == 1 || roadList.indexOf(thisRoadList.get(0)) < roadList.indexOf(thisRoadList.get(1))) {
+						for(Car car:thisFlow.getOutRoadCars()) {
+							flow.addCar(car);
+						}
+						carFlows.set(j, null);
+					}
+					continue;
+				}else if(thisRoadList.containsAll(roadList)) {
+					
+					if(roadList.size() == 1 || thisRoadList.indexOf(roadList.get(0)) < thisRoadList.indexOf(roadList.get(1))) {
+						
+						for(Car car:thisFlow.getOutRoadCars()) {
+							flow.addCar(car);
+						}
+						
+						flow.setRoadList(thisRoadList);
+						carFlows.set(j, null);
+					}
+					continue;
+				}
+				// disjoint case
+			}
+		}
+		
+		for(CarFlow flow: carFlows) {
+			if(flow != null) {
+				result.add(flow);
+			}
+		}
+		carFlows.clear();
+		
+		
+		
+		return result;
+	}
+	
+	
 
 	/**
 	 * @version: v1.0
