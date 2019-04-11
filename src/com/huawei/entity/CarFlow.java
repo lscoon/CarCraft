@@ -133,6 +133,7 @@ public class CarFlow {
 					}
 				}
 			}
+			runCars.addAll(startOffCarList);
 			return startOffCarList;
 		}
 		

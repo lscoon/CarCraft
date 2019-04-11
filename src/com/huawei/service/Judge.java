@@ -142,6 +142,18 @@ public class Judge {
 	}
 	
 	private void findDeadLock() {
+		
+		for(Car car : nowWaitedCars)
+			if(car.isPreset())
+				logger.info("deadlock because of preset: " + car.getCarId());
+		
+//      for(Car car : MapUtil.cars.values())
+//    	if(car.getCarId()==35533 || car.getCarId()==101312 
+//    		||car.getCarId()==28638 || car.getCarId()==76759) {
+//    		String string = "";
+//    		logger.info(car.getCarId() + ":" + string);
+//    	}
+		
 		if(MapUtil.mapView!=null) {
 			String temp = "dead lock " + nowWaitedCars.size() + " cars\n";
 			List<Car> tempCarSet = new LinkedList<>();

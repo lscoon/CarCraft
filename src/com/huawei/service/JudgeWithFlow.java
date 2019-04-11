@@ -89,7 +89,7 @@ public class JudgeWithFlow extends Judge {
 	
 	@Override
 	public void runInOneTerm() {
-		if(term > 770) {
+		if(term % 100 ==0) {
 			int count =0;
 			for(CarFlow carFlow :nowRunCarFlows) {
 				if(carFlow.isPreset())
@@ -144,23 +144,27 @@ public class JudgeWithFlow extends Judge {
 //		logger.info("put back " + outRoadCars.size() + " cars");
 		for(int i=0; i<outRoadCars.size(); i++) {
 			Car car = outRoadCars.get(i);
-			if(!car.isPreset()) {
+//			if(!car.isPreset()) {
 				car.getCarFlow().putback(car);
 				outRoadCars.remove(car);
 				i--;
-			}
+//			}
 		}
 
 		for(int i=0; i<priOutRoadCars.size(); i++) {
 			Car car = priOutRoadCars.get(i);
-			if(!car.isPreset()) {
+//			if(!car.isPreset()) {
 				car.getCarFlow().putback(car);
 				priOutRoadCars.remove(car);
 				i--;
-			}
+//			}
 		}
 		
 		handleFlowDuringRun();
+		for(Car car : nowRunCars) {
+			if(car.getCarFlow().isFinished())
+				logger.error("car run, flow finish");
+		}
 	}
 	
 	private void handleFlowDuringRun() {
@@ -171,8 +175,8 @@ public class JudgeWithFlow extends Judge {
 //				splitFlow();
 //				splitFlowTag = 0;
 //			}
-//			if(nowRunCarFlows.size()>500)
-//				return;
+			if(nowRunCarFlows.size() > 1000)
+				return;
 //			logger.info("finish " + count + " car flows");
 			if(carFlowFinishCount >= MapUtil.MaxCarFlowFinishCount || 
 					outRoadCarFlows.size() < MapUtil.MaxCarFlowFinishCount) {
@@ -223,10 +227,6 @@ public class JudgeWithFlow extends Judge {
 			if(carflow.getMinTerm() <= term) {
 				if(carflow.isLoadFree()) {
 					if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
-						for(Car car :carflow.getOutRoadCars())
-							if(car.getCarId()==43693 || car.getCarId()==46284 ||car.getCarId()==92227) {
-								logger.info("11");
-							}
 						carflow.startoff();
 						outRoadCarFlows.remove(carflow);
 						nowRunCarFlows.add(carflow);
@@ -244,10 +244,6 @@ public class JudgeWithFlow extends Judge {
 						carflow.setRoadList(newRoadList);
 						if(carflow.isLoadFree()) {
 							if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
-								for(Car car :carflow.getOutRoadCars())
-									if(car.getCarId()==43693 || car.getCarId()==46284 ||car.getCarId()==92227) {
-										logger.info("11");
-									}
 								carflow.startoff();
 								outRoadCarFlows.remove(carflow);
 								nowRunCarFlows.add(carflow);

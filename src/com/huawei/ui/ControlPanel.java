@@ -80,7 +80,7 @@ public class ControlPanel extends JPanel{
 			            public void run(){
 			            	btMapRefresh.setEnabled(false);
 			            	if(judge.getTerm()==0)
-			            		for(int i=0;i<770;i++)
+			            		for(int i=0;i<800;i++)
 			            			judge.runInOneTerm();
 			            	judge.runInOneTerm();
 			            	carInfo.setText(MapUtil.cars.get(carBox.getSelectedItem()).info());

@@ -49,12 +49,15 @@ public class SolverWithFlow {
 		
 		for (Car car : MapUtil.cars.values()) {
 			if(car.isPreset()) {
+				
 				CarFlow carFlow = new CarFlow(car);
 				List<Road> newRoadList = new ArrayList<>();
 				for(Road road : car.getRoadList())
 					newRoadList.add(road);
 				carFlow.setRoadList(newRoadList);
 				presetFlows.add(carFlow);
+				if(car.getCarId()==101312)
+					logger.info("11");
 				continue;
 			}
 			for (CarFlow carflow : MapUtil.carFlows) {
@@ -71,8 +74,9 @@ public class SolverWithFlow {
 		}
 		initCarFlowRoadList(0);
 		splitCarFlows();
+
 		MapUtil.presetCarflow = mergeSubFlow(presetFlows);
-		
+
 		Collections.sort(MapUtil.carFlows, new Comparator<CarFlow>() {
 
 			@Override
@@ -148,7 +152,9 @@ public class SolverWithFlow {
 		for(int i=0;i<carFlows.size();++i) {
 			// avoid using Linkedlist to hold carFlows
 			CarFlow flow = carFlows.get(i);
+			
 			if(flow == null) continue;
+			
 			List<Road> roadList =  flow.getRoadList();
 			for(int j = 0;j<carFlows.size();++j) {
 				CarFlow thisFlow = carFlows.get(j);
@@ -162,6 +168,8 @@ public class SolverWithFlow {
 						for(Car car:thisFlow.getOutRoadCars()) {
 							flow.addCar(car);
 						}
+						if(roadList.size() < thisRoadList.size())
+							logger.error("size error");
 						carFlows.set(j, null);
 					}
 					continue;
@@ -172,8 +180,10 @@ public class SolverWithFlow {
 						for(Car car:thisFlow.getOutRoadCars()) {
 							flow.addCar(car);
 						}
-						
+						if(roadList.size() > thisRoadList.size())
+							logger.error("size error");
 						flow.setRoadList(thisRoadList);
+						roadList = thisRoadList;
 						carFlows.set(j, null);
 					}
 					continue;
