@@ -176,10 +176,9 @@ public class SolverWithFlow {
 				result.add(flow);
 			}
 		}
+		
+		logger.info("merge subFlow: "+ carFlows.size() + " flows to " + result.size() + " flows");
 		carFlows.clear();
-		
-		
-		
 		return result;
 	}
 	
