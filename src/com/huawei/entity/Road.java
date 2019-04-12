@@ -71,11 +71,25 @@ public class Road {
 		else return origin.getCrossId();
 	}
 	
+	public Cross getAnOtherCross(Cross cross) {
+		if(origin.getCrossId() == cross.getCrossId())
+			return destination;
+		else return origin;
+	}
+	
 	public void updateRoadDirections(Cross cross) {
 		if(cross.getCrossId() == destination.getCrossId())
 			forwardRoad.updateRoadDirection();
 		else if(isBiDirect)
 			backwardRoad.updateRoadDirection();
+		else logger.error("step2: update invalid road directions " + roadId);
+	}
+	
+	public void newUpdateRoadDirections(Cross cross) {
+		if(cross.getCrossId() == destination.getCrossId())
+			forwardRoad.newUpdateRoadDirection(cross);
+		else if(isBiDirect)
+			backwardRoad.newUpdateRoadDirection(cross);
 		else logger.error("step2: update invalid road directions " + roadId);
 	}
 	
@@ -105,6 +119,16 @@ public class Road {
 		return directions;
 	}
 	
+	public Road[] getNeighbourRoads(Cross cross) {
+		Road[] roads = new Road[3];
+		int index = cross.getRoads().indexOf(this);
+		for(int i=1; i<4; i++) {
+			Road road = cross.getRoads().get((index+i)%4);
+			roads[i-1]=road;
+		}
+		return roads;
+	}
+	
 	public boolean getForwardOrBackward(Road roadBefore) {
 		for(Road r: origin.getRoads())
 			if(r != null)
@@ -117,6 +141,15 @@ public class Road {
 		if(crossId == origin.getCrossId())
 			return true;
 		else return false;
+	}
+	
+	public Road findNextWaitLinkRoad(Road roadBefore) {
+		for(Road r: origin.getRoads())
+			if(r != null)
+				if(roadBefore.getRoadId() == r.getRoadId())
+					return forwardRoad.findNextWaitLinkRoad(getNeighbourRoads(destination));
+		return backwardRoad.findNextWaitLinkRoad(getNeighbourRoads(origin));
+		
 	}
 	
 	private boolean isSameDirection(CarFlow carFlow1, CarFlow carFlow2, Road roadBefore1, Road roadBefore2) {

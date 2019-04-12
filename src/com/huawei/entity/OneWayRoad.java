@@ -20,6 +20,9 @@ public class OneWayRoad {
 	
 	private int load = 0;
 	
+	public int inLoad = 0;
+	public int outLoad = 0;
+	
 	public OneWayRoad(int lanesNumber, int length, Road r) {
 		lanesNum = lanesNumber;
 		len = length;
@@ -129,9 +132,52 @@ public class OneWayRoad {
 		firstCarDirection = Direction.unknown;
 	}
 	
+	public void newUpdateRoadDirection(Cross cross) {
+		if(carNum==0) {
+			firstCarLocation[0] = 0;
+			firstCarLocation[1] = len-1;
+			firstCarDirection = Direction.unknown;
+			return;
+		}
+		
+		for(int j=len-1; j>=0; j--)
+			for(int i=0; i<lanesNum; i++) {
+				if(status[i][j]!=null && status[i][j].isWaited() && status[i][j].isPriority()) {
+					int k=j+1;
+					for(; k<len; k++)
+						if(status[i][k]!=null && status[i][k].isWaited())
+							break;
+					if(k==len) {
+						status[i][j].findNextRoad(cross);
+						firstCarDirection = status[i][j].getDirection();
+						firstCarLocation[0] = i;
+						firstCarLocation[1] = j;
+						return;
+					}
+				}
+			}
+		
+		for(int j=len-1; j>=0; j--)
+			for(int i=0; i<lanesNum; i++) {
+				if(status[i][j]!=null && status[i][j].isWaited()) {
+					status[i][j].findNextRoad(cross);
+					firstCarDirection = status[i][j].getDirection();
+					firstCarLocation[0] = i;
+					firstCarLocation[1] = j;
+					return;
+				}
+			}
+		// all cars have been updated
+		firstCarLocation[0] = 0;
+		firstCarLocation[1] = len-1;
+		firstCarDirection = Direction.unknown;
+	}
+	
 	// -1 means ahead car is waited
 	// -2 means all road have no enough space
 	protected int getInRoadLaneNum(int nextDistance) {
+		if(nextDistance<=0)
+			return nextDistance;
 		for(int i=0; i<lanesNum; i++) {
 			int j=0;
 			for(; j<nextDistance; j++)
@@ -174,6 +220,19 @@ public class OneWayRoad {
 					if(status[i][j].getCarFlow()==carflow)
 						return true;
 		return false;
+	}
+	
+	protected Road findNextWaitLinkRoad(Road[] roads) {
+		if(firstCarDirection==Direction.unknown)
+			return null;
+		else if(firstCarDirection==Direction.direct || firstCarDirection==Direction.priDirect)
+			return roads[1];
+		else if(firstCarDirection==Direction.left || firstCarDirection==Direction.priLeft)
+			return roads[0];
+		else if(firstCarDirection==Direction.right || firstCarDirection==Direction.priRight)
+			return roads[2];
+		logger.error("error in wait link");
+		return null;
 	}
 	
 	public Direction getFirstCarDirection() {

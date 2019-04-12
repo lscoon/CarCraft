@@ -153,6 +153,7 @@ public class RuleHandle {
 				oneWayRoad.setStatus(null, firstCarLocation[0], firstCarLocation[1]);
 				oneWayRoad.setCarNum(oneWayRoad.getCarNum()-1);
 				count++;
+				oneWayRoad.outLoad++;
 				count += driveCarJustOnLaneToEndState(judge, oneWayRoad, firstCarLocation[0]);
 				drivePriCarInGarage(judge,oneWayRoad.getRoad());
 				oneWayRoad.updateRoadDirection();
@@ -175,8 +176,6 @@ public class RuleHandle {
 			return -2;
 		}
 		else {
-			if(car.getNextRoad().getRoadId()==5264)
-				logger.debug("111");
 			int laneNum = car.getNextRoad().getInRoadLaneNum(cross, car.getNextDistance());
 			
 			// could pass the cross
@@ -206,8 +205,10 @@ public class RuleHandle {
 					logger.error("invalid car "+car.getCarId()+" in road ");
 				oneWayRoad.setStatus(car, lane, j-1);
 				oneWayRoad.setCarNum(oneWayRoad.getCarNum()+1);
+				oneWayRoad.inLoad++;
 				return;
 			}
+		oneWayRoad.inLoad++;
 		oneWayRoad.setStatus(car, lane, car.getNextDistance()-1);
 		oneWayRoad.setCarNum(oneWayRoad.getCarNum()+1);
 	}

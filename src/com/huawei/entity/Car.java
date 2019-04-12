@@ -1,11 +1,13 @@
 package com.huawei.entity;
 
-import java.lang.Thread.State;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.huawei.sa.BPRLinkPerformance;
 import com.huawei.util.MapUtil;
 
 public class Car {
@@ -21,6 +23,7 @@ public class Car {
 	private int startTime;
 	private boolean isPriority = false;
 	private boolean isPreset = false;
+//	public boolean tempPreset = false;
 	
 	private int realStartTime = 0;
 	private int realEndTime = 0;
@@ -138,7 +141,12 @@ public class Car {
 					direction = Direction.priLeft;
 				else direction = Direction.left;
 				return;
-			default: logger.error("something error while computing directions");
+			default: 
+				{
+					Car car = null;
+					car.getCarId();
+					logger.error("something error while computing directions");
+				}
 		}
 		direction =  Direction.unknown;
 	}
@@ -161,6 +169,160 @@ public class Car {
 				nextDistance = -2;
 			else nextDistance = nextSpeed-s1;
 		}
+	}
+	
+	public void computeNowDistance(int s1) {
+		int nowSpeed = Math.min(maxSpeed, nowRoad.getLimitSpeed());
+		if(nowSpeed <= s1) {
+			// will not try
+			nowDistance = nowSpeed;
+			nextDistance = 0;
+		}
+		else{
+			// will try to pass the cross
+			nowDistance = s1;
+			nextDistance = 1;
+		}
+	}
+	
+	public void computeNextDistance(Road road) {
+		if(!isRunning) {
+			nowDistance = 0;
+			nextDistance = 1;
+		}
+		if(nextDistance <= 0)
+			logger.error("logic error in com next distance");
+		int nextSpeed = Math.min(maxSpeed, road.getLimitSpeed());
+		if(nowDistance >= nextSpeed)
+			nextDistance = -2;
+		else nextDistance = nextSpeed-nowDistance;
+	}
+	
+	public Road findNextRoad(Cross cross) {
+		if(nextRoad != null) {
+			if(nowRoad != null) {
+				if(checkWaitLink())
+					logger.info(carId + ":preset dead lock");
+				computeDirection();
+			}
+			return nextRoad;
+		}
+		else if(cross.getCrossId()==destination) {
+			computeDirection();
+			return null;
+		}
+		else {
+			int crossIndex = MapUtil.crossSequence.indexOf(cross.getCrossId());
+			float[] linkResistances = {MapUtil.FloatMax,MapUtil.FloatMax,MapUtil.FloatMax,MapUtil.FloatMax};
+			int[] flags = {MapUtil.IntMax,MapUtil.IntMax,MapUtil.IntMax,MapUtil.IntMax};
+			int i=0;
+			for(; i<4; i++) {
+				if(cross.getSequenceRoadIds()[i]==-1) {
+					break;
+				}
+				Road road = cross.getRoads().get(cross.getSequenceRoadIds()[i]);
+				if(nowRoad!=null && nowRoad.getRoadId()==road.getRoadId()) {
+					continue;
+				}
+				if(road.getDestination().getCrossId()==cross.getCrossId() && !road.isBiDirect()) {
+					continue;
+				}
+				
+				computeNextDistance(road);
+				int flag = road.getInRoadLaneNum(cross, nextDistance);
+				nextDistance = 1;
+				
+				flags[i] = flag; 
+				// -2 不能上 -1 等待 >=0 能上
+				float tempLR = BPRLinkPerformance.getLinkResistance(this, road, crossIndex);
+				linkResistances[i] = tempLR; 
+			}
+			
+			while(nextRoad == null) {
+				float minLR = MapUtil.FloatMax;
+				int minIndex = -1;
+				for(int j=0; j<i; j++) {
+					if(linkResistances[j]<minLR) {
+						minLR = linkResistances[j];
+						minIndex = j;
+					}
+				}
+				
+				if(minIndex==-1) {
+					if(nowRoad==null)
+						break;
+					logger.info(carId + ":must choose a dead lock");
+					for(int j=0; j<i; j++)
+						if(flags[j]==-1) {
+							nextRoad = cross.getRoads().get(cross.getSequenceRoadIds()[j]);
+							break;
+						}
+					if(nextRoad==null)
+						logger.info(carId + ":still have no way to go");
+					else break;
+				}
+				
+				if(flags[minIndex]>=0) {
+					nextRoad = cross.getRoads().get(cross.getSequenceRoadIds()[minIndex]);
+					break;
+				}
+				else if(flags[minIndex]==-1) {
+					if(nowRoad==null) {
+						linkResistances[minIndex] = MapUtil.FloatMax;
+						nextRoad=null;
+						continue;
+					}
+					else {
+//						nextRoad = cross.getRoads().get(cross.getSequenceRoadIds()[minIndex]);
+//						if(!checkWaitLink())
+//							break;
+//						else {
+							linkResistances[minIndex] = MapUtil.FloatMax;
+							nextRoad=null;
+							continue;
+//						}
+					}
+				}
+				else if(flags[minIndex]==-2) {
+					if(nowRoad==null){
+						linkResistances[minIndex] = MapUtil.FloatMax;
+						nextRoad=null;
+						continue;
+					}
+					else {
+						nextRoad = cross.getRoads().get(cross.getSequenceRoadIds()[minIndex]);
+						if(!checkWaitLink())
+							break;
+						else {
+							linkResistances[minIndex] = MapUtil.FloatMax;
+							nextRoad=null;
+							continue;
+						}
+					}
+				}
+			}
+		}
+		
+		if(nowRoad!=null) {
+			computeNextDistance(nextRoad);
+			computeDirection();
+		}
+		return nextRoad;
+	}
+	
+	public boolean checkWaitLink() {
+		Road road1 = nowRoad;
+		Road road2 = nextRoad;
+		Set<Road> visitedRoads = new HashSet<>();
+		while(road2!=null) {
+			visitedRoads.add(road1);
+			if(visitedRoads.contains(road2))
+				return true;
+			Road temp = road2.findNextWaitLinkRoad(road1);
+			road1 = road2;
+			road2 = temp;
+		}
+		return false;
 	}
 	
 	public int getCarId() {
@@ -228,6 +390,10 @@ public class Car {
 		this.nextRoad = nextRoad;
 	}
 
+	public void setDirection(Direction d) {
+		direction = d;
+	}
+	
 	public Direction getDirection() {
 		return direction;
 	}

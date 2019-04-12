@@ -17,6 +17,9 @@ public class Cross{
 			{MapUtil.roadIdMax, MapUtil.roadIdMax, MapUtil.roadIdMax, MapUtil.roadIdMax};;
 	private List<Road> roads = null;
 	
+	public List<Car> outRoadCars = new ArrayList<>();
+	public List<Car> priOutRoadCars = new ArrayList<>();
+	
 	private int rotationStatus=0;
 
 	public Cross (String[] strs) {
@@ -87,6 +90,16 @@ public class Cross{
 				if(road.getOrigin().getCrossId()==crossId && !road.isBiDirect())
 					continue;
 				road.updateRoadDirections(this);
+			}
+	}
+	
+	public void newInitFirstCarDirection() {
+		for(int i=0; i<4; i++)
+			if(roads.get(i)!=null) {
+				Road road = roads.get(i);
+				if(road.getOrigin().getCrossId()==crossId && !road.isBiDirect())
+					continue;
+				road.newUpdateRoadDirections(this);
 			}
 	}
 	

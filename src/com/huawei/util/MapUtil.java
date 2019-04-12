@@ -14,6 +14,7 @@ import com.huawei.entity.Car;
 import com.huawei.entity.CarFlow;
 import com.huawei.entity.Cross;
 import com.huawei.entity.Road;
+import com.huawei.sa.BPRLinkPerformance;
 import com.huawei.service.SolverWithFlow;
 import com.huawei.service.Judge;
 import com.huawei.service.JudgeWithFlow;
@@ -51,16 +52,16 @@ public class MapUtil {
 	
 	public static int NowStartOffCarsAdd = 1;
 	public static int DelayTerm = 0;
-	public static double LoadParameter = 0.788;
-	public static int RoadMaxLoad = 250;
-	public static int RoadListMaxIncrease = 4;
+	public static double LoadParameter = 0.78;
+	public static int RoadMaxLoad =450;
+	public static int RoadListMaxIncrease = 10;
 	// when fail this nums, will not try judge overlay
-	public static int MaxFailCount = 50;
+	public static int MaxFailCount = 100;
 //	public static int MaxPreSetFailCount = 50;
 	// when finish this nums carflows, will try to add carflows
-	public static int MaxCarFlowFinishCount = 2;
+	public static int MaxCarFlowFinishCount = 4;
 	
-	public static int ExpectedFlowSize = 250;
+	public static int ExpectedFlowSize = 300;
 	public static int SplitBeginOutRoadCarFlowNum = 20;
 	public static int SplitFlowThreshhold = 10;
 	public static int SelectedFlowNum = 3;
@@ -161,6 +162,7 @@ public class MapUtil {
 		crossSequence.clear();
 		FloydUtil.pathMap = null;
 		FloydUtil.distMap = null;
+		BPRLinkPerformance.AdjMatrixR = null;
 		DijkstraUtil.dist = null;
 	}
 	
@@ -175,6 +177,7 @@ public class MapUtil {
         FileUtil.readInputs(carPath, roadPath, crossPath, presetAnswerPath);
         
         FloydUtil.initPathAndDistMatrixMap();
+        BPRLinkPerformance.initAdjMatrixR();
         SolverWithFlow.initCarClusters();
         JudgeWithFlow judgeWithFlow = new JudgeWithFlow(DelayTerm);
         judgeWithFlow.runWithoutView();
@@ -211,8 +214,8 @@ public class MapUtil {
 //		logger.info(NowStartOffCarsAdd+","+LoadParameter+","+RoadMaxLoad+","+RoadListMaxIncrease+","+MaxFailCount+","+MaxCarFlowFinishCount);
 		clear();
 		runFile("maps/2-map-training-1/");
-//		clear();
-//		runFile("maps/2-map-training-2/");
+		clear();
+		runFile("maps/2-map-training-2/");
 //		clear();
 //		testAnswer("maps/2-map-training-1/");
 //		clear();

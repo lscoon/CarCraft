@@ -79,9 +79,6 @@ public class ControlPanel extends JPanel{
 					Thread t = new Thread(new Runnable(){  
 			            public void run(){
 			            	btMapRefresh.setEnabled(false);
-			            	if(judge.getTerm()==0)
-			            		for(int i=0;i<800;i++)
-			            			judge.runInOneTerm();
 			            	judge.runInOneTerm();
 			            	carInfo.setText(MapUtil.cars.get(carBox.getSelectedItem()).info());
 			            	roadText0.setText(MapUtil.roads.get(roadBox.getSelectedItem()).showStatus());
@@ -105,7 +102,13 @@ public class ControlPanel extends JPanel{
 		carInfo.setEditable(false);
 		
 		carBox = new JComboBox<>();
-		for(int i : MapUtil.cars.keySet())
+		
+		List<Integer> carList = new LinkedList<>();
+		for(int i : MapUtil.cars.keySet()) {
+			carList.add(i);
+		}
+		Collections.sort(carList);
+		for(int i : carList)
 			carBox.addItem(i);
 		carBox.addActionListener(
 				new ActionListener() {

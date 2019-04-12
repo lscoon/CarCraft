@@ -56,8 +56,6 @@ public class SolverWithFlow {
 					newRoadList.add(road);
 				carFlow.setRoadList(newRoadList);
 				presetFlows.add(carFlow);
-				if(car.getCarId()==101312)
-					logger.info("11");
 				continue;
 			}
 			for (CarFlow carflow : MapUtil.carFlows) {
@@ -198,7 +196,7 @@ public class SolverWithFlow {
 			}
 		}
 		
-		logger.info("merge subFlow: "+ carFlows.size() + " flows to " + result.size() + " flows");
+//		logger.info("merge subFlow: "+ carFlows.size() + " flows to " + result.size() + " flows");
 		carFlows.clear();
 		return result;
 	}

@@ -56,7 +56,7 @@ public class FloydUtil {
 		distMap.put(speed, dist);
 	}
 	
-	private static Road computeRoad(Cross crossOne, Cross crossTwo) {
+	public static Road computeRoad(Cross crossOne, Cross crossTwo) {
 		Road road = crossOne.findLinkedRoad(crossTwo);
 		if(road==null)
 			return null;

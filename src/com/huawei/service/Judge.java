@@ -26,7 +26,7 @@ public class Judge {
 	
 	protected List<Car> priOutRoadCars = new LinkedList<>();
 	protected List<Car> outRoadCars = new LinkedList<>();
-	protected Set<Car> nowRunCars = new HashSet<>();
+	public Set<Car> nowRunCars = new HashSet<>();
 	protected Set<Car> finishCars = new HashSet<>();
 	
 	protected Set<Car> nowWaitedCars = new HashSet<>();
@@ -141,11 +141,11 @@ public class Judge {
 		term++;
 	}
 	
-	private void findDeadLock() {
+	protected void findDeadLock() {
 		
-		for(Car car : nowWaitedCars)
-			if(car.isPreset())
-				logger.info("deadlock because of preset: " + car.getCarId());
+//		for(Car car : nowWaitedCars)
+//			if(car.isPreset())
+//				logger.info("deadlock because of preset: " + car.getCarId());
 		
 //      for(Car car : MapUtil.cars.values())
 //    	if(car.getCarId()==35533 || car.getCarId()==101312 

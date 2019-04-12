@@ -10,7 +10,9 @@ import org.apache.log4j.Logger;
 import com.huawei.entity.Car;
 import com.huawei.entity.CarFlow;
 import com.huawei.entity.Road;
+import com.huawei.sa.BPRLinkPerformance;
 import com.huawei.ui.MapFrame;
+import com.huawei.util.DijkSAUtil;
 import com.huawei.util.DijkstraUtil;
 import com.huawei.util.MapUtil;
 
@@ -90,11 +92,11 @@ public class JudgeWithFlow extends Judge {
 	@Override
 	public void runInOneTerm() {
 		if(term % 100 ==0) {
-			int count =0;
-			for(CarFlow carFlow :nowRunCarFlows) {
-				if(carFlow.isPreset())
-					count++;
-			}
+//			int count =0;
+//			for(CarFlow carFlow :nowRunCarFlows) {
+//				if(carFlow.isPreset())
+//					count++;
+//			}
 			logger.info("Judge reach " + term);
 			logger.info("nowRunCarFlowsSize:" + nowRunCarFlows.size() + ",outRoadCarFlowsSize:" + outRoadCarFlows.size());
 		}
@@ -106,6 +108,14 @@ public class JudgeWithFlow extends Judge {
 					priOutRoadCars.add(car);
 				else outRoadCars.add(car);
 			count += list.size();
+		}
+		for(Road road: MapUtil.roads.values()) {
+			road.getForwardRoad().inLoad = 0;
+			road.getForwardRoad().outLoad = 0;
+			if(road.isBiDirect()) {
+				road.getBackwardRoad().inLoad = 0;
+				road.getBackwardRoad().outLoad = 0;
+			}
 		}
 		
 //		for(int i=0; i<preSetCars.size(); i++) {
@@ -215,56 +225,77 @@ public class JudgeWithFlow extends Judge {
 	}
 	
 	private void driveCarFlows() {
-//		if(nowRunCarFlows.size()==0)
-//			flag = true;
-//		if(!flag)
-//			return;
-			
+		if(nowRunCarFlows.size()==0)
+			flag = true;
+		if(!flag)
+			return;
+		BPRLinkPerformance.updateAdjMatrixR();
 		int count = 0;
 		int failCount = 0;
 		for(int i=0; i<outRoadCarFlows.size(); i++) {
 			CarFlow carflow = outRoadCarFlows.get(i);
 			if(carflow.getMinTerm() <= term) {
-				if(carflow.isLoadFree()) {
-					if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
-						carflow.startoff();
-						outRoadCarFlows.remove(carflow);
-						nowRunCarFlows.add(carflow);
-						i--;
-						count++;
-					}
-					else failCount++;
-
-				}
-				else{
-					List<Road> newRoadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), 
-							carflow.getDestination(), MapUtil.AllCarMaxSpeed, null);
-					if(newRoadList!=null && newRoadList.size() - carflow.getRoadList().size() <= MapUtil.RoadListMaxIncrease) {
-						List<Road> oldRoadList = carflow.getRoadList();
-						carflow.setRoadList(newRoadList);
-						if(carflow.isLoadFree()) {
-							if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
-								carflow.startoff();
-								outRoadCarFlows.remove(carflow);
-								nowRunCarFlows.add(carflow);
-								i--;
-								count++;
-							}
-							else{
-								carflow.setRoadList(oldRoadList);
-								failCount++;
-							}
+				List<Road> newRoadList = DijkSAUtil.Dijkstra(carflow.getOrigin(), 
+						carflow.getDestination(), MapUtil.AllCarMaxSpeed);
+				if(newRoadList!=null && newRoadList.size() - carflow.getRoadList().size() <= MapUtil.RoadListMaxIncrease) {
+					carflow.setRoadList(newRoadList);
+					if(carflow.isLoadFree()) {
+						if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
+							carflow.startoff();
+							outRoadCarFlows.remove(carflow);
+							nowRunCarFlows.add(carflow);
+							i--;
+							count++;
 						}
-						else carflow.setRoadList(oldRoadList);
+						else failCount++;
 					}
 				}
+				
+				
+				if(failCount > MapUtil.MaxFailCount)
+					break;
+				
+				
+//				if(carflow.isLoadFree()) {
+//					if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
+//						carflow.startoff();
+//						outRoadCarFlows.remove(carflow);
+//						nowRunCarFlows.add(carflow);
+//						i--;
+//						count++;
+//					}
+//					else failCount++;
+//
+//				}
+//				else{
+//					List<Road> newRoadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), 
+//							carflow.getDestination(), MapUtil.AllCarMaxSpeed, null);
+//					if(newRoadList!=null && newRoadList.size() - carflow.getRoadList().size() <= MapUtil.RoadListMaxIncrease) {
+//						List<Road> oldRoadList = carflow.getRoadList();
+//						carflow.setRoadList(newRoadList);
+//						if(carflow.isLoadFree()) {
+//							if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
+//								carflow.startoff();
+//								outRoadCarFlows.remove(carflow);
+//								nowRunCarFlows.add(carflow);
+//								i--;
+//								count++;
+//							}
+//							else{
+//								carflow.setRoadList(oldRoadList);
+//								failCount++;
+//							}
+//						}
+//						else carflow.setRoadList(oldRoadList);
+//					}
+//				}
 				
 //				if(failCount > MapUtil.MaxFailCount)
 					//break;
 			}
 			else count++;
-			if(i - count > MapUtil.MaxFailCount)
-				break;
+//			if(i - count > MapUtil.MaxFailCount)
+//				break;
 		}
 //		logger.info("add " + count + " car flows");
 	}
