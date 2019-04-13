@@ -40,6 +40,7 @@ public class Main {
         FileUtil.readInputs(carPath, roadPath, crossPath, presetAnswerPath);
         
         FloydUtil.initPathAndDistMatrixMap();
+        MapUtil.changePreset();
         SolverWithFlow.initCarClusters();
         JudgeWithFlow judgeWithFlow = new JudgeWithFlow(MapUtil.DelayTerm);
         judgeWithFlow.runWithoutView();

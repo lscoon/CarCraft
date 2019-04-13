@@ -57,7 +57,7 @@ public class DijkstraUtil {
 		
 		int startSeq = MapUtil.crossSequence.indexOf(crossOneId);
 		int endSeq = MapUtil.crossSequence.indexOf(crossTwoId);
-		int nearSeq = 0;
+		int nearSeq = -1;
 		
 		float[] mindist = new float[MapUtil.crosses.size()];
 		//Road[] path = new Road[MapUtil.crosses.size()];

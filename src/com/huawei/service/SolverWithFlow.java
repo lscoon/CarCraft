@@ -32,7 +32,7 @@ public class SolverWithFlow {
 	 * @return: save results in variable carFlows
 	 */
 	
-	private static boolean compareRoadList(List<Road> list1, List<Road> list2) {
+	public static boolean compareRoadList(List<Road> list1, List<Road> list2) {
 		int len1 = list1.size();
 		int len2 = list2.size();
 		if(len1!=len2)
@@ -117,8 +117,12 @@ public class SolverWithFlow {
 			while(carflow.getOutRoadCars().size() > MapUtil.ExpectedFlowSize) {
 				List<Road> newRoadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), 
 						carflow.getDestination(), MapUtil.AllCarMaxSpeed, carflow.getRoadList());
-				CarFlow newCarFlow = carflow.split(newRoadList, MapUtil.ExpectedFlowSize);
-				MapUtil.carFlows.add(newCarFlow);
+				if(newRoadList!=null) {
+					CarFlow newCarFlow = carflow.split(newRoadList, MapUtil.ExpectedFlowSize);
+					MapUtil.carFlows.add(newCarFlow);
+				}
+				else break;
+				
 			}
 		}
 	}

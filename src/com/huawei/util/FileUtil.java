@@ -259,6 +259,8 @@ public class FileUtil {
 	}
 
 	public static void outputAnswer(String answerPath) {
+		for(Car car : MapUtil.changePresetCarSet)
+			car.setPreset(false);
 		answerFile = answerPath;
 		FileWriter output = null;
 		BufferedWriter writer = null;

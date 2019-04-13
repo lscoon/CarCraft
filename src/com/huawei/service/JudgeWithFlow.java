@@ -230,7 +230,7 @@ public class JudgeWithFlow extends Judge {
 //			flag = true;
 //		if(!flag)
 //			return;
-		BPRLinkPerformance.updateAdjMatrixR();
+//		BPRLinkPerformance.updateAdjMatrixR();
 		int count = 0;
 		int failCount = 0;
 		for(int i=0; i<outRoadCarFlows.size(); i++) {

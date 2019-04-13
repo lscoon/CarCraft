@@ -446,4 +446,8 @@ public class Car {
 		return isPreset;
 	}
 	
+	public void setPreset(Boolean bool) {
+		isPreset = bool;
+	}
+	
 }

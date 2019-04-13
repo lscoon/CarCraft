@@ -1,9 +1,12 @@
 package com.huawei.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,12 +59,12 @@ public class MapUtil {
 	public static int RoadMaxLoad = 200;
 	public static int RoadListMaxIncrease = 4;
 	// when fail this nums, will not try judge overlay
-	public static int MaxFailCount = 50;
+	public static int MaxFailCount = 100;
 //	public static int MaxPreSetFailCount = 50;
 	// when finish this nums carflows, will try to add carflows
 	public static int MaxCarFlowFinishCount = 4;
 	
-	public static int ExpectedFlowSize = 50;
+	public static int ExpectedFlowSize = 80;
 	public static int SplitBeginOutRoadCarFlowNum = 20;
 	public static int SplitFlowThreshhold = 10;
 	public static int SelectedFlowNum = 3;
@@ -72,6 +75,8 @@ public class MapUtil {
 	public static Map<Integer, Road> roads = new HashMap<>();
 	public static Map<Integer, Car> cars = new HashMap<>();
 
+	public static Set<Car> changePresetCarSet = new HashSet<>();
+	
 	public static ArrayList<CarFlow> carFlows = new ArrayList<CarFlow>();
 	public static List<CarFlow> presetCarflow = null;
 	
@@ -166,6 +171,38 @@ public class MapUtil {
 		DijkstraUtil.dist = null;
 	}
 	
+	public static void changePreset() {
+		List<Car> presetCars = new LinkedList<>();
+		for(Car car : MapUtil.cars.values())
+			if(car.isPreset())
+				presetCars.add(car);
+		int size = presetCars.size();
+		size = (int)(size * 0.1) -1;
+		Collections.sort(presetCars, new Comparator<Car>() {
+			@Override
+			public int compare(Car o1, Car o2) {
+				return o2.getStartTime() - o1.getStartTime();
+			}
+		});
+		List<Car> changePreSetCars = new LinkedList<>();
+		int count = 0;
+		while(true) {
+			Car car = presetCars.get(count);
+			List<Road> newRoadList = DijkstraUtil.Dijkstra(car.getOrigin(), 
+					car.getDestination(), car.getMaxSpeed(), null);
+//			if(newRoadList!=null && !SolverWithFlow.compareRoadList(newRoadList, car.getRoadList())) {
+			if(newRoadList!=null && (car.getRoadList().size()-newRoadList.size()>2)) {
+				car.setRoadList(newRoadList);
+				changePreSetCars.add(car);
+			}
+			count++;
+			if(count>=size)
+				break;
+		}
+		changePresetCarSet.addAll(changePreSetCars);
+				
+	}
+	
 	private static void runFile(String arg) {
 		Date start_time = new Date();
 		String[] args = FileUtil.initFiles(arg);
@@ -177,7 +214,8 @@ public class MapUtil {
         FileUtil.readInputs(carPath, roadPath, crossPath, presetAnswerPath);
         
         FloydUtil.initPathAndDistMatrixMap();
-        BPRLinkPerformance.initAdjMatrixR();
+        changePreset();
+//        BPRLinkPerformance.initAdjMatrixR();
         SolverWithFlow.initCarClusters();
         JudgeWithFlow judgeWithFlow = new JudgeWithFlow(DelayTerm);
         judgeWithFlow.runWithoutView();
