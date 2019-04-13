@@ -52,16 +52,16 @@ public class MapUtil {
 	
 	public static int NowStartOffCarsAdd = 1;
 	public static int DelayTerm = 0;
-	public static double LoadParameter = 0.78;
-	public static int RoadMaxLoad =450;
-	public static int RoadListMaxIncrease = 10;
+	public static double LoadParameter = 0.8;
+	public static int RoadMaxLoad = 200;
+	public static int RoadListMaxIncrease = 4;
 	// when fail this nums, will not try judge overlay
-	public static int MaxFailCount = 100;
+	public static int MaxFailCount = 50;
 //	public static int MaxPreSetFailCount = 50;
 	// when finish this nums carflows, will try to add carflows
 	public static int MaxCarFlowFinishCount = 4;
 	
-	public static int ExpectedFlowSize = 300;
+	public static int ExpectedFlowSize = 50;
 	public static int SplitBeginOutRoadCarFlowNum = 20;
 	public static int SplitFlowThreshhold = 10;
 	public static int SelectedFlowNum = 3;
@@ -213,9 +213,9 @@ public class MapUtil {
 	public static void main(String[] args) {
 //		logger.info(NowStartOffCarsAdd+","+LoadParameter+","+RoadMaxLoad+","+RoadListMaxIncrease+","+MaxFailCount+","+MaxCarFlowFinishCount);
 		clear();
-		runFile("maps/2-map-training-1/");
-		clear();
-		runFile("maps/2-map-training-2/");
+		runFile("maps/2-map-exam-1/");
+//		clear();
+//		runFile("maps/2-map-exam-2/");
 //		clear();
 //		testAnswer("maps/2-map-training-1/");
 //		clear();

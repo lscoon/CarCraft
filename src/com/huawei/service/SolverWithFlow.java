@@ -106,8 +106,8 @@ public class SolverWithFlow {
 				carFlow.setMinTerm(carFlow.getOutRoadCars().get(0).getStartTime());
 		}
 		
-//		logger.info(MapUtil.cars.values().size() + " cars to " + MapUtil.carFlows.size() + " clusters!");
-//		logger.info("max cluster: " + MapUtil.carFlows.get(0).getCarFlowSize() + " cars");
+		logger.info(MapUtil.cars.values().size() + " cars to " + MapUtil.carFlows.size() + " clusters!");
+		logger.info("max cluster: " + MapUtil.carFlows.get(0).getCarFlowSize() + " cars");
 	}
 
 	private static void splitCarFlows() {

@@ -98,6 +98,7 @@ public class JudgeWithFlow extends Judge {
 //					count++;
 //			}
 			logger.info("Judge reach " + term);
+//			logger.info("nowRunCarSize:" + nowRunCars.size() + ",outRoadCarSize:" + (outRoadCars.size()+priOutRoadCars.size()));
 			logger.info("nowRunCarFlowsSize:" + nowRunCarFlows.size() + ",outRoadCarFlowsSize:" + outRoadCarFlows.size());
 		}
 		int count = 0;
@@ -225,73 +226,73 @@ public class JudgeWithFlow extends Judge {
 	}
 	
 	private void driveCarFlows() {
-		if(nowRunCarFlows.size()==0)
-			flag = true;
-		if(!flag)
-			return;
+//		if(nowRunCarFlows.size()==0)
+//			flag = true;
+//		if(!flag)
+//			return;
 		BPRLinkPerformance.updateAdjMatrixR();
 		int count = 0;
 		int failCount = 0;
 		for(int i=0; i<outRoadCarFlows.size(); i++) {
 			CarFlow carflow = outRoadCarFlows.get(i);
 			if(carflow.getMinTerm() <= term) {
-				List<Road> newRoadList = DijkSAUtil.Dijkstra(carflow.getOrigin(), 
-						carflow.getDestination(), MapUtil.AllCarMaxSpeed);
-				if(newRoadList!=null && newRoadList.size() - carflow.getRoadList().size() <= MapUtil.RoadListMaxIncrease) {
-					carflow.setRoadList(newRoadList);
-					if(carflow.isLoadFree()) {
-						if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
-							carflow.startoff();
-							outRoadCarFlows.remove(carflow);
-							nowRunCarFlows.add(carflow);
-							i--;
-							count++;
+//				List<Road> newRoadList = DijkSAUtil.Dijkstra(carflow.getOrigin(), 
+//						carflow.getDestination(), MapUtil.AllCarMaxSpeed);
+//				if(newRoadList!=null && newRoadList.size() - carflow.getRoadList().size() <= MapUtil.RoadListMaxIncrease) {
+//					carflow.setRoadList(newRoadList);
+//					if(carflow.isLoadFree()) {
+//						if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
+//							carflow.startoff();
+//							outRoadCarFlows.remove(carflow);
+//							nowRunCarFlows.add(carflow);
+//							i--;
+//							count++;
+//						}
+//						else failCount++;
+//					}
+//				}
+//				
+//				
+//				if(failCount > MapUtil.MaxFailCount)
+//					break;
+				
+				
+				if(carflow.isLoadFree()) {
+					if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
+						carflow.startoff();
+						outRoadCarFlows.remove(carflow);
+						nowRunCarFlows.add(carflow);
+						i--;
+						count++;
+					}
+					else failCount++;
+
+				}
+				else{
+					List<Road> newRoadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), 
+							carflow.getDestination(), MapUtil.AllCarMaxSpeed, null);
+					if(newRoadList!=null && newRoadList.size() - carflow.getRoadList().size() <= MapUtil.RoadListMaxIncrease) {
+						List<Road> oldRoadList = carflow.getRoadList();
+						carflow.setRoadList(newRoadList);
+						if(carflow.isLoadFree()) {
+							if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
+								carflow.startoff();
+								outRoadCarFlows.remove(carflow);
+								nowRunCarFlows.add(carflow);
+								i--;
+								count++;
+							}
+							else{
+								carflow.setRoadList(oldRoadList);
+								failCount++;
+							}
 						}
-						else failCount++;
+						else carflow.setRoadList(oldRoadList);
 					}
 				}
 				
-				
 				if(failCount > MapUtil.MaxFailCount)
 					break;
-				
-				
-//				if(carflow.isLoadFree()) {
-//					if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
-//						carflow.startoff();
-//						outRoadCarFlows.remove(carflow);
-//						nowRunCarFlows.add(carflow);
-//						i--;
-//						count++;
-//					}
-//					else failCount++;
-//
-//				}
-//				else{
-//					List<Road> newRoadList = DijkstraUtil.Dijkstra(carflow.getOrigin(), 
-//							carflow.getDestination(), MapUtil.AllCarMaxSpeed, null);
-//					if(newRoadList!=null && newRoadList.size() - carflow.getRoadList().size() <= MapUtil.RoadListMaxIncrease) {
-//						List<Road> oldRoadList = carflow.getRoadList();
-//						carflow.setRoadList(newRoadList);
-//						if(carflow.isLoadFree()) {
-//							if(SolverWithFlow.isOverlayLoopFree(carflow, nowRunCarFlows)) {
-//								carflow.startoff();
-//								outRoadCarFlows.remove(carflow);
-//								nowRunCarFlows.add(carflow);
-//								i--;
-//								count++;
-//							}
-//							else{
-//								carflow.setRoadList(oldRoadList);
-//								failCount++;
-//							}
-//						}
-//						else carflow.setRoadList(oldRoadList);
-//					}
-//				}
-				
-//				if(failCount > MapUtil.MaxFailCount)
-					//break;
 			}
 			else count++;
 //			if(i - count > MapUtil.MaxFailCount)
