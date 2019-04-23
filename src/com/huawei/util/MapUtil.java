@@ -59,10 +59,10 @@ public class MapUtil {
 	public static int RoadMaxLoad = 200;
 	public static int RoadListMaxIncrease = 4;
 	// when fail this nums, will not try judge overlay
-	public static int MaxFailCount = 100;
+	public static int MaxFailCount = 500;
 //	public static int MaxPreSetFailCount = 50;
 	// when finish this nums carflows, will try to add carflows
-	public static int MaxCarFlowFinishCount = 4;
+	public static int MaxCarFlowFinishCount = 40;
 	
 	public static int ExpectedFlowSize = 80;
 	public static int SplitBeginOutRoadCarFlowNum = 20;
@@ -181,7 +181,8 @@ public class MapUtil {
 		Collections.sort(presetCars, new Comparator<Car>() {
 			@Override
 			public int compare(Car o1, Car o2) {
-				return o2.getStartTime() - o1.getStartTime();
+				return o2.getRoadList().size()-o1.getRoadList().size();
+//				return o2.getStartTime() - o1.getStartTime();
 			}
 		});
 		List<Car> changePreSetCars = new LinkedList<>();

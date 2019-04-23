@@ -13,7 +13,7 @@ import com.huawei.util.MapUtil;
 public class RuleHandleWithSA {
 
 	private static final Logger logger = Logger.getLogger(RuleHandleWithSA.class);
-	public static int MapMaxCarNum = 2000;
+	public static int MapMaxCarNum = 3000;
 	
 	public static int driveCarJustOnRoadToEndState(Judge judge, Road road) {
 		int count = 0;

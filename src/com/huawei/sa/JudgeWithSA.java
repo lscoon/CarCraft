@@ -178,7 +178,7 @@ public class JudgeWithSA extends Judge{
 	}
 	
 	public static void main(String[] args) {
-		args = FileUtil.initFiles("maps/2-map-training-1/");
+		args = FileUtil.initFiles("maps/2-map-exam-1/");
 		String carPath = args[0];
         String roadPath = args[1];
         String crossPath = args[2];
